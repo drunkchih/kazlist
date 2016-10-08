@@ -1,0 +1,119 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<!--
+Dialog element
+
+@demo demo/index.html Basic Dialog
+@demo demo/index2.html Custom Buttons
+-->
+<dom-module id="amb-dialog">
+  <style is="custom-style">
+    paper-dialog .header {
+      height: 40px;
+      margin-top: 0px;
+      padding: 4px 12px 4px 24px;
+      background-color: var(--default-primary-color);
+    }
+    paper-dialog ::content > paper-dialog-scrollable {
+      margin-top: 16px;
+    }
+    paper-dialog ::content > paper-input {
+      margin-top: 0px;
+    }
+    #dialog ::content .buttons + .buttons {
+      display: none;
+    }
+  </style>
+  <template>
+    <paper-dialog id="dialog" transition="paper-dialog-transition-bottom" modal$="[[modal]]"
+        on-iron-overlay-closed="_overlayClosed" no-cancel-on-esc-key="[[noCancel]]">
+      <div style$="[[_getThemeBG(themeColor)]]" class="header flex-layout-center flex-layout-horizontal dark-bg-primary">
+        <div class="typo-title flex-layout-flex">[[xlate(header)]]</div>
+        <paper-icon-button icon="close" on-tap="hide" hidden$="[[noCancel]]"></paper-icon-button>
+      </div>
+      <content select="[dialog-content]"></content>
+      <content select="[dialog-buttons]"></content>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <iron-a11y-keys target="{{dialog}}" on-keys-pressed="_onEnter" keys="enter"></iron-a11y-keys>
+  </template>
+</dom-module>
+<script>
+(function() {
+  Polymer({
+    is: 'amb-dialog',
+    behaviors: [I18NBehavior],
+    properties: {
+      /**
+       * Header Text
+       */
+      header: String,
+      /**
+       * Modal dialog?
+       */
+      modal: Boolean,
+      /**
+       * Theme color to use for header background
+       */
+      themeColor: String,
+      /**
+       * Should the enter key cause a confirm?
+       */
+      confirmOnEnter: Boolean,
+      /**
+       * Disable dismissing on esc or 'X' button
+       */
+      noCancel: Boolean
+    },
+    _getThemeBG: function(clr) {
+      if (clr) {
+        return 'background-color: ' + clr;
+      } else {
+        return;
+      }
+    },
+    _onEnter: function() {
+      if (this.confirmOnEnter === true) {
+        this.$.dialog._updateClosingReasonConfirmed(true);
+        this.hide();
+      }
+    },
+    _overlayClosed: function(e) {
+      if (this.$.dialog.closingReason.confirmed === true) {
+        this.fire('confirm');
+      } else {
+        this.fire('dismiss');
+      }
+    },
+    /**
+     * Hide the dialog
+     */
+    hide: function() {
+      this.$.dialog.close();
+    },
+    /**
+     * Show the dialog
+     */
+    show: function() {
+      this.$.dialog.open();
+      this.async(function(){this.$.dialog.refit();}.bind(this));
+    },
+    /**
+     * Boolean indicating dialog is open 
+     */
+    isOpen: function() {
+      return this.$.dialog.opened;
+    }
+
+  });
+})();
+</script>

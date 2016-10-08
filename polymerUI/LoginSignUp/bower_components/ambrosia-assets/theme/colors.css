@@ -1,0 +1,41 @@
+.primary-color {
+  color: #0072BC !important;
+}
+.primary-bg {
+  background-color: #0072BC !important;
+}
+.secondary-bg {
+  background-color: #F44336 !important;
+}
+
+.light-bg {
+  background-color: #EEEEEE !important;
+}
+.light-bg-primary {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+.light-bg-secondary {
+  color: rgba(0, 0, 0, 0.54) !important;
+}
+.light-bg-disabled {
+  color: rgba(0, 0, 0, 0.26) !important;
+}
+.light-bg-icon {
+  color: #5C5C5C !important;
+}
+
+.dark-bg {
+  background-color: #303030 !important;
+}
+.dark-bg-primary {
+  color: rgba(255, 255, 255, 1.0) !important;
+}
+.dark-bg-secondary {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.dark-bg-disabled {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+.dark-bg-icon {
+  color: rgba(255, 255, 255, 1.0) !important;
+}

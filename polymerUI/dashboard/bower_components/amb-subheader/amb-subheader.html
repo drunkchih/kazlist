@@ -1,0 +1,46 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+
+<!--
+Subheader toolbar for Ambrosia apps
+
+@demo demo/index.html
+-->
+<dom-module id="amb-subheader">
+  <style is="custom-style">
+    :host #container {
+      height: 48px;
+      padding: 0px 16px;
+      background-color: var(--default-primary-color);
+    }
+    paper-material {
+      /* need to override paper-material box-shadow, so that it seems nicely with the appheader */
+      box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 2px 4px -1px rgba(0, 0, 0, 0.4) !important;
+    }
+  </style>
+  <template>
+    <paper-material elevation="2">
+      <div id="container" style$="[[_computeHeaderStyle(backgroundColor)]]" class="flex-layout-horizontal flex-layout-center">
+        <content></content>
+      </div>
+    </paper-material>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-subheader',
+      behaviors: [I18NBehavior],
+      properties: {
+        /**
+         * Background color of the header (default is the app primary color)
+         */
+        backgroundColor: String
+      },
+      _computeHeaderStyle: function() {
+        return 'background-color: ' + this.backgroundColor;
+      }
+    });
+  })();
+</script>

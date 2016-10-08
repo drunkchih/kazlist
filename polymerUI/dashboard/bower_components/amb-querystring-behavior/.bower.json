@@ -1,0 +1,9 @@
+{
+  "name": "amb-querystring-behavior",
+  "description": "Querystring helper functions",
+  "main": "amb-querystring-behavior.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-querystring-behavior",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-querystring-behavior"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "amb-terminal",
+  "description": "Terminal emulator element",
+  "main": "amb-terminal.html",
+  "private": true
+}

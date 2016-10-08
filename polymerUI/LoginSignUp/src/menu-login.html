@@ -1,0 +1,60 @@
+<link rel="import" href="menu-imports.html">
+
+<dom-module id="menu-login">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      #credentialsContainer {
+        width: 280px;
+      }
+
+      #loginBtn {
+        box-shadow: 1px 1px 1px grey;
+      }
+
+    </style>
+    <div class="card">
+      <div class="circle">
+        <iron-icon icon="social:person"></iron-icon>
+      </div>
+
+      <h1>Login View</h1>
+      <div id="credentialsContainer">
+        <paper-input id="userName" always-float-label="true" label="Username" required error-message="[[xlate('REQUIRED')]]">
+          <iron-icon icon="social:person" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="password" always-float-label="true" type="password" label="Password" required error-message="[[xlate('REQUIRED')]]">
+          <iron-icon icon="communication:vpn-key" prefix></iron-icon>
+        </paper-input>
+      </div>
+      <br>
+      <paper-button id="loginBtn" on-tap="_onLoginButtonTap"> Login </paper-button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'menu-login',
+
+      // ---------------------------------------------------------------------------------------------------------------
+      // Component Lifecycle
+      // ---------------------------------------------------------------------------------------------------------------
+
+      ready: function () {
+      },
+
+      // ---------------------------------------------------------------------------------------------------------------
+      // User Gesture Handlers
+      // ---------------------------------------------------------------------------------------------------------------
+
+      _onLoginButtonTap: function () {
+        window.location.replace("../../dashboard/index.html");
+      },
+
+    });
+  </script>
+</dom-module>

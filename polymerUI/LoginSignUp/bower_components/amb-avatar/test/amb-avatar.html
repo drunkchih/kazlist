@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-avatar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-avatar.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="Avatar">
+    <template>
+      <amb-avatar></amb-avatar>
+    </template>
+  </test-fixture>
+  <script>
+    suite('<amb-avatar>', function () {
+      var avatar;
+
+      suite('tests', function () {
+        setup(function () {
+          avatar = fixture('Avatar');
+        });
+
+        test('_defaultImgChanged', function (done) {
+          avatar.$.profileAvatar = {};
+          avatar.avatarImageSrc = 'ut-image-src';
+          avatar._defaultImgChanged();
+          expect(avatar.$.profileAvatar.src).to.equal('ut-image-src');
+          done();
+        });
+
+        test('_sizeChanged', function (done) {
+          avatar.size = 'huge';
+          avatar.$.profileAvatar = {className:''};
+          avatar._sizeChanged();
+          expect(avatar.$.profileAvatar.className).to.equal(' avatar-huge');
+          done();
+        });
+
+        test('_uuidChanged', function (done) {
+          //nothing currently
+          avatar._uuidChanged();
+          done();
+        });
+
+        test('_setDefaultAvatar', function (done) {
+          avatar.avatarImageSrc = 'ut-image-src';
+          avatar.$.profileAvatar = {};
+
+          avatar._setFail = 7;
+          avatar._setDefaultAvatar();
+          expect(avatar.$.profileAvatar.src).to.be.undefined;
+          expect(avatar._setFail).to.equal(7);
+
+          avatar._setFail = 0;
+          avatar._setDefaultAvatar();
+          expect(avatar.$.profileAvatar.src).to.equal('ut-image-src');
+          expect(avatar._setFail).to.equal(1);
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

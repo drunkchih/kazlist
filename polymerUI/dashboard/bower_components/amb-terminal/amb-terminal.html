@@ -1,0 +1,119 @@
+<link rel="import" href="../polymer/polymer.html">
+<script src="../term.js/src/term.js"></script>
+<!--
+Terminal emulator element
+
+@demo demo/index.html
+-->
+<dom-module id="amb-terminal">
+  <style is="custom-style">
+    :host {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+    }
+    #termWrapper {
+      padding: 10px;
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+    }
+    #divTerm {
+      width: 100%;
+      height: 100%;
+    }
+    #divTerm ::content .terminal-cursor {
+      color: #EEEEEE;
+      background-color: #EEEEEE;
+    }
+  </style>
+  <template>
+    <div id="termWrapper">
+      <div id="divTerm"></div>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-terminal',
+      /**
+       * Data changed event
+       *
+       * @event data
+       */
+      properties: {
+        _term: {
+          type: Object,
+          value: function(){return {};}
+        }
+      },
+      _onData: function(data) {
+        this.fire('data', data);
+      },
+      _render: function() {
+        var wSubs   = this.$.divTerm.offsetWidth - this.$.divTerm.clientWidth,
+            w       = this.$.divTerm.clientWidth - wSubs - 12,
+            hSubs   = this.$.divTerm.offsetHeight - this.$.divTerm.clientHeight,
+            h       = this.$.divTerm.clientHeight - hSubs,
+            x       = this._charDims.width + 0.25,
+            y       = this._charDims.height + 0.25;
+            cols    = Math.max(Math.floor(w / x), 10),
+            rows    = Math.max(Math.floor(h / y), 10);
+        var delta = this._term.rows - rows;
+        var newYbase = this._term.ybase + delta;
+        var prevY = this._term.y;
+        var cursorOutOfView = this._term.y >= rows;
+        if (newYbase > this._term.ybase && cursorOutOfView) {
+          this._term.ybase = newYbase;
+          this._term.y = prevY - delta;
+        }
+        this._term.resize(cols,rows);
+        this._term.scrollDisp(this._term.rows - 1);
+      },
+      /**
+       * Set focus to the terminal element
+       */
+      focus: function() {
+        document.activeElement.blur();
+        this._term.focus(true);
+      },
+      /**
+       * Write data to the terminal
+       *
+       * @param String data Data to write to the terminal
+       */
+      write: function(data) {
+        this._term.write(data);
+      },
+      /**
+       * Erase the previous char
+       */
+      backspace: function() {
+        this._term.cursorBackward([1]);
+        this._term.deleteChars([1]);
+        this._term.refresh(this._term.y, this._term.y);
+      },
+      attached: function() {
+        this._term = new Terminal();
+        this._term.on('data', this._onData.bind(this));
+        this._term.open(this.$.divTerm);
+        this._charDims = function() {
+          var temp = document.createElement('tempdiv');
+          document.body.appendChild(temp);
+          temp.style.fontFamily = "\"Courier New\", Courier, monospace";
+          temp.style.fontSize = "12px";
+          temp.style.position = "absolute";
+          temp.style.left = -1000;
+          temp.style.top = -1000;
+          temp.innerHTML = 'M';
+          var metrics = {width:temp.clientWidth,height:temp.clientHeight};
+          document.body.removeChild(temp);
+          temp = null;
+          return metrics;
+        }.bind(this)();
+        window.addEventListener('resize:end', this._render.bind(this));
+        this._render();
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,395 @@
+<link rel="import" href="dashboard-imports.html">
+
+<dom-module id="dashboard-main-dashboard">
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      /*#container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+      }*/
+
+      #eventContainer, #serviceContainer {
+        height: 250px;
+      }
+
+      #eventDataTable, #serviceDataTable {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-top: 1px solid #e8e8e8;
+      }
+
+      #eventMoreMenuDropdown, #serviceMoreMenuDropdown {
+        width: 192px;
+      }
+
+      #eventMoreMenuDropdown ::content #contentWrapper > * {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      #eventMoreMenuDropdown paper-item {
+        color: #666666;
+        cursor: pointer;
+        background-color: #FFFFFF;
+      }
+
+      #eventMoreMenuDropdown paper-item:hover {
+        color: #000000;
+        background-color: #EEEEEE;
+      }
+
+      #eventMoreMenuDropdown paper-item.iron-selected {
+        font-weight: initial;
+      }
+
+      #eventMoreMenuDropdown paper-item paper-item-body {
+        margin-left: 16px;
+        white-space: nowrap;
+      }
+
+      #serviceMoreMenuDropdown ::content #contentWrapper > * {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      #serviceMoreMenuDropdown paper-item {
+        color: #666666;
+        cursor: pointer;
+        background-color: #FFFFFF;
+      }
+
+      #serviceMoreMenuDropdown paper-item:hover {
+        color: #000000;
+        background-color: #EEEEEE;
+      }
+
+      #serviceMoreMenuDropdown paper-item.iron-selected {
+        font-weight: initial;
+      }
+
+      #serviceMoreMenuDropdown paper-item paper-item-body {
+        margin-left: 16px;
+        white-space: nowrap;
+      }
+
+  </style>
+  <template is="dom-bind">
+    <div class="card">
+      <div class="circle">
+        <iron-icon icon="hardware:computer"></iron-icon>
+      </div>
+
+      <h1>Dashboard View</h1>
+
+      <paper-button id="eventArrowIcon" on-tap="toggleEvents">
+        <iron-icon id="eventIcon" icon="icons:chevron-right"> </iron-icon>
+        <iron-icon icon="icons:event"> </iron-icon>
+        Events
+      </paper-button>
+
+      <iron-collapse id="eventsCollapse">
+        <div id="eventContainer" hidden>
+          <iron-data-table id="eventDataTable" selection-enabled  multi-selection hidden on-selected-items-changed="_onSelectedEventItemsChanged">
+            <data-table-column name="Event Name">
+              <template>[[item.eventName]]</template>
+            </data-table-column>
+            <data-table-column name="Location">
+              <template>[[item.location]]</template>
+            </data-table-column>
+            <data-table-column name="Date">
+              <template>[[item.date]]</template>
+            </data-table-column>
+            <data-table-column name="Time">
+              <template>[[item.time]]</template>
+            </data-table-column>
+            <data-table-column name="Point of Contact">
+              <template>[[item.contactPoint]]</template>
+            </data-table-column>
+            <data-table-column name="Action/Options">
+              <template>
+                <paper-icon-button id="moreMenuButtonEvents" class="light-bg-icon" icon="more-vert" noink
+                                 on-tap="_onEventMoreMenuButtonTap"></paper-icon-button>
+              </template>
+            </data-table-column>
+          </iron-data-table>
+        </div>
+        <br>
+        <paper-button id="multiEventDeleteButton" raised on-tap="_onMultiEventDeleteTap"><iron-icon icon="icons:delete"></iron-icon>Delete Selected Event(s)</paper-button>
+      </iron-collapse>
+      <br>
+      <paper-button id="serviceArrowIcon" on-tap="toggleServices">
+        <iron-icon id="serviceIcon" icon="icons:chevron-right"> </iron-icon>
+        <iron-icon icon="communication:contact-phone"> </iron-icon>
+        Services
+      </paper-button>
+      <iron-collapse id="servicesCollapse">
+        <div id="serviceContainer" hidden>
+          <iron-data-table id="serviceDataTable" selection-enabled  multi-selection hidden on-selected-items-changed="_onSelectedServiceItemsChanged">
+            <data-table-column name="Name/Title">
+              <template>[[item.name]]</template>
+            </data-table-column>
+            <data-table-column name="Type">
+              <template>[[item.type]]</template>
+            </data-table-column>
+            <data-table-column name="Status">
+              <template>[[item.status]]</template>
+            </data-table-column>
+            <data-table-column name="Point of Contact">
+              <template>[[item.contactPoint]]</template>
+            </data-table-column>
+            <data-table-column name="Action/Options">
+              <template>
+                <paper-icon-button id="moreMenuButtonServices" class="light-bg-icon" icon="more-vert" noink
+                                 on-tap="_onServiceMoreMenuButtonTap"></paper-icon-button>
+              </template>
+            </data-table-column>
+          </iron-data-table>
+        </div>
+        <br>
+        <paper-button id="multiServiceDeleteButton" raised on-tap="_onMultiServiceDeleteTap"><iron-icon icon="icons:delete"></iron-icon>Delete Selected Service(s)</paper-button>
+      </iron-collapse>
+      <br>
+    </div>
+
+    <iron-dropdown id="eventMoreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
+      <paper-material class="dropdown-content">
+        <paper-item id="eventInfoButton" on-tap="_onEventInfoButtonTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:info" noink></paper-icon-button>
+          <paper-item-body>More Info</paper-item-body>
+        </paper-item>
+        <paper-item id="eventUpdateButton" on-tap="_onEventUpdateTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:create" noink></paper-icon-button>
+          <paper-item-body>Update/Edit</paper-item-body>
+        </paper-item>
+      </paper-material>
+    </iron-dropdown>
+
+    <iron-dropdown id="serviceMoreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
+      <paper-material class="dropdown-content">
+        <paper-item id="eventInfoButton" on-tap="_onServiceInfoButtonTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:info" noink></paper-icon-button>
+          <paper-item-body>More Info</paper-item-body>
+        </paper-item>
+        <paper-item id="eventUpdateButton" on-tap="_onServiceUpdateTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:create" noink></paper-icon-button>
+          <paper-item-body>Update/Edit</paper-item-body>
+        </paper-item>
+        <paper-item id="eventUpdateButton" on-tap="_onServiceSignUpTap">
+          <paper-icon-button class="light-bg-icon" icon="social:group-add" noink></paper-icon-button>
+          <paper-item-body>Sign Up</paper-item-body>
+        </paper-item>
+      </paper-material>
+    </iron-dropdown>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'dashboard-main-dashboard',
+      behaviors: [
+        I18NBehavior,
+        Polymer.IronResizableBehavior
+      ],
+
+      ready: function () {
+        this._moreMenuTarget = null;
+        this.selectedEvents = [];
+        this.selectedServices = [];
+
+      },
+
+      attached: function () {
+        this.async(function () {
+          this._onSelectedEventItemsChanged();
+          this._onSelectedServiceItemsChanged();
+        }, 250);
+      },
+
+      toggleEvents: function() {
+        if(!this.$.eventsCollapse.opened){
+          this._events = [];
+          for( i = 0;i<10;i++){
+            this._events.push({
+              eventName: "Event Name" + i,
+              location: "classroom" + i,
+              date: i+"/"+i+"/"+i,
+              time: i+":0"+i+"pm",
+              duration: "1 hr",
+              contactPoint: "Person"+i,
+              email: "email"+i+"@example.com",
+              phone: i+"-"+i+"-"+i,
+              googleMapsCoordinates: i+","+i,
+              address: "7549 Holloran Ct. \n Las Vegas, NV 89128",
+              comment: "description about the event ...",
+              link: "www.eventPage.com"
+            });
+          }
+          this.$.eventIcon.icon = 'icons:expand-more';
+          this.$.serviceIcon.icon = 'icons:chevron-right';
+          this.$.serviceContainer.hidden = true;
+          this.$.serviceDataTable.hidden = true;
+          this.$.servicesCollapse.opened = false;
+          this.$.eventContainer.hidden = false;
+          this.$.eventDataTable.hidden = false;
+          this.$.eventDataTable.items = this._events;
+          this.$.eventsCollapse.toggle();
+        }
+      },
+
+      toggleServices: function() {
+        if(!this.$.servicesCollapse.opened){
+          this._services = [];
+          for( i = 0;i<10;i++){
+            this._services.push({
+              name: "name"+i,
+              type: "tutor/ride",
+              status: i+"/"+i+1,
+              contactPoint: "Person"+i,
+              phone: i+"-"+i+"-"+i,
+              email: "email"+i+"@example.com",
+              comment: "description about the service ..."
+            });
+          }
+          this.$.serviceIcon.icon = 'icons:expand-more';
+          this.$.eventIcon.icon = 'icons:chevron-right';
+          this.$.eventContainer.hidden = true;
+          this.$.eventDataTable.hidden = true;
+          this.$.eventsCollapse.opened = false;
+          this.$.serviceContainer.hidden = false;
+          this.$.serviceDataTable.hidden = false;
+          this.$.serviceDataTable.items = this._services;
+          this.$.servicesCollapse.toggle();
+        }
+      },
+
+      _onMoreMenuDropdownClosed: function (evt) {
+        var iconButtonElement = evt.currentTarget.positionTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', false);
+      },
+
+      _onEventMoreMenuButtonTap: function (evt) {
+        evt.stopPropagation();
+        if (this.$.eventMoreMenuDropdown.opened) {
+          return;
+        }
+        var iconButtonElement = evt.currentTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', true);
+        this._moreMenuTarget = evt.model.__data__;
+        console.log(this._moreMenuTarget.item); //this is what we need to send to php
+        var targetY = iconButtonElement.getBoundingClientRect().bottom;
+        var targetHeight = 30;
+        var gapY = 0;
+        var menuHeight = this.$.eventMoreMenuDropdown.childNodes.length * 48;
+
+        var offsetX = 0;
+        var offsetY = targetHeight + gapY;
+
+        this.$.eventMoreMenuDropdown.positionTarget = iconButtonElement;
+        this.$.eventMoreMenuDropdown.verticalOffset = offsetY;
+        this.$.eventMoreMenuDropdown.horizontalOffset = offsetX;
+
+        this.$.eventMoreMenuDropdown.open();
+      },
+
+      _onSelectedEventItemsChanged: function (evt) {
+        this.selectedEvents = this.$.eventDataTable.selectedItems;
+        if(this.selectedEvents.length != 0){
+          this.$.multiEventDeleteButton.disabled = false;
+        }
+        else{
+          this.$.multiEventDeleteButton.disabled = true;
+        }
+      },
+
+      _onServiceMoreMenuButtonTap: function (evt) {
+        evt.stopPropagation();
+        if (this.$.serviceMoreMenuDropdown.opened) {
+          return;
+        }
+        var iconButtonElement = evt.currentTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', true);
+        this._moreMenuTarget = evt.model.__data__;
+        console.log(this._moreMenuTarget.item); //this is what we need to send to php
+        var targetY = iconButtonElement.getBoundingClientRect().bottom;
+        var targetHeight = 30;
+        var gapY = 0;
+        var menuHeight = this.$.serviceMoreMenuDropdown.childNodes.length * 48;
+
+        var offsetX = 0;
+        var offsetY = targetHeight + gapY;
+
+        this.$.serviceMoreMenuDropdown.positionTarget = iconButtonElement;
+        this.$.serviceMoreMenuDropdown.verticalOffset = offsetY;
+        this.$.serviceMoreMenuDropdown.horizontalOffset = offsetX;
+
+        this.$.serviceMoreMenuDropdown.open();
+      },
+
+      _onSelectedServiceItemsChanged: function (evt) {
+        this.selectedServices = this.$.serviceDataTable.selectedItems;
+        if(this.selectedServices.length != 0){
+          this.$.multiServiceDeleteButton.disabled = false;
+        }
+        else{
+          this.$.multiServiceDeleteButton.disabled = true;
+        }
+      },
+
+      _onMultiServiceDeleteTap: function() {
+        console.log(this.selectedServices);
+      },
+
+      _onMultiEventDeleteTap: function() {
+        console.log(this.selectedEvents);
+      },
+
+      _onEventInfoButtonTap: function(evt) {
+        this.$.eventMoreMenuDropdown.close();
+        var event = this._moreMenuTarget.item;
+        this.fire('event-info-tap', {event:event} );
+
+      },
+
+      _onEventUpdateTap: function(evt) {
+        this.$.eventMoreMenuDropdown.close();
+        var event = this._moreMenuTarget.item;
+        console.log(event);
+
+      },
+
+      _onServiceSignUpTap: function(evt) {
+        this.$.eventMoreMenuDropdown.close();
+        var event = this._moreMenuTarget.item;
+        console.log(event);
+
+      },
+
+      _onServiceInfoButtonTap: function(evt) {
+        this.$.serviceMoreMenuDropdown.close();
+        var service = this._moreMenuTarget.item;
+        this.fire('service-info-tap', {service:service} );
+
+      },
+
+      _onServiceUpdateTap: function(evt) {
+        this.$.serviceMoreMenuDropdown.close();
+        var service = this._moreMenuTarget.item;
+        console.log(service);
+
+      }
+
+    });
+  </script>
+</dom-module>

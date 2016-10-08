@@ -1,0 +1,35 @@
+{
+  "name": "paper-fab-menu",
+  "version": "0.5.0",
+  "authors": [
+    "Chang W. Doh <changwook.doh@gmail.com>",
+    "Jonathan Rajavuori <jrajav@gmail.com>"
+  ],
+  "description": "`paper-fab-menu` creates a floating action button menu with paper elements. On mobile device, tooltip is automatically shown, otherwise it will be hidden on desktop browsers.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "paper-fab-menu"
+  ],
+  "main": "paper-fab-menu.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page",
+    "iron-icons": "PolymerElements/iron-icons",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout",
+    "iron-overlay-behavior": "PolymerElements/iron-overlay-behavior",
+    "paper-fab": "PolymerElements/paper-fab",
+    "paper-tooltip": "PolymerElements/paper-tooltip"
+  },
+  "devDependencies": {
+    "web-component-tester": "*"
+  }
+}

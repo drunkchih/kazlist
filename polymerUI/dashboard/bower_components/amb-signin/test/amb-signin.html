@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-signin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-signin.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="SigninTests">
+    <template is="dom-template">
+      <amb-signin></amb-signin>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<amb-signin>', function () {
+      var signin;
+
+      suite('tests', function () {
+        setup(function () {
+          signin = fixture('SigninTests');
+        });
+
+        test('_boundEnterHandler', function (done) {
+          signin._signin = sinon.stub();
+          signin._boundEnterHandler({keyCode:14});
+          expect(signin._signin.called).to.equal(false);
+          signin._boundEnterHandler({keyCode:13});
+          expect(signin._signin.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_logoChanged', function (done) {
+          signin.$.logo = {src:null};
+          signin.logoImageSrc = 'ut-signin-src';
+          expect(signin.$.logo.src).to.equal('ut-signin-src');
+          done();
+        });
+
+        test('_autofocusDomain', function (done) {
+          expect(signin._autofocusDomain(true, {domain:''})).to.equal(true);
+          done();
+        });
+
+        test('_autofocusUsername', function (done) {
+          expect(signin._autofocusUsername(true, {domain:'',username:''})).to.equal(false);
+          done();
+        });
+
+        test('_autofocusPassword', function (done) {
+          expect(signin._autofocusPassword(true, {domain:'',username:''})).to.equal(false);
+          done();
+        });
+
+        test('_signin', function (done) {
+          signin.async = function(fn){fn();};
+          signin.includeDomain = true;
+          signin.currentUser = {domain:''};
+          signin._signin();
+          expect(signin._signinError).to.equal('INVALID_DOMAIN');
+
+          signin.includeDomain = false;
+          signin._signin();
+          expect(signin._signinError).to.equal('INVALID_USERNAME');
+
+          signin.currentUser = {username:'ut-user'};
+          signin._signin();
+          expect(signin._signinError).to.equal('INVALID_PASSWORD');
+
+          signin.currentUser = {username:'ut-user',password:'ut-password'};
+          signin._loading = false;
+          signin.fire = sinon.stub();
+          signin._signin();
+          expect(signin._signinError).to.equal(null);
+          expect(signin._loading).to.equal(true);
+          expect(signin.fire.calledOnce).to.equal(true);
+          expect(signin.fire.firstCall.args[0]).to.equal('signin');
+          done();
+        });
+
+        test('setError', function(done) {
+          signin._signinError = null;
+          signin._loading = true;
+          signin.setError('ut-error');
+          expect(signin._signinError).to.equal('ut-error');
+          expect(signin._loading).to.equal(false);
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "core-drag-drop",
+  "homepage": "https://github.com/timcope/core-drag-drop",
+  "_release": "192aefc71b",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "192aefc71b0f62e95361d6ab78d23453d76d11cb"
+  },
+  "_source": "git://github.com/timcope/core-drag-drop.git",
+  "_target": "master",
+  "_originalSource": "timcope/core-drag-drop"
+}

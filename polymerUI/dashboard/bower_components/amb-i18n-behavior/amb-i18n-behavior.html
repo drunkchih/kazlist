@@ -1,0 +1,384 @@
+<script>
+
+/**
+ * Localiation functions for languauge, number, data, and currency translation
+ *
+ * @polymerBehavior
+ */
+  I18NBehavior = {
+
+    /**
+     * @private
+     */
+    _i18n: {},
+
+    /**
+     * @private
+     */
+    _geti18nData: function() {
+      var appRef = document.querySelector('body > #app');
+      if (appRef !== null) {
+        return appRef._i18n;
+      } else {
+        return this._i18n;
+      }
+    },
+
+    /**
+     * Returns the translated names of the week days
+     *
+     * @return {array} The translated week day names.
+     */
+    getDaysOfTheWeek: function() {
+      return this._geti18nData().dateFormats.DAY;
+    },
+
+    /**
+     * Translates a string, using the provided translation key.
+     *
+     * @param {string} value The translation key to be translated.
+     * @param {object} interpolated An object to use to map dynamic values into the translated string. (optional)
+     * @return {string} The translated string.
+     */
+    xlate: function(value, interpolated) {
+      var result = value;
+      if (typeof value !== 'undefined') {
+        if (this._geti18nData() && this._geti18nData().lang && this._geti18nData().lang.hasOwnProperty(value)) {
+          result = this._geti18nData().lang[value];
+        }
+      }
+      if (interpolated !== undefined && interpolated != null) {
+        result = result.replace(/{{([^}]*)}}/g, function(fullMatch, capture) {
+          return interpolated[capture];
+        });
+      }
+      return result;
+    },
+
+    /**
+     * Localizes a number, by applying the proper group/decimal separators.
+     *
+     * @param {number} number The number to be localized.
+     * @param {number} fractionSize Number of decimal places. (optional)
+     * @param {string} pattern Custom formatting pattern. (optional)
+     * @param {string} groupSep Custom group separator. (optional)
+     * @param {string} decimalSep Custom decimal separator. (optional)
+     * @return {string} The translated number.
+     */
+    xlateNumber: function (number, fractionSize, pattern, groupSep, decimalSep) {
+      var DECIMAL_SEP = '.';
+      var formats = this._geti18nData().numberFormats;
+
+      if (typeof pattern === 'undefined') {
+        pattern = formats.PATTERNS[0];
+      }
+
+      if (typeof groupSep === 'undefined') {
+        groupSep = formats.GROUP_SEP;
+      }
+
+      if (typeof decimalSep === 'undefined') {
+        decimalSep = formats.DECIMAL_SEP;
+      }
+
+      if (isNaN(number) || !isFinite(number)) {
+        return '';
+      }
+
+      var isNegative = number < 0;
+      number = Math.abs(number);
+      var numStr = number + '',
+          formatedText = '',
+          parts = [];
+
+      var hasExponent = false;
+      if (numStr.indexOf('e') !== -1) {
+        var match = numStr.match(/([\d\.]+)e(-?)(\d+)/);
+        if (match && match[2] == '-' && match[3] > fractionSize + 1) {
+          numStr = '0';
+        } else {
+          formatedText = numStr;
+          hasExponent = true;
+        }
+      }
+
+      if (!hasExponent) {
+        var fractionLen = (numStr.split(DECIMAL_SEP)[1] || '').length;
+
+        // determine fractionSize if it is not specified
+        if (typeof fractionSize === 'undefined') {
+          fractionSize = Math.min(Math.max(pattern.minFrac, fractionLen), pattern.maxFrac);
+        }
+
+        var pow = Math.pow(10, fractionSize);
+        number = Math.round(number * pow) / pow;
+        var fraction = ('' + number).split(DECIMAL_SEP);
+        var whole = fraction[0];
+        fraction = fraction[1] || '';
+
+        var i, pos = 0,
+            lgroup = pattern.lgSize,
+            group = pattern.gSize;
+
+        if (whole.length >= (lgroup + group)) {
+          pos = whole.length - lgroup;
+          for (i = 0; i < pos; i++) {
+            if ((pos - i)%group === 0 && i !== 0) {
+              formatedText += groupSep;
+            }
+            formatedText += whole.charAt(i);
+          }
+        }
+
+        for (i = pos; i < whole.length; i++) {
+          if ((whole.length - i)%lgroup === 0 && i !== 0) {
+            formatedText += groupSep;
+          }
+          formatedText += whole.charAt(i);
+        }
+
+        // format fraction part.
+        while(fraction.length < fractionSize) {
+          fraction += '0';
+        }
+
+        if (fractionSize && fractionSize !== "0") {
+          formatedText += decimalSep + fraction.substr(0, fractionSize);
+        }
+      } else {
+
+        if (fractionSize > 0 && number > -1 && number < 1) {
+          formatedText = number.toFixed(fractionSize);
+        }
+      }
+
+      parts.push(isNegative ? pattern.negPre : pattern.posPre);
+      parts.push(formatedText);
+      parts.push(isNegative ? pattern.negSuf : pattern.posSuf);
+      return parts.join('');
+    },
+
+    /**
+     * Localizes a date object to a string, according to the client timezone.
+     *
+     * @param {date} date The date to be localized.
+     * @param {string} format Format string to use. (default=mediumDate)
+     * @return {string} The translated date.
+     */
+    xlateDateToLocal: function(date, format) {
+      var pad = function(number,length){var str=''+number;while(str.length<length){str='0'+str;}return str;}
+      var offset = new Date().getTimezoneOffset();
+      offset = ((offset<0?'+':'-')+pad(parseInt(Math.abs(offset/60)),2)+pad(Math.abs(offset%60),2));
+      return this.xlateDate(date, format, offset);
+    },
+
+    /**
+     * Localizes a date object to a string.
+     *
+     * @param {date} date The date to be localized.
+     * @param {string} format Format string to use. (default=mediumDate)
+     * @param {string} timezone Timezone to use, rather than local time. (optional)
+     * @return {string} The translated date.
+     */
+    xlateDate: function(date, format, timezone) {
+      var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
+                        // 1        2       3         4          5          6          7          8  9     10      11
+
+      var padNumber = function(num, digits, trim) {
+        var neg = '';
+        if (num < 0) {
+          neg =  '-';
+          num = -num;
+        }
+        num = '' + num;
+        while(num.length < digits) {
+          num = '0' + num;
+        }
+        if (trim) {
+          num = num.substr(num.length - digits);
+        }
+        return neg + num;
+      }
+
+      var dateGetter = function(name, size, offset, trim) {
+        offset = offset || 0;
+        return function(date) {
+          var value = date['get' + name]();
+          if (offset > 0 || value > -offset) {
+            value += offset;
+          }
+          if (value === 0 && offset == -12 ) {
+            value = 12;
+          }
+          return padNumber(value, size, trim);
+        };
+      }
+
+      var dateStrGetter = function(name, shortForm) {
+        return function(date, formats) {
+          var shortened = shortForm ? ('SHORT' + name) : name;
+          return formats[shortened.toUpperCase()][date['get' + name]()];
+        };
+      }
+
+      var timeZoneGetter = function(date) {
+        var zone = -1 * date.getTimezoneOffset();
+        var paddedZone = (zone >= 0) ? "+" : "";
+
+        paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
+                      padNumber(Math.abs(zone % 60), 2);
+
+        return paddedZone;
+      }
+
+      var getFirstThursdayOfYear = function(year) {
+          // 0 = index of January
+          var dayOfWeekOnFirst = (new Date(year, 0, 1)).getDay();
+          // 4 = index of Thursday (+1 to account for 1st = 5)
+          // 11 = index of *next* Thursday (+1 account for 1st = 12)
+          return new Date(year, 0, ((dayOfWeekOnFirst <= 4) ? 5 : 12) - dayOfWeekOnFirst);
+      }
+
+      var getThursdayThisWeek = function(datetime) {
+          return new Date(datetime.getFullYear(), datetime.getMonth(),
+            // 4 = index of Thursday
+            datetime.getDate() + (4 - datetime.getDay()));
+      }
+
+      var weekGetter = function(size) {
+         return function(date) {
+            var firstThurs = getFirstThursdayOfYear(date.getFullYear()),
+               thisThurs = getThursdayThisWeek(date);
+
+            var diff = +thisThurs - +firstThurs,
+               result = 1 + Math.round(diff / 6.048e8); // 6.048e8 ms per week
+
+            return padNumber(result, size);
+         };
+      }
+
+      var ampmGetter = function(date, formats) {
+        return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
+      }
+
+      var DATE_FORMATS = {
+        yyyy: dateGetter('FullYear', 4),
+          yy: dateGetter('FullYear', 2, 0, true),
+           y: dateGetter('FullYear', 1),
+        MMMM: dateStrGetter('Month'),
+         MMM: dateStrGetter('Month', true),
+          MM: dateGetter('Month', 2, 1),
+           M: dateGetter('Month', 1, 1),
+          dd: dateGetter('Date', 2),
+           d: dateGetter('Date', 1),
+          HH: dateGetter('Hours', 2),
+           H: dateGetter('Hours', 1),
+          hh: dateGetter('Hours', 2, -12),
+           h: dateGetter('Hours', 1, -12),
+          mm: dateGetter('Minutes', 2),
+           m: dateGetter('Minutes', 1),
+          ss: dateGetter('Seconds', 2),
+           s: dateGetter('Seconds', 1),
+           // while ISO 8601 requires fractions to be prefixed with `.` or `,`
+           // we can be just safely rely on using `sss` since we currently don't support single or two digit fractions
+         sss: dateGetter('Milliseconds', 3),
+        EEEE: dateStrGetter('Day'),
+         EEE: dateStrGetter('Day', true),
+           a: ampmGetter,
+           Z: timeZoneGetter,
+          ww: weekGetter(2),
+           w: weekGetter(1)
+      };
+
+      var DATE_FORMATS_SPLIT = /((?:[^yMdHhmsaZEw']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|d+|H+|h+|m+|s+|a|Z|w+))(.*)/,
+        NUMBER_STRING = /^\-?\d+$/;
+
+      if (typeof date !== 'undefined') {
+        var text = '',
+            parts = [],
+            fn, match;
+
+        format = format || 'mediumDate';
+        var formats = this._geti18nData().dateFormats;
+        format = formats[format] || format;
+        if (typeof date === 'string') {
+          date = NUMBER_STRING.test(date) ? Number(date) : Date.parse(date);
+        }
+
+        if (typeof date === 'number') {
+          date = new Date(date);
+        }
+
+        if ((Object.prototype.toString.call(date) === '[object Date]') === false) {
+          return date;
+        }
+
+        while(format) {
+          match = DATE_FORMATS_SPLIT.exec(format);
+          /* Cannot seem to find a format string value to cause a non-match, so ignoring the else for now */
+          /* istanbul ignore else */
+          if (match) {
+            parts = parts.concat(match.slice(1)) ;
+            format = parts.pop();
+          } else {
+            parts.push(format);
+            format = null;
+          }
+        }
+        var dateTimezoneOffset = date.getTimezoneOffset();
+        timezone = timezone || 'UTC';
+        dateTimezoneOffset = this.timezoneToOffset(timezone, date.getTimezoneOffset());
+        date = this.convertTimezoneToLocal(date, timezone, true);
+        parts.forEach(function(value) {
+          fn = DATE_FORMATS[value];
+          text += fn ? fn(date, formats, dateTimezoneOffset)
+                     : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
+        });
+
+        return text;
+      }
+      return date;
+    },
+
+    /**
+     * Localizes a number as a currency, by applying the proper group/decimal separators and currency symbol.
+     *
+     * @param {number} value The number to be localized.
+     * @param {string} currencySymbol Custom currency symbol to use. (optional)
+     * @param {number} fractionSize Number of decimal places. (optional)
+     * @return {string} The translated number.
+     */
+    xlateCurrency: function(value, currencySymbol, fractionSize) {
+      if (typeof value !== 'undefined') {
+        var formats = this._geti18nData().numberFormats;
+        if (typeof currencySymbol === 'undefined') {
+          currencySymbol = formats.CURRENCY_SYM;
+        }
+        return this.xlateNumber(value,
+                        fractionSize,
+                        formats.PATTERNS[1],
+                        formats.GROUP_SEP,
+                        formats.DECIMAL_SEP).replace(/\u00A4/g, currencySymbol);
+      }
+      return value;
+    },
+
+    convertTimezoneToLocal: function(date, timezone, reverse) {
+      reverse = reverse ? -1 : 1;
+      var timezoneOffset = this.timezoneToOffset(timezone, date.getTimezoneOffset());
+      return this.addDateMinutes(date, reverse * (timezoneOffset - date.getTimezoneOffset()));
+    },
+
+    timezoneToOffset: function(timezone, fallback) {
+      var requestedTimezoneOffset = Date.parse('Jan 01, 1970 00:00:00 ' + timezone) / 60000;
+      return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
+    },
+
+    addDateMinutes: function(date, minutes) {
+      date = new Date(date.getTime());
+      date.setMinutes(date.getMinutes() + minutes);
+      return date;
+    }
+
+  };
+</script>

@@ -1,0 +1,475 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/communication-icons.html">
+<link rel="import" href="../iron-icons/notification-icons.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<!--
+Chat component for use in UserPortal and Hydra
+
+@demo demo/index.html
+-->
+<dom-module id="amb-chat">
+  <style is="custom-style">
+    .main {
+      height: 100%;
+    }
+    .main > paper-material:first-of-type {
+      background-color: #F9F9F9;
+      height: 64px;
+    }
+    .main > paper-material:nth-of-type(2) {
+      border-top: solid 1px #CCCCCC;
+    }
+    .main > paper-material > paper-input {
+      margin-top: -8px;
+    }
+    .main > paper-material > paper-input[is-invalid] {
+      margin-top: -20px;
+    }
+    .main > paper-material > paper-input ::content input {
+      line-height: 16px;
+    }
+    .main > paper-material > paper-input:first-of-type {
+      margin-right: 24px;
+    }
+    .launch-button {
+      margin-left: 24px;
+    }
+    .launch-button[disabled] {
+      opacity: 0.25;
+    }
+    #messagesDiv {
+      overflow-y: auto;
+      padding-top: 32px;
+    }
+    .message-container {
+      transition: opacity 500ms;
+      opacity: 0;
+    }
+    .message {
+      padding: 12px;
+    }
+    .message .date {
+      font-size: 10px;
+      opacity: 0.7;
+      padding-top: 4px;
+    }
+    .bubble {
+      display: table;
+      position: relative;
+      max-width: 45%;
+      border-radius: 4px;
+      margin: 0px 0px 32px;
+    }
+    .left-message .bubble {
+      color: var(--text-primary-color);
+      border-top-left-radius: 0px;
+      background-color: var(--default-primary-color);
+      border-color: #CCCCCC;
+      border-width: 2px;
+      border-style: none;
+    }
+    .right-message .bubble {
+      color: rgba(0, 0, 0, 0.87);
+      border-top-right-radius: 0px;
+      background-color: var(--default-background-color);
+      border-color: #CCCCCC;
+      border-width: 2px;
+      border-style: none;
+    }
+    .pointer {
+      position: absolute;
+      border-style: solid;
+      top: 0px;
+      z-index: 1;
+    }
+    .pointerBorder {
+      position: absolute;
+      border-style: none;
+      top: -2px;
+      z-index: 0;
+    }
+    .left-message .pointer {
+      border-color: transparent var(--default-primary-color);
+      border-width: 0px 14px 17px 0px;
+      left: -14px;
+    }
+    .right-message .pointer {
+      border-color: transparent var(--default-background-color);
+      border-width: 0px 0px 17px 14px;
+      right: -14px;
+    }
+    .left-message .pointerBorder {
+      border-color: transparent #CCCCCC;
+      border-width: 0px 16px 20px 0px;
+      left: -18px;
+    }
+    .right-message .pointerBorder {
+      border-color: transparent #CCCCCC;
+      border-width: 0px 0px 20px 16px;
+      right: -18px;
+    }
+    .chip {
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+    }
+    .left-message .chip {
+      margin: 0px 20px 0px 12px;
+      background-color: var(--default-background-color);
+      color: var(--primary-text-color);
+    }
+    .right-message .chip {
+      margin: 0px 12px 0px 20px;
+      background-color: var(--default-primary-color);
+      color: var(--text-primary-color);
+    }
+    .initial {
+      text-align: center;
+      vertical-align: middle;
+      line-height: 40px;
+      font-size: 24px;
+      font-weight: 500;
+    }
+    .send {
+      width: 100%;
+      margin-top: 16px;
+    }
+    .input-bubble {
+      width: 90%;
+      max-width: initial;
+      margin-bottom: 16px;
+    }
+    #messageInput {
+      overflow-x: hidden;
+    }
+    #placeholder {
+      top: 64px;
+    }
+  </style>
+  <template>
+    <div class="main flex-layout-vertical">
+      <paper-material class="flex-layout-center-center flex-layout-horizontal">
+        <paper-input id="incident-number" label="[[xlate('INCIDENT_NUMBER')]]" value="{{incidentNumber}}"
+            always-float-label disabled$="[[_checkChatting(_isChatting, canInitiateChat)]]"
+            hidden$="[[hideIncidentNumber]]"></paper-input>
+        <paper-input label="[[xlate('PROMPT_USER_NAME')]]" value="{{user}}" always-float-label
+            disabled$="[[_checkChatting(_isChatting, canInitiateChat)]]"></paper-input>
+        <paper-fab mini class="dark-bg-primary launch-button" style$="[[_getChatButtonStyle(_isChatting)]]"
+            disabled$="[[_checkUser(user, canInitiateChat)]]"
+            icon="[[_getChatButtonIcon(_isChatting)]]" on-click="_chatButtonClicked"></paper-fab>
+      </paper-material>
+      <div id="placeholder" class="flex-layout-fit flex-layout-center-center flex-layout-vertical"
+          hidden$="[[_isChatting]]">
+        <div class="light-bg-secondary">[[xlate('CHAT_INACTIVE')]]</div>
+      </div>
+      <div id="messagesDiv" class="flex-layout-flex" hidden$="[[!_isChatting]]">
+        <template is="dom-repeat" items="[[_messages]]">
+          <div class$="[[_getMessageClasses(item)]]">
+            <div class="chip initial" title$="[[item.user.name]]">[[_getUserInitial(item.user.name)]]</div>
+            <div class="bubble">
+              <div class="message">
+                <div class="text">[[item.message]]</div>
+                <div class="date">[[item.date]]</div>
+              </div>
+              <div class="pointer"></div>
+              <div class="pointerBorder"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <paper-material class="flex-layout-center-center flex-layout-horizontal" hidden$="[[!_isChatting]]">
+        <div class="send">
+          <div class="right-message flex-layout-horizontal-reverse flex-layout-horizontal">
+            <a on-click="_sendChat"><div class="chip initial" title$="[[user.name]]">[[_getUserInitial(user)]]</div></a>
+            <div class="input-bubble bubble">
+              <div class="message">
+                <paper-input id="messageInput" label="[[xlate('PROMPT_MESSAGE')]]" on-keyup="_handleSendKeyUp"></paper-input>
+              </div>
+              <div class="pointer"></div>
+              <div class="pointerBorder"></div>
+            </div>
+          </div>
+        </div>
+      </paper-material>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-chat',
+      behaviors: [I18NBehavior],
+      properties: {
+        partitionId: {
+          type: Number,
+          value: 1
+        },
+        incidentNumber: {
+          type: String,
+          value: '',
+          notify: true
+        },
+        user: {
+          type: String,
+          value: '',
+          notify: true
+        },
+        domain: {
+          type: String,
+          value: ''
+        },
+        agentGuid: {
+          type: String,
+          value: ''
+        },
+        chatKey: {
+          type: String,
+          value: ''
+        },
+        _isChatting: {
+          type: Boolean,
+          value: false
+        },
+        _messages: {
+          type: Array,
+          value: function() {return [];}
+        },
+        canInitiateChat: {
+          type: Boolean,
+          value: true
+        },
+        hideIncidentNumber: {
+          type: Boolean,
+          value: true
+        }
+      },
+      _messagePollDelay: 0,
+      _lastMessageId: -99,
+      _stop: false,
+      _init: function() {
+        this.async(function() {
+          if (this.chatKey && this.chatKey !== '') {
+            this._isChatting = true;
+          } else {
+            this._isChatting = false;
+          }
+
+          this._messages = [];
+
+          if (this._isChatting) {
+            this._chat();
+          } else if (this.canInitiateChat) {
+            this.$['incident-number'].focus();
+          }
+        }.bind(this));
+      },
+      _closeSession: function() {
+        this.chatKey = '';
+        this._isChatting = false;
+        this._stop = true;
+        this.incidentNumber = '';
+        this._lastMessageId = -99;
+        this._messages = [];
+        this.$['incident-number'].focus();
+        this.fire('close-session', {});
+      },
+      _chatButtonClicked: function() {
+        if (this._isChatting) {
+          this._saveAllToNote();
+        } else {
+          this._launchChat();
+        }
+      },
+      _launchChat: function(e) {
+        if (this.hideIncidentNumber) {
+          this._startChatSession();
+        } else {
+          this._startChatSessionForValidIncident();
+        }
+      },
+      _startChatSessionForValidIncident: function() {
+        var incidentNumberElement = this.$['incident-number'];
+        incidentNumberElement.invalid = false;
+        incidentNumberElement.removeAttribute('is-invalid');
+        incidentNumberElement.errorMessage = '';
+        var incidentCheckCallback = function(xhr) {
+          switch (xhr.status) {
+            case 200:
+              this._startChatSession();
+              break;
+            case 404:
+              incidentNumberElement.errorMessage = this.xlate('INVALID_INCIDENT_NUMBER');
+              incidentNumberElement.invalid = true;
+              incidentNumberElement.setAttribute('is-invalid', '');
+              break;
+          }
+        }.bind(this);
+
+        if (this.incidentNumber) {
+          this._sendMessage('GET', this.domain + '/Chat/GetIncident?partitionId=' +
+                            this.partitionId + '&incidentNumber=' + this.incidentNumber,
+                            undefined, incidentCheckCallback);
+        } else {
+          this._startChatSession();
+        }
+      },
+      _startChatSession: function() {
+        this._isChatting = true;
+        this._stop = false;
+
+        var handleResponse = function(xhr) {
+          if (xhr.status === 200) {
+            this.chatKey = JSON.parse(xhr.responseText).key;
+            this._chat();
+            this._sendMessage('POST', this.domain + '/Chat/LaunchChatForAgent',
+                              {key:this.chatKey, incidentNumber:this.incidentNumber,agentGuid:this.agentGuid});
+            this.async(function(){this.$.messageInput.focus();}.bind(this));
+          }
+        }.bind(this);
+
+        this._sendMessage('GET', this.domain + '/Chat/Open?partitionId=' + this.partitionId, undefined, handleResponse);
+      },
+      _chat: function() {
+        if (this._stop) {
+          return;
+        }
+        var handleResponse = function(xhr) {
+          switch (xhr.status) {
+            case 200:
+              var data = JSON.parse(xhr.responseText);
+              if (data.status === 404) {
+                this._closeSession();
+              } else {
+                this._processMessages(data.messages);
+              }
+              break;
+          }
+          this._isGettingChatMessages = false;
+          if (xhr.status === 0) {
+            // Not a good response. Wait a few seconds.
+            this._asyncHandle = this.async(function() {
+              this._chat();
+            }.bind(this), 3000);
+          } else {
+            this._asyncHandle = this.async(function() {
+              this._chat();
+            }.bind(this), 1000);
+          }
+        }.bind(this);
+
+        this._isGettingChatMessages = true;
+        this._sendMessage('GET', this.domain + '/Chat?key=' + this.chatKey + '&id=' + this._lastMessageId,
+                          undefined, handleResponse);
+      },
+      _processMessages: function(data) {
+        var messages = [];
+        data.forEach(function (message) {
+          if (message.id > this._lastMessageId) {
+            message.date = this.xlateDateToLocal(new Date(message.timestamp), 'hh:mm a');
+            this._lastMessageId = message.id;
+            messages.push(message);
+          } else if (message.id === -1000000) {
+            this._closeSession();
+          }
+        }.bind(this));
+        var scrollToBottom = (messages.length > 0);
+        this._messages = this._messages.concat(messages);
+        if (scrollToBottom) {
+          this.async(function(){
+            this.$.messagesDiv.scrollTop = this.$.messagesDiv.scrollHeight;
+            var msgCntrs = this.querySelectorAll('.message-container');
+            for (var i = 0; i < msgCntrs.length; i++) {
+              msgCntrs[i].style.opacity = 1.0;
+            }
+          }.bind(this));
+        }
+      },
+      _saveAllToNote: function() {
+        if (this.incidentNumber) {
+          this._sendMessage('POST', this.domain + '/Chat/SaveSessionToTicket',
+                            { key: this.chatKey, incidentNumber: this.incidentNumber, user: this.user, msg: 'Session closed.' });
+        } else {
+          this._sendMessage('POST', this.domain + '/Chat/Close',
+                            { key: this.chatKey, incidentNumber: '', user: this.user, msg: 'Session closed.' });
+        }
+        this._closeSession();
+      },
+      _handleSendKeyUp: function(e) {
+        if (e.keyCode === 13) { //enter key
+          this._sendChat();
+        }
+      },
+      _sendChat: function() {
+        var message = this.$.messageInput.value;
+        if (message.trim().length > 0) {
+          this.cancelAsync(this._asyncHandle);
+          var callback;
+          if (!this._isGettingChatMessages) {
+            callback = function(){this._chat();}.bind(this);
+          }
+          this._sendMessage('POST', this.domain + '/Chat/New', {key:this.chatKey,user:this.user,msg:message}, callback);
+        }
+        this.$.messageInput.value = '';
+      },
+      _sendMessage: function(method, url, msg, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (callback) {
+              callback(xhr);
+            }
+          }
+        }
+        if (msg) {
+          msg = JSON.stringify(msg);
+        }
+        xhr.send(msg);
+      },
+      _checkUser: function(user, canInitiateChat) {
+        return (user === undefined || user === '') || !canInitiateChat;
+      },
+      _getChatButtonStyle: function(isChatting) {
+        return 'background-color: ' + ((isChatting) ? '#F44336' : '#4CAF50');
+      },
+      _getChatButtonIcon: function(isChatting) {
+        return (isChatting) ? 'notification:do-not-disturb' : 'communication:chat';
+      },
+      _getUserInitial: function(username) {
+        if (username) {
+          return username.charAt(0).toUpperCase();
+        }
+        return '?';
+      },
+      _getMessageClasses: function(item) {
+        var classes = 'flex-layout-horizontal message-container';
+        if (item.user.name === this.user) { //TODO: need a better way to differentiate
+          classes = 'right-message flex-layout-horizontal-reverse ' + classes;
+        } else {
+          classes = 'left-message ' + classes;
+        }
+        return classes
+      },
+      setIsChatting: function (isChatting) {
+        this._isChatting = isChatting;
+      },
+      detached: function() {
+        this._stop = true;
+      },
+      _checkChatting: function(isChatting, canInitiateChat) {
+        return isChatting || !canInitiateChat;
+      },
+      ready: function() {
+        this._init();
+      }
+    });
+  })();
+
+</script>

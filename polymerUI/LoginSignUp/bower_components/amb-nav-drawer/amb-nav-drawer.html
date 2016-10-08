@@ -1,0 +1,342 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/av-icons.html">
+<link rel="import" href="../iron-icons/communication-icons.html">
+<link rel="import" href="../iron-icons/device-icons.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
+<link rel="import" href="../iron-icons/hardware-icons.html">
+<link rel="import" href="../iron-icons/image-icons.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/maps-icons.html">
+<link rel="import" href="../iron-icons/notification-icons.html">
+<link rel="import" href="../iron-icons/social-icons.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<!--
+Navigation control designed to be used as the drawer content of a
+paper-drawer-panel.  Each item is displayed as an icon, and the
+drawer can be opened further to show the label as well.
+
+@demo demo/index.html
+-->
+<dom-module id="amb-nav-drawer">
+  <style is="custom-style">
+    #navMenu {
+      padding: 0px;
+      margin: 0px;
+      font-size: 16px;
+    }
+
+    #navMenu paper-button {
+      width: 100%;
+      margin: 0px;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-bottom: -4px;
+      text-transform: none;
+      cursor: pointer;
+      border-radius: 0px;
+    }
+    #navMenu paper-button:hover {
+      color: #000000;
+    }
+    #navMenu paper-button > ::content .button-content {
+      justify-content: initial;
+      -webkit-justify-content: flex-start;
+    }
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+      #navMenu paper-button > ::content .button-content {
+        display: block;
+      }
+    }
+    .nav-link:hover iron-icon {
+      box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                  0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    }
+    .nav-link:focus iron-icon {
+      box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                  0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    }
+    .nav-link.selected {
+      background-color: var(--selection-background-color, #EEEEEE);
+    }
+    .nav-link iron-icon {
+      margin: 0px 24px 0px 18px;
+      width: 30px;
+      height: 30px;
+      color: #5C5C5C;
+    }
+    .nav-link iron-icon.chip {
+      margin: 0px 24px 0px 13px;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      color: #FFFFFF;
+      background-color: var(--default-primary-color);
+    }
+    .nav-link iron-icon.chip ::content svg {
+      height: 50% !important;
+      width: 50% !important;
+    }
+    .nav-link .icon-container {
+      display: inline-block;
+      width: 57px;
+      margin-right: 12px;
+    }
+    .nav-link span {
+      vertical-align: middle;
+    }
+    #navToggle {
+      position: absolute;
+      top: 0px;
+      height: 52px;
+      left: 0px;
+      right: 0px;
+    }
+    #navToggle paper-button.keyboard-focus iron-icon {
+      background-color: #DDDDDD;
+      border-radius: 20px;
+      padding: 4px;
+      margin: -4px 14px;
+    }
+    #navToggle iron-icon {
+      margin: 0px 20px 0px 18px;
+      width: 30px;
+      height: 30px;
+      transition: opacity .25s ease-in-out;
+      opacity: 1.0;
+    }
+    #navToggle iron-icon[fadeout] {
+      opacity: 0;
+    }
+    #navButtons {
+      overflow-y: hidden;
+      overflow-x: hidden;
+      position: absolute;
+      top: 52px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+    }
+    #navMenu[drawer-open] #navButtons {
+      overflow-y: auto;
+    }
+  </style>
+  <template>
+    <div id="navMenu">
+      <div id="navToggle">
+        <paper-button tabIndex$="[[_tabIdx]]" on-click="_minimizerClicked">
+          <iron-icon id="btnMinimize" class="light-bg-icon" icon="arrow-back" style="position:absolute"></iron-icon>
+          <iron-icon id="btnRestore" class="light-bg-icon" icon="menu" fadeout></iron-icon>
+          <span class="light-bg-secondary typo-body2" style="font-style: italic">[[_prepareLabel(_subMenuLink)]]</span>
+        </paper-button>
+      </div>
+      <div id="navButtons">
+      <template is="dom-repeat" items="[[_shownLinks]]">
+        <paper-button tabIndex$="[[_tabIdx]]" class$="[[_getButtonClasses(_subMenuParentIdx, _selectedIndex, index)]]"
+          hidden$="[[item.disabled]]" on-click="_handleNavClick">
+          <div class="icon-container">
+            <iron-icon icon="[[item.icon]]" class$="[[_getChipClass(iconBackgroundColors)]]"
+            style$="[[_getChipStyle(index, iconBackgroundColors)]]" title$="[[_prepareLabel(item.label)]]"></iron-icon>
+          </div>
+          <span class="light-bg-primary typo-body1">[[_prepareLabel(item.label)]]</span>
+        </paper-button>
+      </template>
+      </div>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    var DEFAULT_DRAWER_OPEN_WIDTH = '256px';
+    var DEFAULT_DRAWER_MINIMIZED_WIDTH = '82px';
+    Polymer({
+      is: 'amb-nav-drawer',
+
+      /**
+       * Fired when a nav button is clicked.
+       *
+       * @event selected
+       */
+
+      behaviors: [I18NBehavior],
+      properties: {
+        /**
+         * Links to display in the nav drawer
+         */
+        navLinks: {
+          type: Array,
+          value: function() {return [];}
+        },
+        /**
+         * Show a random colored circle behind the icons
+         */
+        iconBackgroundColors: {
+          type: Array,
+          value: function() {return [];}
+        },
+        _minimized: {
+          type: Boolean,
+          value: false
+        },
+        _subMenuParentIdx: {
+          type: Number,
+          value: -1
+        },
+        _subMenuLink: {
+          type: String,
+          value: ''
+        },
+        _selectedIndex: {
+          type: Object,
+          value: -1
+        },
+        _tabIdx: {
+          type: Number,
+          value: 0
+        }
+      },
+      observers: [
+        '_navLinksChanged(navLinks.*)'
+      ],
+      _navLinksChanged: function(change) {
+        this._shownLinks = this.navLinks;
+      },
+      _getChipClass: function(bgcolors) {
+        if (bgcolors && bgcolors.length > 0) {
+          return 'chip';
+        } else {
+          return '';
+        }
+      },
+      _getChipStyle: function(idx, bgcolors) {
+        if (bgcolors && bgcolors.length > 0) {
+          return 'background-color: ' + bgcolors[idx % bgcolors.length];
+        } else {
+          return '';
+        }
+      },
+      _prepareLabel: function(v) {
+        var xlate = this.xlate(v);
+        if (xlate.length > 24) {
+          xlate = xlate.substr(0, 21) + '...';
+        }
+        return xlate;
+      },
+      _handleNavClick: function(e) {
+        var item = e.model.__data__.item;
+        if (item.sublinks && item.sublinks.length > 0) {
+          this._subMenuLink = item.label;
+          this._shownLinks = item.sublinks;
+          if (this._minimized) {
+            this._toggleWidth();
+          }
+          this._subMenuParentIdx = e.model.__data__.index;
+        } else {
+          if (this._minimized) {
+            this.fire('selected', item);
+          } else {
+            this.async(function() {this.fire('selected', item);}.bind(this), 500);
+          }
+          if (this._subMenuParentIdx >= 0) {
+            this._resetLinks();
+          }
+          this._selectItem(item);
+          this.$.navMenu.selected = -1;
+          if (!this._minimized) {
+            this._toggleWidth();
+          }
+        }
+      },
+      _toggleWidth: function() {
+        if (this._minimized) {
+          this.parentNode.style.width = DEFAULT_DRAWER_OPEN_WIDTH;
+          this.parentNode.setAttribute('drawer-open', '');
+          this.$.navMenu.setAttribute('drawer-open', '');
+          this._showMinimizeButton();
+        } else {
+          this.parentNode.style.width = DEFAULT_DRAWER_MINIMIZED_WIDTH;
+          this.parentNode.removeAttribute('drawer-open');
+          this.$.navMenu.removeAttribute('drawer-open');
+          this._hideMinimizeButton();
+        }
+        this._minimized = !this._minimized;
+      },
+      _showMinimizeButton: function() {
+        this.$.btnMinimize.removeAttribute('fadeout');
+        this.$.btnRestore.setAttribute('fadeout', '');
+      },
+      _hideMinimizeButton: function() {
+        this.$.btnMinimize.setAttribute('fadeout', '');
+        this.$.btnRestore.removeAttribute('fadeout');
+      },
+      _minimizerClicked: function() {
+        if (this._subMenuParentIdx >= 0) {
+          this._resetLinks();
+        } else {
+          this._toggleWidth();
+        }
+      },
+      _resetLinks: function() {
+        this._shownLinks = this.navLinks;
+        this._subMenuParentIdx = -1;
+        this._subMenuLink = '';
+        this._updateSelection();
+      },
+      _selectItem: function(item) {
+        for (var i = 0; i < this.navLinks.length; i++) {
+          var link = this.navLinks[i];
+          if (link.sublinks !== undefined) {
+            for (var j = 0; j < link.sublinks.length; j++) {
+              if (item === link.sublinks[j]) {
+                this._selectedIndex = [i,j];
+              }
+            }
+          } else {
+            if (item === link) {
+              this._selectedIndex = i;
+            }
+          }
+        }
+      },
+      _updateSelection: function() {
+        var btns = this.$.navButtons.querySelectorAll('paper-button.nav-link');
+        for (var i = 0; i < btns.length; i++) {
+          if (btns[i].dataHost.item.selected) {
+            this.toggleClass('selected', true, btns[i]);
+          } else {
+            this.toggleClass('selected', false, btns[i]);
+          }
+        };
+      },
+      _getButtonClasses: function(parentIdx, selIdx, idx) {
+        var c = 'nav-link';
+        if (parentIdx >= 0) {
+          if (Array.isArray(selIdx) &&
+              selIdx[0] === parentIdx &&
+              selIdx[1] === idx) {
+            c += ' selected';
+          }
+        } else if ((Array.isArray(selIdx) === false && selIdx === idx) ||
+                  (Array.isArray(selIdx) && selIdx[0] === idx)) {
+            c += ' selected';
+        }
+        return c;
+      },
+      disableTabbing: function() {
+        this._tabIdx = '-1';
+      },
+      enableTabbing: function() {
+        this._tabIdx = '0';
+      },
+      ready: function() {
+        this._toggleWidth();
+        this._lightParent.openDrawer();
+        this._lightParent.$$('#scrim').style.display = 'none';
+      }
+    });
+  })();
+</script>

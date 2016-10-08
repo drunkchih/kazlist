@@ -1,0 +1,90 @@
+<link rel="import" href="../polymer/polymer.html">
+<script>
+/**
+ * Core behaviors for the 2fa passcode prompts
+ *
+ * @polymerBehavior
+ */
+  TwoFactorAuthBehavior = {
+    properties: {
+      /**
+       * Modal dialog?
+       */
+      modal: Boolean,
+      pattern: String,
+      imageDir: String,
+      _verifying: {
+        type: Boolean,
+        value: false
+      },
+      _signinError: {
+        type: String,
+        value: ''
+      },
+    },
+    listeners: {
+      'passcode.keydown': '_inputKeyPressed'
+    },
+    _getImageUrl: function(dir, file) {
+      return dir + '/' + file;
+    },
+    _onEnter: function() {
+      this._verify();
+    },
+    _inputKeyPressed: function(e) {
+      if (this._signinError !== '' && e.keyCode !== 13) {
+        this._signinError = '';
+      }
+    },
+    _verify: function() {
+      if (this._verifying) { return; }
+      if (!this.$.passcode.value || this.$.passcode.validate() === false) {
+        this._verifying = false;
+        this._signinError = 'INVALID_PASSCODE';
+        this.async(function(){this.$.passcode.focus();}.bind(this));
+        return;
+      }
+      this._signinError = '';
+      this._verifying = true;
+      this.async(function(){this.fire('verify', {passcode:this.$.passcode.value})}.bind(this),100); //give the spinner a chance to render
+    },
+    _overlayClosed: function(e) {
+      this._verifying = false;
+      this.$.passcode.value = '';
+    },
+    _dialogResized: function(e) {
+      this.async(function(){this.$.dialog.refit();}.bind(this));
+    },
+    /**
+     * Causes an error message to be shown to the user and stops the loading spinner.
+     *
+     * @param {String} error The error message to display.
+     */
+    setError: function(error) {
+      this._signinError = error;
+      this._verifying = false;
+      this.async(function(){this.$.passcode.focus();}.bind(this));
+    },
+    /**
+     * Hide the dialog
+     */
+    hide: function() {
+      this.$.dialog.close();
+    },
+    /**
+     * Show the dialog
+     */
+    show: function() {
+      this.$.dialog.open();
+      this.async(function(){this.$.dialog.refit();}.bind(this));
+      this.async(function(){this.$.passcode.focus();}.bind(this));
+    },
+    /**
+     * Boolean indicating dialog is open
+     */
+    isOpen: function() {
+      return this.$.dialog.opened;
+    }
+  };
+
+</script>

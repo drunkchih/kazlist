@@ -1,0 +1,411 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
+
+<link rel="import" href="paper-fab-menu-item.html">
+<link rel="import" href="paper-fab-menu-overlay.html">
+
+<!--
+`paper-fab-menu` creates a floating action button menu with paper elements. By default, the menu will be hide. Use `opened` or `toggle()` to show/hide the menu. On mobile device, tooltip is automatically shown, otherwise it will be hidden on desktop browsers.
+
+##### Example
+
+    <paper-fab-menu icon="menu" closeIcon="close" duration="0.3">
+      <paper-fab-menu-item icon="info-outline" color="blue;" tooltip="Information"></paper-fab-menu-item>
+      <paper-fab-menu-item icon="alarm" color="purple;" tooltip="Alarm"></paper-fab-menu-item>
+      <paper-fab-menu-item icon="star-outline" color="green;" tooltip="Favorites"></paper-fab-menu-item>
+      <paper-fab-menu-item icon="list" color="orange;" tooltip="List"></paper-fab-menu-item>
+    </paper-fab-menu>
+
+@element paper-fab-menu
+@blurb `paper-fab-menu` creates a floating action button menu with paper elements.
+@status alpha
+@homepage http://cwdoh.github.io/paper-fab-menu
+-->
+
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="paper-fab-menu">
+
+  <template>
+
+    <style>
+      .layout {
+        @apply(--layout);
+      }
+      .layout.vertical {
+        @apply(--layout-vertical);
+      }
+      .layout.center {
+        @apply(--layout-center);
+      }
+    </style>
+
+    <style>
+      :host {
+        /*position: absolute !important;*/
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 0.5em;
+        padding-top: 0;
+
+        z-index: 110;
+
+        --paper-fab-menu-duration: 0.3s;
+        --paper-fab-menu-z-index: 1000;
+      }
+
+      .container {
+        /* layer hack */
+        transform: translateZ(0);
+        overflow: visible;
+      }
+
+      .container.show {
+        z-index: 10000;
+      }
+
+      .container.show {
+        z-index: var(--paper-fab-menu-z-index);
+      }
+
+      #trigger {
+        margin-top: 0.5em;
+      }
+
+      #trigger::shadow iron-icon {
+        transition: transform var(--paper-fab-menu-duration);
+        will-change: transform;
+      }
+
+      #trigger[activate]::shadow iron-icon {
+        transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+      }
+
+      #fam > ::content paper-fab-menu-item::shadow paper-fab {
+        opacity: 0;
+        transform: scale(0);
+        -moz-transform: scale(0);
+        -webkit-transform: scale(0);
+      }
+
+      #fam.show > ::content paper-fab-menu-item::shadow paper-fab {
+        opacity: 1;
+        transform: scale(1);
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1);
+      }
+
+      .container .item-container {
+          left:0;
+          right: 0;
+          transition-property: transform, -moz-transform, -webkit-transform;
+          transform: scale3d(0, 0, 0);
+          -moz-transform: scale3d(0, 0, 0);
+          -webkit-transform: scale3d(0, 0, 0);
+      }
+
+
+      .container.show .item-container {
+          transition-delay: 0s;
+          transition-property: transform, -moz-transform, -webkit-transform;
+          transform: scale3d(1, 1, 1);
+          -moz-transform: scale3d(1, 1, 1);
+          -webkit-transform: scale3d(1, 1, 1);
+      }
+
+
+
+    </style>
+
+    <style>
+
+      #fam > ::content paper-fab-menu-item::shadow paper-fab {
+        /*will-change: opacity, transform;*/
+        transition: opacity var(--paper-fab-menu-duration), transform var(--paper-fab-menu-duration), -moz-transform var(--paper-fab-menu-duration), -webkit-transform var(--paper-fab-menu-duration);
+      }
+
+      .container:not(.show) .item-container {
+        transition-delay: var(--paper-fab-menu-duration);
+      }
+
+      /**
+      * Below styles will prevent hijacking of tap event upon trigger button
+      * by container height during hide floating menus.
+      */
+      #fam .menus {
+        will-change: transform;
+        transition-property: transform, -moz-transform, -webkit-transform;
+      }
+
+      #fam:not(.show) .menus {
+        transition-delay: var(--paper-fab-menu-duration);
+        transform: translate3d(0, 100%, 0);
+        -moz-transform: translate3d(0, 100%, 0);
+        -webkit-transform: translate3d(0, 100%, 0);
+      }
+    </style>
+
+    <div class="container layout vertical center" id="fam">
+      <paper-fab-menu-overlay id="overlay" with-backdrop={{overlay}} on-iron-overlay-opened="overlayOpenedChanged" on-iron-overlay-closed="overlayOpenedChanged"></paper-fab-menu-overlay>
+        <div style="position: absolute; overflow: visible; left:0; right: 0;" class="layout vertical center">
+          <div class="item-container layout vertical center" style="position: absolute; bottom: 0;">
+            <content id="content" select="paper-fab-menu-item"></content>
+          </div>
+        </div>
+
+      <paper-fab icon="menu" id="trigger" on-tap="toggle"></paper-fab>
+    </div>
+
+  </template>
+
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'paper-fab-menu',
+
+      properties: {
+        /**
+        * Set the icon of main button to close floating menu
+        *
+        * @attribute closeIcon
+        * @type String
+        * @default 'close'
+        */
+        closeIcon: {
+          type: String,
+          value: 'close',
+          notify: true
+        },
+        /**
+        * Set duration of total animation to show/hide menu. This will be seed value to determine delay and duration of each menu item.
+        *
+        * @attribute duration
+        * @type Float
+        * @default 0.3
+        */
+        duration: {
+          type: Number,
+          value: 0.3,
+          notify: true,
+          observer: 'durationChanged'
+        },
+        /**
+        * Set the default icon of main button to show floating menu
+        *
+        * @attribute icon
+        * @type String
+        * @default 'menu'
+        */
+        icon: {
+          type: String,
+          value: 'menu',
+          notify: true
+        },
+        /**
+        * Automactically set delay to each item. This will be deprecated at later version.
+        *
+        * @attribute items
+        * @type Array
+        * @default []
+        */
+        items: {
+          type: Array,
+          value: function () {
+            return [];
+          }
+        },
+        /**
+        * Set opened to true to show the floating menu and to false to hide it.
+        *
+        * @attribute opened
+        * @type boolean
+        * @default false
+        */
+        opened: {
+          type: Boolean,
+          value: false,
+          observer: 'openedChanged'
+        },
+        /**
+        * Set if the overlay of screen should be used when the menu is opened.
+        * @attribute overlay
+        * @type boolean
+        * @default
+        */
+        overlay: {
+          type: Boolean,
+          value: true,
+          notify: true
+        },
+
+        /**
+        * Set z-index of container to contain whole parts of menu. This will be depth to determine z-orders of elements including paper-fab-menu.
+        *
+        * @attribute zIndex
+        * @type Integer
+        * @default 10000
+        */
+        // zIndex: {
+        //   type: Number,
+        //   value: 10000,
+        //   notify: true
+        // }
+      },
+
+      observers: [
+        '_itemsChanged(items.splices)'
+      ],
+
+      ready: function () {
+        this.calculateTransitionEffects.apply(this);
+        // set default icon
+        this.$.trigger.icon = this.icon;
+      },
+
+      overlayOpenedChanged: function () {
+
+        if (this.overlay) {
+          var overlay = this.querySelector('#overlay');
+          this.opened = overlay.opened;
+        }
+      },
+      /**
+       * The `paper-fab-menu-open` event is fired whenever menu
+       * is opened or closed.
+       *
+       * @event paper-fab-menu-open
+       * @param {Object} detail
+       */
+      openedChanged: function () {
+        this.update();
+        this.fire('paper-fab-menu-open', this.opened);
+        // workaround for multiple backdrops when closing fab-menu.
+        if (!this.opened) {
+          //console.log(this.overlay)
+          // var backdrops = document.querySelectorAll('html iron-overlay-backdrop');
+          // if (backdrops.length <= 1)
+          //   return;
+          // if (this.overlay) {
+          //   for (l in backdrops) {
+          //     if (backdrops[l] != this.$.overlay.scrim) {
+          //       // add core-opened to other backdrop for workaround
+          //       backdrops[l].classList.add('core-opened');
+          //       // remove overlay of fab-menu.
+          //       this.$.overlay.scrim.remove();
+          //       // just do this at first backdrop.
+          //       return;
+          //     }
+          //   }
+          // }
+        }
+      },
+      /**
+       * The `toggle` method will toggle the state of menu.
+       *
+       * @method toggle
+       */
+      toggle: function () {
+        this._updateItemsDelay();
+        this.opened = !this.opened;
+      },
+      /**
+       * The `open` method will show the menu.
+       *
+       * @method open
+       */
+      open: function () {
+        this.opened = true;
+        this.$.trigger.icon = this.closeIcon;
+        this.$.trigger.setAttribute('activate', '');
+        if (this.overlay) {
+          this.$.overlay.open();
+          //var overlay = this.querySelector('#overlay');
+          //overlay.open();
+        }
+
+      },
+      /**
+       * The `close` method will hide the menu.
+       *
+       * @method close
+       */
+      close: function () {
+        this.opened = false;
+        this.$.trigger.icon = this.icon;
+        this.$.trigger.removeAttribute('activate');
+        if (this.overlay) {
+          this.$.overlay.close();
+          //var overlay = this.querySelector('#overlay');
+          //overlay.close();
+        }
+      },
+      update: function () {
+        this.$.fam.classList.toggle('show', this.opened);
+        this[this.opened ? 'open' : 'close']();
+      },
+      durationChanged: function () {
+        this.calculateTransitionEffects.apply(this);
+      },
+
+      _itemsChanged: function() {
+        var children = Polymer.dom(this.$.content).getDistributedNodes();
+
+        this._updateItemsDelay();
+      },
+
+      _updateItemsDelay: function() {
+        var length = this.items.length;
+        var children = Polymer.dom(this.$.content).getDistributedNodes();
+
+        for (var i = 0; i < length; i++) {
+          var target = Polymer.dom(children[i].root).querySelector('paper-fab');
+
+          if (target == undefined) {
+            continue;
+          }
+
+          if (this.$.fam.classList.contains('show')) {
+            target.style.transitionDelay = this.items[i].delay.appear + 's';
+          }
+          else {
+            target.style.transitionDelay = this.items[i].delay.disappear + 's';
+          }
+
+        }
+      },
+
+      calculateTransitionEffects: function () {
+        // this should calculates delays of menu items and updates them into css.
+        var length = Polymer.dom(this.$.content).getDistributedNodes().length;
+        var duration = parseFloat(this.duration);
+        var delta = this.duration / length;
+        //this.items = [];
+        this.set('items', []);
+        for (var index = 1; index <= length; index++) {
+          var factor = delta * index;
+          this.push('items', {
+            index: index,
+            delay: {
+              appear: factor,
+              disappear: duration - factor
+            }
+          });
+        }
+      }
+    });
+  </script>
+</dom-module>

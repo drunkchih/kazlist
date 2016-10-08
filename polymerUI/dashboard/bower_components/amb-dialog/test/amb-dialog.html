@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>amb-dialog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../amb-dialog.html">
+</head>
+<body>
+  <test-fixture id="DialogFixture">
+    <template>
+      <amb-dialog header="FOOBAR"></amb-dialog>
+    </template>
+  </test-fixture>
+  <script>
+    suite('amb-dialog', function() {
+      var dialog;
+
+      suite('tests', function() {
+        setup(function() {
+          dialog = fixture('DialogFixture');
+        });
+
+        test('_getThemeBG', function(done) {
+          expect(dialog._getThemeBG()).to.be.undefined;
+          expect(dialog._getThemeBG('greenish')).to.equal('background-color: greenish');
+          done();
+        });
+
+        test('_onEnter', function(done) {
+          dialog.confirmOnEnter = false;
+          dialog.$.dialog = {_updateClosingReasonConfirmed: sinon.stub()};
+          dialog.hide = sinon.stub();
+          dialog._onEnter();
+          expect(dialog.$.dialog._updateClosingReasonConfirmed.called).to.equal(false);
+          expect(dialog.hide.called).to.equal(false);
+
+          dialog.confirmOnEnter = true;
+          dialog._onEnter();
+          expect(dialog.$.dialog._updateClosingReasonConfirmed.calledOnce).to.equal(true);
+          expect(dialog.hide.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_overlayClosed', function(done) {
+          dialog.$.dialog.closingReason = {confirmed: false};
+          dialog.fire = sinon.stub();
+          dialog._overlayClosed();
+          expect(dialog.fire.calledOnce).to.equal(true);
+          expect(dialog.fire.firstCall.args[0]).to.equal('dismiss');
+          dialog.fire.reset();
+
+          dialog.$.dialog.closingReason.confirmed = true;
+          dialog._overlayClosed();
+          expect(dialog.fire.calledOnce).to.equal(true);
+          expect(dialog.fire.firstCall.args[0]).to.equal('confirm');
+          done();
+        });
+
+        test('hide', function(done) {
+          dialog.$.dialog.close = sinon.stub();
+          dialog.hide();
+          expect(dialog.$.dialog.close.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('show', function(done) {
+          dialog.async = function(fn){fn();};
+          dialog.$.dialog.open = sinon.stub();
+          dialog.$.dialog.refit = sinon.stub();
+          dialog.show();
+          expect(dialog.$.dialog.open.calledOnce).to.equal(true);
+          expect(dialog.$.dialog.refit.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('isOpen', function(done) {
+          dialog.$.dialog.opened = false;
+          expect(dialog.isOpen()).to.equal(false);
+          dialog.$.dialog.opened = true;
+          expect(dialog.isOpen()).to.equal(true);
+          done();
+        });
+      });
+    });
+  </script>
+  </body>
+</html>

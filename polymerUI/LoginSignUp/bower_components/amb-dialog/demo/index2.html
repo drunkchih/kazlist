@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-dialog demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../amb-dialog.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    #btnDialog1 {
+      background-color: #0072BC;
+      color: #FFFFFF;
+    }
+    #dialog1 ::content paper-dialog {
+      max-width: 360px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h2>amb-dialog (custom buttons)</h2>
+    <paper-button id="btnDialog1" raised on-tap="_showDialog">Show Dialog</paper-button>
+    <amb-dialog id="dialog1" theme-color="#0072BC" header="Dialog Example" modal>
+      <div dialog-content>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+      <div dialog-buttons class="buttons">
+        <paper-button on-tap="_fooClicked">Foo</paper-button>
+        <paper-button on-tap="_barClicked">Bar</paper-button>
+        <paper-button on-tap="_bazClicked">Baz</paper-button>
+      </div>
+    </amb-dialog>
+  </template>
+  <script>
+    app._showDialog = function() {
+      document.querySelector('#dialog1').show();
+    };
+    app._fooClicked = function() {
+      console.log('Foo clicked!');
+      document.querySelector('#dialog1').hide();
+    };
+    app._barClicked = function() {
+      console.log('Bar clicked!');
+      document.querySelector('#dialog1').hide();
+    };
+    app._bazClicked = function() {
+      console.log('Baz clicked!');
+      document.querySelector('#dialog1').hide();
+    };
+  </script>
+</body>
+</html>

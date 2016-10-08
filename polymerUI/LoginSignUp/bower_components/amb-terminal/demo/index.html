@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-terminal demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../amb-terminal.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    .termContainer {
+      width: 500px;
+      height: 300px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h2>amb-terminal</h2>
+    <div class="termContainer">
+      <amb-terminal id="term" on-data="_handleData"></amb-terminal>
+    </div>
+  </template>
+  <script>
+    app._handleData = function(e) {
+      var data = e.detail;
+      if (data === '\r') {
+        data = '\r\n';
+      }
+      app.$.term.write(data);
+    };
+  </script>
+  <script>
+  //sends an event anytime the window resizing ends or device is rotated
+  (function(window) {
+    var currentOrientation, debounce, dispatchResizeEndEvent, document, events, getCurrentOrientation, initialOrientation, resizeDebounceTimeout;
+    document = window.document;
+    if (!(window.addEventListener && document.createEvent)) {
+      return;
+    }
+    events = ['resize:end', 'resizeend'].map(function(name) {
+      var event;
+      event = document.createEvent('Event');
+      event.initEvent(name, false, false);
+      return event;
+    });
+    dispatchResizeEndEvent = function() {
+      return events.forEach(window.dispatchEvent.bind(window));
+    };
+    getCurrentOrientation = function() {
+      return Math.abs(+window.orientation || 0) % 180;
+    };
+    initialOrientation = getCurrentOrientation();
+    currentOrientation = null;
+    resizeDebounceTimeout = null;
+    debounce = function() {
+      currentOrientation = getCurrentOrientation();
+      if (currentOrientation !== initialOrientation) {
+        dispatchResizeEndEvent();
+        return initialOrientation = currentOrientation;
+      } else {
+        clearTimeout(resizeDebounceTimeout);
+        return resizeDebounceTimeout = setTimeout(dispatchResizeEndEvent, 100);
+      }
+    };
+    return window.addEventListener('resize', debounce, false);
+  })(window);
+  </script>
+</body>
+</html>

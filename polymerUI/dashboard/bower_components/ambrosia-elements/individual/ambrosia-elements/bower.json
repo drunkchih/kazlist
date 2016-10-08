@@ -1,0 +1,46 @@
+{
+  "name": "ambrosia-elements",
+  "version": "0.2.0",
+  "homepage": "http://www.kaseya.com",
+  "authors": [
+    "Kaseya, Inc"
+  ],
+  "description": "Kaseya's resuable Polymer elements.",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "kaseya"
+  ],
+  "license": "commercial",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "amb-2fa": "../../src/core/amb-2fa",
+    "amb-appheader": "../../src/core/amb-appheader",
+    "amb-asset-subheader": "../../src/core/amb-asset-subheader",
+    "amb-avatar": "../../src/core/amb-avatar",
+    "amb-breadcrumbs": "../../src/core/amb-breadcrumbs",
+    "amb-color-behavior": "../../src/core/amb-color-behavior",
+    "amb-date-picker": "../../src/core/amb-date-picker",
+    "amb-dialog": "../../src/core/amb-dialog",
+    "amb-nav-drawer": "../../src/core/amb-nav-drawer",
+    "amb-signin": "../../src/core/amb-signin",
+    "amb-subheader": "../../src/core/amb-subheader",
+    "amb-terminal": "../../src/core/amb-terminal",
+    "amb-time-picker": "../../src/core/amb-time-picker",
+    "amb-toast-with-list": "../../src/core/amb-toast-with-list",
+    "amb-transfer-icon": "../../src/core/amb-transfer-icon",
+    "amb-i18n-behavior": "../../src/core/amb-i18n-behavior",
+    "amb-querystring-behavior": "../../src/core/amb-querystring-behavior",
+    "ambrosia-assets": "../../src/assets",
+    "amb-chat": "../../src/core/amb-chat"
+  },
+  "resolutions": {
+    "polymer": "1.2.3"
+  }
+}

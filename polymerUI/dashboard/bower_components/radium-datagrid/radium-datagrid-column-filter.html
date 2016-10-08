@@ -1,0 +1,303 @@
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="datestring-validator.html">
+<dom-module id="radium-datagrid-column-filter">
+  <style is="custom-style">
+    #colFilter {
+      display: none;
+      height: 24px;
+      line-height: 24px;
+    }
+    paper-dropdown-menu {
+      display: block;
+    }
+    #colFilter #filterInput {
+      display: none;
+      pointer-events: none;
+    }
+    #colFilter[data-filter] #filterInput {
+      display: initial;
+      pointer-events: initial;
+    }
+    #colFilter[data-filter] #filterPH {
+      display: none;
+    }
+    #colFilter[data-filter] #filterInput ::content paper-input-container,
+    #colFilter[data-filter] #filterMenu ::content paper-input-container {
+      line-height: 16px;
+      padding: 0px;
+    }
+    #colFilter[data-filter] #filterInput ::content paper-input-container input,
+    #colFilter[data-filter] #filterMenu ::content paper-input-container input {
+      font-size: 12px;
+      line-height: 16px;
+    }
+    #colFilter[data-filter] #filterMenu ::content paper-input-container iron-icon {
+      width: 16px;
+      height: 16px;
+    }
+    #colFilter[data-filter] #btnFilterDate {
+      font-size: 12px;
+      text-transform: initial;
+      padding: 0px;
+      margin: 0px;
+      color: rgba(0, 0, 0, 0.54);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    #colFilter[data-filter] #ddFilterDate {
+      width: 256px;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-material {
+      background-color: #FFFFFF;
+      min-width: 256px;
+      min-height: 160px;
+      overflow: hidden;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-input {
+      padding: 0px 0px 0px 16px;
+      width: 192px;
+    }
+    #colFilter[data-filter] #ddFilterDate paper-icon-button {
+      padding: 12px 8px 4px 8px;
+      color: #5C5C5C;
+    }
+    #colFilter[data-filter] #ddButtons {
+      float: right;
+      margin: 8px;
+    }
+    #colFilter[data-filter] #ddButtons paper-button {
+      color: #0072BC;
+      min-width: 24px;
+    }
+    #dateDialog ::content #picker {
+      padding: 0px;
+      margin-top: 0px;
+    }
+    #dateDialog ::content #heading .date {
+      font-size: 24px;
+    }
+  </style>
+  <template>
+    <datestring-validator id="datevalidator" validator-name="datevalidator"></datestring-validator>
+    <div id="colFilter" data-filter$="[[_filtersEnabled(filterType)]]">
+      <paper-input id="filterInput" no-label-float hidden$="[[!_showFilter(filterType, 'text')]]"></paper-input>
+      <paper-dropdown-menu id="filterMenu" no-label-float hidden$="[[!_showFilter(filterType, 'options')]]"
+          horizontal-align="right">
+        <paper-listbox class="dropdown-content">
+          <paper-item>&nbsp;</paper-item>
+          <template is="dom-repeat" items="[[filterOptions]]">
+            <paper-item>[[item]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-button id="btnFilterDate" hidden$="[[!_showFilter(filterType, 'date')]]" on-tap="_showDateFilter"
+          title$="[[_getButtonLabel(_gridRef,_filterFrom,_filterTo)]]">[[_getButtonLabel(_gridRef,_filterFrom,_filterTo)]]</paper-button>
+      <iron-dropdown id="ddFilterDate" on-iron-overlay-canceled="_checkDateFilters" no-cancel-on-esc-key>
+        <paper-material class="dropdown-content" on-keydown="_dateDDKeyPress" >
+          <div class="end horizontal layout">
+            <paper-input id="fromDate" label="[[_computedTranslate(_gridRef, 'FROM', 'From')]]" required validator="datevalidator"></paper-input>
+            <paper-icon-button on-tap="_selectFromDate" icon="event"></paper-icon-button>
+          </div>
+          <div class="end horizontal layout">
+            <paper-input id="toDate" label="[[_computedTranslate(_gridRef, 'TO', 'To')]]" required validator="datevalidator"></paper-input>
+            <paper-icon-button on-tap="_selectToDate" icon="event"></paper-icon-button>
+          </div>
+          <div id="ddButtons">
+            <paper-button on-tap="_clearDateFields">[[_computedTranslate(_gridRef, 'CLEAR', 'Clear')]]</paper-button>
+            <paper-button on-tap="_cancelDateEdits">[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
+            <paper-button on-tap="_checkDateFilters">[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
+          </div>
+        </paper-material>
+      </iron-dropdown>
+      <div id="filterPH">&nbsp;</div>
+    </div>
+    <paper-dialog id="dateDialog" class="date-picker-dialog" modal on-iron-overlay-closed="_dateDialogClosed">
+      <div class="buttons">
+        <paper-button dialog-dismiss>[[_computedTranslate(_gridRef, 'CANCEL', 'Cancel')]]</paper-button>
+        <paper-button dialog-confirm>[[_computedTranslate(_gridRef, 'OK', 'OK')]]</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-datagrid-column-filter',
+      properties: {
+        filterType: {
+          type: String,
+          value: ''
+        },
+        filterOptions: {
+          type: Array,
+          value: null
+        },
+        _filterFrom: {
+          type: String,
+          value: null
+        },
+        _filterTo: {
+          type: String,
+          value: null
+        },
+        _selectedDate: {
+          type: Date,
+          value: new Date(),
+          observer: '_selectedDateChanged'
+        },
+        _gridRef: {
+          type: Object,
+          value: null
+        }
+      },
+      _selectedDateChanged: function(newValue) {
+        if (this.$.picker) {
+          this.$.picker.date = newValue;
+        }
+      },
+      _filtersEnabled: function(ft) {
+        return ft !== undefined && ft !== '';
+      },
+      _showFilter: function(ft, type) {
+        return ft === type;
+      },
+      _showDateFilter: function() {
+        this.async(function() {
+          var delta = window.innerWidth -
+                      (parseInt(this.$.ddFilterDate.getComputedStyleValue('left')) +
+                      parseInt(this.$.ddFilterDate.getComputedStyleValue('width')));
+          if (delta < 0) {
+            this.$.ddFilterDate.style.transform = 'translateX(' + delta + 'px)';
+          } else {
+            this.$.ddFilterDate.style.transform = '';
+          }
+        }.bind(this));
+        this.$.ddFilterDate.open();
+        this.async(function(){this.$.fromDate.focus();}.bind(this));
+      },
+      _dateDDKeyPress: function(e) {
+        if (e.keyCode === 13) {
+          this._checkDateFilters();
+        } else if (e.keyCode === 27) {
+          this._cancelDateEdits();
+        }
+      },
+      _checkDateFilters: function() {
+        if (this.$.fromDate.value === '' && this.$.toDate.value === '') {
+          this.$.fromDate.value = '';
+          this.$.toDate.value = '';
+          this._filterFrom = null;
+          this._filterTo = null;
+          this.fire('filter', {id:this.domHost.id, value:null});
+          this.$.ddFilterDate.close();
+          return;
+        }
+        if (!this._validateDateInput(this.$.fromDate) || !this._validateDateInput(this.$.toDate)) {
+          return;
+        }
+        this._filterFrom = this.$.fromDate.value;
+        this._filterTo = this.$.toDate.value;
+        this.$.ddFilterDate.close();
+        var fromUTC = new Date(this._filterFrom + ' 00:00:00 UTC');
+        var toUTC = new Date(this._filterTo + ' 00:00:00 UTC');
+        toUTC.setTime(toUTC.getTime() + 86400000);
+        this.fire('filter', {id:this.domHost.id, value:[fromUTC,toUTC]});
+      },
+      _validateDateInput: function(input) {
+        if (input.validate() === false) {
+          this.async(function(){input.focus();}.bind(this));
+          input.errorMessage = this._translate('EXPECTING', 'Expecting') + ': M/D/YYYY';
+          return false;
+        }
+        return true;
+      },
+      _getButtonLabel: function(grid, df, dt) {
+        if (!df || !dt) {
+          return '<' + this._computedTranslate(grid, 'SELECT_DATES', 'Select Dates') + '>';
+        } else {
+          return df + ' - ' + dt;
+        }
+      },
+      _clearDateFields: function() {
+        this.$.fromDate.value = '';
+        this.$.toDate.value = '';
+      },
+      _cancelDateEdits: function() {
+        this.$.fromDate.value = this._filterFrom;
+        this.$.toDate.value = this._filterTo;
+        this.$.ddFilterDate.close();
+      },
+      _selectFromDate: function() {
+        this._showDateDialog(this.$.fromDate, 'from');
+      },
+      _selectToDate: function() {
+        this._showDateDialog(this.$.toDate, 'to');
+      },
+      _showDateDialog: function(dateInput, fid) {
+        if (!this.$.picker) {
+          var picker = this.$.picker =
+              document.createElement((this._gridRef.datePickerElement) ? this._gridRef.datePickerElement : 'paper-date-picker');
+          picker.id = 'picker';
+          picker.date = this._selectedDate;
+          picker.addEventListener("date-changed", function(ev) {
+            this._selectedDate = picker.date;
+          }.bind(this));
+          this.$.dateDialog.insertBefore(picker,this.$.dateDialog.firstChild);
+        }
+        var currentDate;
+        if (dateInput.value) {
+          currentDate = new Date(dateInput.value);
+        }
+        this._selectedDate = (currentDate && !isNaN(currentDate.getTime())) ? currentDate : new Date();
+        this.$.dateDialog.setAttribute('data-field', fid);
+        this.$.dateDialog.open();
+      },
+      _dateDialogClosed: function(e) {
+        var dateStr = this._formatSimpleDate(this._selectedDate);
+        if (this.$.dateDialog.getAttribute('data-field') === 'from') {
+          this.$.fromDate.value = dateStr;
+        } else {
+          this.$.toDate.value = dateStr;
+        }
+      },
+      _formatSimpleDate: function(date) {
+        return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
+      },
+      _computedTranslate: function(grid, key, defaultVal) {
+        if (grid !== null) {
+          return this._translate(key, defaultVal);
+        }
+      },
+      _translate: function(key, defaultVal) {
+        return this._gridRef._translate(key, defaultVal);
+      },
+      ready: function() {
+        this.async(function() {
+          this._gridRef = this.domHost.domHost;
+        }.bind(this));
+        var filterInput = this.querySelector('#filterInput');
+        if (filterInput !== null) {
+          filterInput.addEventListener('change', function() {
+            this.fire('filter', {id:this.domHost.id, value:filterInput.value});
+          }.bind(this));
+        }
+        var filterBox = this.querySelector('#filterMenu paper-listbox');
+        if (filterBox !== null) {
+          filterBox.addEventListener('iron-select', function(e) {
+            this.fire('filter', {id:this.domHost.id, value:filterBox.selected - 1});
+          }.bind(this));
+        }
+      }
+    });
+  })();
+</script>

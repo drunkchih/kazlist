@@ -1,0 +1,30 @@
+{
+  "name": "iron-scroll-threshold",
+  "version": "1.0.1",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "description": "Polymer element for triggering an event when nearing the beginning or end of a scrollable element",
+  "authors": [
+    "Josh Heinrichs <joshiheinrichs@gmail.com>",
+    "The Polymer Authors"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "lazy loading"
+  ],
+  "main": [
+    "iron-interval-behavior.html"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Decateron/iron-scroll-threshold.git"
+  },
+  "ignore": [],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~1.0.3"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#~1.0.4",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#~0.7.4"
+  }
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-subheader demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../iron-icons/iron-icons.html">
+  <link rel="import" href="../../paper-fab/paper-fab.html">
+  <link rel="import" href="../../paper-tabs/paper-tabs.html">
+  <link rel="import" href="../amb-subheader.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    .header-container {
+      margin-bottom: 16px;
+      width: calc(100% - 16px);
+    }
+    paper-fab {
+      margin-top: 48px;
+      margin-right: 16px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h2>amb-subheader</h2>
+    <div class="header-container">
+      <amb-subheader>
+        <span class="typo-title dark-bg-primary flex-layout-flex">Simple label with buttons</span>
+        <iron-icon class="dark-bg-icon" icon="apps"></iron-icon>
+        <iron-icon class="dark-bg-icon" icon="more-vert"></iron-icon>
+      </amb-appheader>
+    </div>
+    <div class="header-container">
+      <amb-subheader>
+        <paper-tabs selected="0" class="dark-bg-primary typo-title">
+          <paper-tab>Item One</paper-tab>
+          <paper-tab>Item Two</paper-tab>
+          <paper-tab>Item Three</paper-tab>
+        </paper-tabs>
+      </amb-appheader>
+    </div>
+    <div class="header-container">
+      <amb-subheader background-color="#009688">
+        <paper-fab mini icon="add" noink></paper-fab>
+        <span class="typo-title dark-bg-primary flex-layout-flex">I have a fab button</span>
+        <iron-icon class="dark-bg-icon" icon="more-vert"></iron-icon>
+      </amb-appheader>
+    </div>
+  </template>
+  <script>
+
+  </script>
+</body>
+</html>

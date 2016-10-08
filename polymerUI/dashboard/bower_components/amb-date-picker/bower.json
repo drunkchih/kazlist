@@ -1,0 +1,6 @@
+{
+  "name": "amb-date-picker",
+  "description": "Material Design Date Picker - based on paper-date-picker",
+  "main": "amb-date-picker.html",
+  "private": true
+}

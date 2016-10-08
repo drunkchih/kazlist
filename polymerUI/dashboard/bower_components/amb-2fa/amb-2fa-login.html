@@ -1,0 +1,120 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="amb-2fa-behavior.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../iron-input/iron-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+<!--
+Two factor auth prompt for VSA login
+
+@demo demo/amb-2fa-login.html
+-->
+<dom-module id="amb-2fa-login">
+  <style is="custom-style">
+    #dialog .main {
+      padding: 0px;
+    }
+    #dialog .main .title {
+      padding: 0px 0px 24px;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+    }
+    #dialog .middle {
+      width: 100%;
+    }
+    #dialog .instructions {
+      padding: 36px 48px 0px 8px;
+      font-size: 16px !important;
+      font-weight: 500 !important;
+    }
+    #dialog .img-holder {
+      padding: 16px 8px 16px 28px;
+    }
+    #dialog .input-container {
+      padding-top: 16px;
+      width: 100%;
+    }
+    #dialog input {
+      margin: 0px 28px;
+      line-height: 22px;
+      font-family: Roboto;
+      font-size: 16px;
+      outline-color: var(--default-primary-color);
+      outline-width: thin;
+    }
+    #dialog .error-label {
+      color: var(--paper-red-500);
+    }
+    #dialog .buttons {
+      max-height: 30px;
+      line-height: 10px;
+      padding: 16px 28px 28px;
+    }
+    #dialog paper-button {
+      background-color: var(--default-primary-color);
+      color: white;
+      width: 100%;
+      text-transform: initial;
+      margin: 0px;
+      border-radius: 0px;
+    }
+    #dialog paper-spinner {
+      width: 14px;
+      height: 14px;
+    }
+    /* bug when vulcanizing css with vars */
+    #dialog paper-spinner {
+      --paper-spinner-layer-1-color: var(--paper-light-blue-200);
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-2-color: var(--paper-light-blue-200);
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-3-color: var(--paper-light-blue-200);
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-4-color: var(--paper-light-blue-200);
+    }
+  </style>
+  <template>
+    <paper-dialog id="dialog" transition="paper-dialog-transition-bottom" modal$="[[modal]]" on-iron-resize="_dialogResized"
+        on-iron-overlay-closed="_overlayClosed" no-cancel-on-esc-key no-cancel-on-outside-click>
+      <div class="main flex-layout-center flex-layout-vertical">
+        <div class="title">[[xlate('TWOFA_LOGIN_TITLE')]]</div>
+        <div class="middle flex-layout-horizontal">
+          <div class="img-holder">
+            <img src$="[[_getImageUrl(imageDir, 'Phone.png')]]"/>
+          </div>
+          <div class="instructions flex-layout-flex flex-layout-justified flex-layout-horizontal">[[xlate('TWOFA_ENTER_CODE')]]</div>
+        </div>
+        <div class="input-container flex-layout-horizontal">
+          <input is="iron-input" id="passcode" type="password" class="flex-layout-flex" disabled$="[[_verifying]]" pattern$="[[pattern]]" title="foo"></input>
+        </div>
+        <template is="dom-if" if="[[_signinError]]">
+          <label class="typo-body2 error-label">[[xlate(_signinError)]]</label>
+        </template>
+      </div>
+      <div class="buttons">
+        <paper-button raised on-tap="_verify" disabled="[[_verifying]]">
+          <template is="dom-if" if="[[!_verifying]]">
+            <span>[[xlate('VERIFY')]]</span>
+          </template>
+          <template is="dom-if" if="[[_verifying]]">
+            <paper-spinner active></paper-spinner>
+          </template>
+        </paper-button>
+      </div>
+    </paper-dialog>
+    <iron-a11y-keys target="[[dialog]]" on-keys-pressed="_onEnter" keys="enter"></iron-a11y-keys>
+  </template>
+</dom-module>
+<script>
+(function() {
+  Polymer({
+    is: 'amb-2fa-login',
+    behaviors: [I18NBehavior, TwoFactorAuthBehavior]
+  });
+})();
+</script>

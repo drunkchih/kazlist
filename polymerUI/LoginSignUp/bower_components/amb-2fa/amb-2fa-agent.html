@@ -1,0 +1,119 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="amb-2fa-behavior.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../iron-image/iron-image.html">
+<link rel="import" href="../iron-input/iron-input.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+<!--
+Two factor auth prompt for VSA agents
+
+@demo demo/amb-2fa-agent.html
+-->
+<dom-module id="amb-2fa-agent">
+  <style is="custom-style">
+    #dialog .main {
+      padding: 0px;
+    }
+    #dialog .title {
+      width: 100%;
+    }
+    #dialog .title > div {
+      padding: 16px 28px;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+    }
+    #dialog .note {
+      width: 100%;
+    }
+    #dialog .note > div {
+      padding: 16px 28px;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+    }
+    #dialog .img-holder {
+      padding: 0px;
+    }
+    #dialog .input-container {
+      padding: 16px 0px;
+      width: 100%;
+    }
+    #dialog .passcode-label {
+      font-size: 14px !important;
+      font-weight: 900 !important;
+    }
+    #dialog input {
+      margin: 0px 8px;
+      width: 160px;
+      line-height: 22px;
+      font-family: Roboto;
+      font-size: 16px;
+      outline-color: var(--default-primary-color);
+      outline-width: thin;
+    }
+    #dialog .input-container iron-image {
+      cursor: pointer;
+    }
+    #dialog .error-label {
+      color: var(--paper-red-500);
+    }
+    #dialog paper-spinner {
+      width: 20px;
+      height: 20px;
+      margin: 6px;
+    }
+    /* bug when vulcanizing css with vars */
+    #dialog paper-spinner {
+      --paper-spinner-layer-1-color: #6862A0;
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-2-color: #6862A0;
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-3-color: #6862A0;
+    }
+    #dialog paper-spinner {
+      --paper-spinner-layer-4-color: #6862A0;
+    }
+  </style>
+  <template>
+    <paper-dialog id="dialog" transition="paper-dialog-transition-bottom" modal$="[[modal]]" on-iron-resize="_dialogResized"
+        on-iron-overlay-closed="_overlayClosed" no-cancel-on-esc-key no-cancel-on-outside-click>
+      <div class="main flex-layout-center flex-layout-vertical">
+        <div class="img-holder">
+          <img src$="[[_getImageUrl(imageDir, 'AuthAnvil-logo.png')]]"/>
+        </div>
+        <div class="title"><div>[[xlate('TWOFA_AGENT_TITLE')]]</div></div>
+        <div class="note" hidden$="[[_hideNote(note)]]"><div>[[note]]</div></div>
+        <div class="flex-layout-center">
+          <div class="input-container flex-layout-center flex-layout-horizontal">
+            <div class="passcode-label">[[xlate('TWOFA_PASSCODE')]]</div>
+            <input is="iron-input" id="passcode" type="password" disabled$="[[_verifying]]" pattern$="[[pattern]]" title="foo"></input>
+            <template is="dom-if" if="[[!_verifying]]">
+              <iron-image src="[[_getImageUrl(imageDir, 'arrow-submit.png')]]" on-tap="_verify"></iron-image>
+            </template>
+            <template is="dom-if" if="[[_verifying]]">
+              <paper-spinner active></paper-spinner>
+            </template>
+          </div>
+        </div>
+        <template is="dom-if" if="[[_signinError]]">
+          <label class="typo-body2 error-label">[[xlate(_signinError)]]</label>
+        </template>
+      </div>
+    </paper-dialog>
+    <iron-a11y-keys target="[[dialog]]" on-keys-pressed="_onEnter" keys="enter"></iron-a11y-keys>
+  </template>
+</dom-module>
+<script>
+(function() {
+  Polymer({
+    is: 'amb-2fa-agent',
+    behaviors: [I18NBehavior, TwoFactorAuthBehavior],
+    _hideNote: function(n) {
+      return Boolean(!n);
+    }
+  });
+})();
+</script>

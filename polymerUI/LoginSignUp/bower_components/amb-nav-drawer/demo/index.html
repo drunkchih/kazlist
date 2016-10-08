@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-nav-drawer demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-drawer-panel/paper-drawer-panel.html">
+  <link rel="import" href="../amb-nav-drawer.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    #drawerPanel ::content #main {
+      left: 82px !important;
+      padding: 0px 16px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <paper-drawer-panel id="drawerPanel" force-narrow disable-swipe>
+      <amb-nav-drawer id="navDrawer" drawer nav-links="[[navLinks]]" on-selected="_handleNav"
+          icon-background-colors="[[_iconBGColors]]"></amb-nav-drawer>
+      <div main>
+        <h2>amb-nav-drawer</h2>
+        <span>Selected:</span><span>[[_selectedModule]]</span>
+      </div>
+    </paper-drawer-panel>
+  </template>
+  <script>
+    app._iconBGColors = ['#F57C00','#009688','#3F51B5','#9C27B0','#4CAF50','#795548'];
+    app._handleNav = function(e) {
+      app._selectedModule = e.detail.label;
+    };
+    app._selectedModule = 'No module selected yet';
+    app.navLinks = [
+                      {label:'Module 1', icon:'dashboard'},
+                      {label:'Module 2', icon:'av:airplay'},
+                      {label:'Module 3', icon:'code'},
+                      {label:'Module 4', icon:'file-upload'},
+                      {label:'Module 5', icon:'assessment'},
+                      {label:'Module 6', icon:'assignment'},
+                      {label:'Module 7', icon:'assignment-late', sublinks: [
+                        {label:'SubModule 1', icon:'image:looks-one'},
+                        {label:'SubModule 2', icon:'image:looks-two'},
+                        {label:'SubModule 3', icon:'image:looks-3'},
+                        {label:'SubModule 4', icon:'image:looks-4'},
+                        {label:'SubModule 5', icon:'image:looks-5'}
+                      ]}
+                    ];
+
+  </script>
+</body>
+</html>

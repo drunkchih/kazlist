@@ -1,0 +1,49 @@
+{
+  "name": "radium-combo",
+  "description": "Material Design Dropdown/Typeahead/Combobox control",
+  "authors": [
+    "jason gardner <jason.gardner.lv@gmail.com>"
+  ],
+  "keywords": [
+    "radium",
+    "polymer",
+    "select",
+    "combobox",
+    "dropdown"
+  ],
+  "main": [
+    "radium-combo.html"
+  ],
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jasongardnerlv/radium-combo.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/jasongardnerlv/radium-combo",
+  "ignore": [],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.3",
+    "iron-dropdown": "PolymerElements/iron-dropdown#^1.0.6",
+    "iron-icon": "PolymerElements/iron-icon#^1.0.7",
+    "iron-icons": "PolymerElements/iron-icons#^1.0.4",
+    "iron-selector": "PolymerElements/iron-selector#^1.0.8",
+    "paper-input": "PolymerElements/paper-input#^1.1.2",
+    "paper-item": "PolymerElements/paper-item#^1.0.5"
+  },
+  "devDependencies": {
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^1.0.11",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "web-component-tester": "Polymer/web-component-tester#^3.3.0",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0"
+  },
+  "_release": "aa87d32f74",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "aa87d32f746b2a9568519c22c857bc223d5e5d30"
+  },
+  "_source": "git://github.com/jasongardnerlv/radium-combo.git",
+  "_target": "master",
+  "_originalSource": "jasongardnerlv/radium-combo"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "amb-terminal",
+  "description": "Terminal emulator element",
+  "main": "amb-terminal.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-terminal",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-terminal"
+}

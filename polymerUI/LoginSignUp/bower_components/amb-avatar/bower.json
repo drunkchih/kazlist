@@ -1,0 +1,6 @@
+{
+  "name": "amb-avatar",
+  "description": "User avatar icon control",
+  "main": "amb-avatar.html",
+  "private": true
+}

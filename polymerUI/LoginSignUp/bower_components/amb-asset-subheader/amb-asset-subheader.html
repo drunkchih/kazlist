@@ -1,0 +1,159 @@
+<link rel="import" href="../amb-subheader/amb-subheader.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/hardware-icons.html">
+<link rel="import" href="../iron-icons/social-icons.html">
+
+<!--
+Sub toolbar for displaying basic asset attributes
+
+@demo demo/index.html
+-->
+<dom-module id="amb-asset-subheader">
+  <style is="custom-style">
+    amb-subheader ::content > paper-material {
+      border-left: solid 1px #ccc;
+    }
+    amb-subheader ::content #container {
+      padding: 0px 24px;
+    }
+    .header-column {
+      max-width: 25%;
+    }
+    .header-row {
+      width: 100%;
+      min-width: 870px;
+      max-width: 1184px;
+      line-height: 40px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .header-row i {
+      font-size: 32px;
+      vertical-align: middle;
+    }
+    .header-row iron-icon {
+      height: 32px;
+      width: 32px;
+    }
+    .header-lbls {
+      display:inline-block;
+      max-width: calc(100% - 32px);
+    }
+    .header-lbl {
+      line-height: 20px;
+      margin-left: 16px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .cpuram {
+      margin-left:12px
+    }
+  </style>
+  <template>
+    <amb-subheader background-color="#F9F9F9">
+      <div class="header-row flex-layout-horizontal">
+        <div class="header-column flex-layout-flex light-bg-primary typo-subheader">
+          <div class="flex-layout-center-center flex-layout-horizontal">
+            <iron-icon class="light-bg-icon" icon="hardware:desktop-mac"></iron-icon>
+            <div class="header-lbls">
+              <div class="typo-body2 light-bg-primary header-lbl" title$="[[assetInfo.AgentName]]">[[assetInfo.AgentName]]</div>
+              <div class="typo-body1 light-bg-secondary header-lbl" title$="[[assetInfo.ComputerName]]">[[assetInfo.ComputerName]]</div>
+            </div>
+          </div>
+        </div>
+        <div class="header-column flex-layout-flex light-bg-primary typo-subheader">
+          <div class="flex-layout-center-center flex-layout-horizontal">
+            <i class$="[[_computeOSLogo(assetInfo.OSType)]]"></i>
+            <div class="header-lbls">
+              <div class="typo-body2 light-bg-primary header-lbl" title$="[[_formatVersion(assetInfo.OSType)]]">[[_formatVersion(assetInfo.OSType)]]</div>
+              <div class="typo-body1 light-bg-secondary header-lbl" title$="[[assetInfo.OperatingSystem]]">[[assetInfo.OperatingSystem]]</div>
+            </div>
+          </div>
+        </div>
+        <div class="header-column flex-layout-flex light-bg-primary typo-subheader">
+          <div class="flex-layout-center-center flex-layout-horizontal">
+            <iron-icon class="light-bg-icon" icon="social:public"></iron-icon>
+            <div class="header-lbls">
+              <div class="typo-body2 light-bg-primary header-lbl" title$="[[_getCountry(assetInfo.Country)]]">[[_getCountry(assetInfo.Country)]]</div>
+              <div class="typo-body1 light-bg-secondary header-lbl" title$="[[assetInfo.TimeZone]]">[[assetInfo.TimeZone]]</div>
+            </div>
+          </div>
+        </div>
+        <div class="header-column flex-layout-flex light-bg-primary typo-subheader">
+          <div class="flex-layout-center-center flex-layout-horizontal">
+            <iron-icon class="light-bg-icon" icon="hardware:memory"></iron-icon>
+            <div class="header-lbls">
+              <div class="typo-body2 light-bg-primary cpuram header-lbl" title$="[[_formatCpu(assetInfo.CpuType)]]">[[_formatCpu(assetInfo.CpuType)]]</div>
+              <div class="typo-body1 light-bg-secondary cpuram header-lbl" title$="[[_formatRam(assetInfo.RamMBytes)]]">[[_formatRam(assetInfo.RamMBytes)]]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </amb-subheader>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-asset-subheader',
+      behaviors: [I18NBehavior],
+      properties: {
+        /*
+         * Asset object
+         */
+        assetInfo: {
+          type: Object,
+          value: function() {
+            return {
+              AgentName: '',
+              ComputerName: '',
+              OSType: '',
+              OperatingSystem: '',
+              Country: '',
+              TimeZone: '',
+              CpuType: '',
+              RamMBytes: ''
+            };
+          }
+        }
+      },
+      _computeOSLogo: function(osType) {
+        var defaultClasses = " light-bg-icon";
+        if(!osType) {
+          return "fa fa-question" + defaultClasses;
+        }
+        osType = osType.toLowerCase();
+        if (osType.indexOf("mac") >= 0 || osType.indexOf("apple") >= 0 || osType.indexOf("osx") >= 0) {
+          return "fa fa-apple" + defaultClasses;
+        } else if (osType.indexOf("linux") >= 0) {
+          return "fa fa-linux" + defaultClasses;
+        } else {
+          // everything else is windows
+          return "fa fa-windows" + defaultClasses;
+        }
+      },
+      _getCountry: function(country) {
+        return (country === null) ? this.xlate('COUNTRY_UNAVAIL') : country;
+      },
+      _formatCpu: function(cputype) {
+        return ((cputype) ? cputype : this.xlate('UNKNOWN'));
+      },
+      _formatRam: function(ram) {
+        return (ram) ? Math.round(ram / 1024) + 'GB RAM' : this.xlate('UNKNOWN');
+      },
+      _formatVersion: function(osType) {
+        osType = osType.toLowerCase();
+        if (osType.indexOf("mac") >= 0 ||
+            osType.indexOf("apple") >= 0 ||
+            osType.indexOf("osx") >= 0 ||
+            osType.indexOf("linux") >= 0) {
+          return osType;
+        } else {
+          // everything else is windows
+          return "Windows " + osType;
+        }
+      }
+    });
+  })();
+</script>

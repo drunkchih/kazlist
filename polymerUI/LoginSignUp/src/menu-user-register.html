@@ -1,0 +1,76 @@
+<link rel="import" href="menu-imports.html">
+
+<dom-module id="menu-user-register">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      .infoContainer {
+        width: 280px;
+        margin-right: 16px;
+        margin-left: 16px;
+      }
+
+      #signUpBtn {
+        box-shadow: 1px 1px 1px grey;
+      }
+
+      #userInfoSection {
+        display: flex;
+        flex-wrap:wrap;
+        position: relative;
+      }
+
+    </style>
+    <div class="card">
+      <div class="circle">
+        <iron-icon icon="social:group"></iron-icon>
+      </div>
+
+      <h1>Register as a User</h1>
+      <div>
+        <h3>User Information</h3>
+        <div id="userInfoSection">
+          <paper-input class="infoContainer" id="userFirst" always-float-label label="First Name" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+          <paper-input class="infoContainer" id="userLast" always-float-label label="Last Name" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+        </div>
+        <br>
+        <div id="userInfoSection">
+          <paper-input class="infoContainer" id="userName" always-float-label label="Desired Username" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="social:person" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="userPassword" always-float-label label="Desired Password" type="password" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:vpn-key" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="repeatPassword" always-float-label label="Repeat Password" type="password" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="av:repeat" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="userPhone" always-float-label label="User Phone number" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:call" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="userEmail" always-float-label label="User Email" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:email" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="userSchool" always-float-label label="Name of School registering for" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="social:school" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="userDesiredRole" always-float-label label="Desired Role" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="icons:account-circle" prefix></iron-icon>
+          </paper-input>
+        </div>
+      </div>
+      <br>
+      <br>
+      <paper-button id="signUpBtn" toggles> Sign Up </paper-button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'menu-user-register'
+    });
+  </script>
+</dom-module>

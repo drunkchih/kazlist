@@ -1,0 +1,6 @@
+{
+  "name": "amb-signin",
+  "description": "Sign in components for Kaseya apps",
+  "main": "amb-signin.html",
+  "private": true
+}

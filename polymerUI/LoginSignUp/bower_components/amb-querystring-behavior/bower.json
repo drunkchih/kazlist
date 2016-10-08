@@ -1,0 +1,6 @@
+{
+  "name": "amb-querystring-behavior",
+  "description": "Querystring helper functions",
+  "main": "amb-querystring-behavior.html",
+  "private": true
+}

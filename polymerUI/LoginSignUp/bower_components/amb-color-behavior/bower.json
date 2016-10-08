@@ -1,0 +1,6 @@
+{
+  "name": "amb-color-behavior",
+  "description": "Helper functions for retrieving and calculating color values",
+  "main": "amb-color-behavior.html",
+  "private": true
+}

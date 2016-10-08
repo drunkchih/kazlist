@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-transfer-icon demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../amb-transfer-icon.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    #icons {
+      padding: 16px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <div style="position:absolute;top:0px">
+      <h2>amb-transfer-icon</h2>
+      <div id="icons">
+        <amb-transfer-icon transfer-count="[[_numTransfers]]"></amb-transfer-icon>
+      </div>
+      <div>
+        <paper-button class="dark-bg-primary primary-bg" raised on-click="_addTransfer">Add transfer</paper-button>
+        <paper-button class="dark-bg-primary primary-bg" raised on-click="_removeTransfer">Remove transfer</paper-button>
+      </div>
+    </div>
+  </template>
+  <script>
+    app._numTransfers = 0;
+    app._addTransfer = function() {
+      if (app._numTransfers < 10) {
+        app._numTransfers++;
+      }
+    }
+    app._removeTransfer = function() {
+      if (app._numTransfers > 0) {
+        app._numTransfers--;
+      }
+    }
+  </script>
+</body>
+</html>

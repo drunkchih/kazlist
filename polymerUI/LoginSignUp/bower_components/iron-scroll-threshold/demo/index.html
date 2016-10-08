@@ -1,0 +1,91 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!doctype html>
+<html>
+<head>
+
+  <title>iron-scroll-threshold</title>
+
+  <script src="../../webcomponentsjs/webcomponents.js"></script>
+
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../iron-scroll-threshold.html">
+
+</head>
+<body>
+  <dom-module id='x-lazyload'>
+
+    <style>
+      #scroller {
+        height: 300px;
+        border: 1px solid red;
+        padding: 20px;
+        overflow: auto;
+      }
+      .thing {
+        padding: 10px;
+        margin: 10px;
+        background: lightblue;
+        border-radius: 10px;
+        font-size: 2em;
+      }
+    </style>
+
+    <template>
+
+      <iron-scroll-threshold id="threshold" lower-threshold="1" on-lower-trigger="loadMore" lower-triggered="{{lowerTriggered}}" fit></iron-scroll-threshold>
+
+      <div id="scroller" class="vertical layout center" fill>
+
+        <template is="dom-repeat" items="{{items}}">
+          <div class="thing">{{item}}</div>
+        </template> 
+
+        <div hidden?="{{!lowerTriggered}}">Please wait...</div>
+      </div>
+
+    </template>
+  </dom-module>
+
+  <script>
+    Polymer({
+      is:'x-lazyload',
+
+      properties: {
+        items: {
+          type: Array, 
+          value: []
+        },
+      },
+
+      ready: function() {
+        this.$.threshold.scrollTarget = this.$.scroller;
+        for (n=0; n<20; n++) {
+          this.push('items', n);
+        }
+      },
+
+      loadMore: function() {
+        var scope = this;
+        setTimeout(function() {
+          for (var i=n; i<n+10; i++) {
+            scope.push('items', i);
+          }
+          n = i;
+          scope.$.threshold.clearLower();
+        }, 1000);
+      }
+    });
+  </script>
+
+  <x-lazyload></x-lazyload>
+  
+</body>
+</html>

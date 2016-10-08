@@ -1,0 +1,6 @@
+{
+  "name": "amb-transfer-icon",
+  "description": "Icon depicting the number of active/completed transfers",
+  "main": "amb-transfer-icon.html",
+  "private": true
+}

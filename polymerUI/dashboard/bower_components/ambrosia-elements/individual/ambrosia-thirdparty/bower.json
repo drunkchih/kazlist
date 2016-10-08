@@ -1,0 +1,36 @@
+{
+  "name": "ambrosia-thirdparty",
+  "version": "0.2.0",
+  "homepage": "http://www.kaseya.com",
+  "authors": [
+    "Kaseya, Inc"
+  ],
+  "description": "3rd Party Polymer elements used by Kaseya.",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "kaseya"
+  ],
+  "license": "commercial",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "components-font-awesome": "4.5.0",
+    "iron-scroll-threshold": "joshheinrichs/iron-scroll-threshold#1.0.2",
+    "core-drag-drop": "timcope/core-drag-drop#master",
+    "term.js": "chjj/term.js#0.0.7",
+    "misbehave": "devinivy/misbehave#v1.0.2",
+    "test-fixture": "PolymerElements/test-fixture#1.0.3",
+    "highmaps": "highslide-software/highmaps-release#1.1.5",
+    "highstock": "highslide-software/highstock-release#2.1.5",
+    "export-csv": "highslide-software/export-csv#master"
+  },
+  "resolutions": {
+    "polymer": "1.2.3"
+  }
+}

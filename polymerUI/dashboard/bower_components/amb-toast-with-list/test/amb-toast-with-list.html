@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-toast-with-list</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-toast-with-list.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="ToastTest">
+    <template>
+      <amb-toast-with-list></amb-toast-with-list>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<amb-toast-with-list>', function() {
+      var toast;
+
+      suite('tests', function() {
+        setup(function() {
+          toast = fixture('ToastTest');
+        });
+
+        test('_boundTemplateChanged', function(done) {
+          toast.async = function(fn){fn();};
+          var stub = sinon.stub(toast.$.listWrapper, 'querySelector');
+          stub.returns({clientHeight:100});
+          toast._minimized = true;
+          toast._boundTemplateChanged();
+          expect(toast._itemCount).to.equal(-1);
+          expect(toast._rowHeight).to.equal(100);
+          expect(toast.$.listWrapper.style.height).to.equal('');
+
+          toast._minimized = false;
+          toast._boundTemplateChanged();
+          expect(toast._itemCount).to.equal(-1);
+          expect(toast._rowHeight).to.equal(100);
+          expect(toast.$.listWrapper.style.height).to.equal('');
+          stub.restore();
+          done();
+        });
+
+        test('toggle', function(done) {
+          toast.show = sinon.stub();
+          toast.hide = sinon.stub();
+
+          toast.$.toast = {visible: false};
+          toast.toggle();
+          expect(toast.show.calledOnce).to.equal(true);
+          expect(toast.hide.called).to.equal(false);
+
+          toast.$.toast.visible = true;
+          toast.toggle();
+          expect(toast.show.calledOnce).to.equal(true);
+          expect(toast.hide.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('hide', function(done) {
+          toast.$.toast = {hide:sinon.stub()};
+          toast.hide();
+          expect(toast.$.toast.hide.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('show', function(done) {
+          toast.$.toast = {show:sinon.stub(),cancelDebouncer:sinon.stub()};
+          toast.show();
+          expect(toast.$.toast.show.calledOnce).to.equal(true);
+          expect(toast.$.toast.cancelDebouncer.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('toggleMinimize', function(done) {
+          toast.minimize = sinon.stub();
+          toast.maximize = sinon.stub();
+
+          toast._minimized = false;
+          toast.toggleMinimize();
+          expect(toast.minimize.calledOnce).to.equal(true);
+          expect(toast.maximize.called).to.equal(false);
+
+          toast._minimized = true;
+          toast.toggleMinimize();
+          expect(toast.minimize.calledOnce).to.equal(true);
+          expect(toast.maximize.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('minimize', function(done) {
+          toast._minimized = false;
+          toast.$.listWrapper.style.opacity = '1.0';
+          toast.minimize();
+          expect(toast._minimized).to.equal(true);
+          expect(toast.$.listWrapper.style.opacity).to.equal('0');
+          done();
+        });
+
+        test('maximize', function(done) {
+          toast._minimized = true;
+          toast.$.listWrapper.style.opacity = '0';
+          toast.maximize();
+          expect(toast._minimized).to.equal(false);
+          expect(toast.$.listWrapper.style.opacity).to.equal('1');
+          done();
+        });
+
+        test('attached', function(done) {
+          var stub = sinon.stub(toast.$.listWrapper, 'querySelector');
+          var evStub = sinon.stub();
+          stub.returns({addEventListener:evStub});
+          toast.attached();
+          expect(evStub.calledOnce).to.equal(true);
+          expect(evStub.firstCall.args[0]).to.equal('dom-change');
+          stub.restore();
+          done();
+        });
+
+        test('detached', function(done) {
+          var stub = sinon.stub(toast.$.listWrapper, 'querySelector');
+          var evStub = sinon.stub();
+          stub.returns({removeEventListener:evStub});
+          toast.detached();
+          expect(evStub.calledOnce).to.equal(true);
+          expect(evStub.firstCall.args[0]).to.equal('dom-change');
+          stub.restore();
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

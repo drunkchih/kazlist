@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>radium-datagrid demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../paper-styles/paper-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../radium-datagrid.html">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #gridExample {
+      min-width: 480px;
+      max-width: 480px;
+      height: 400px;
+    }
+    .demo-button {
+      width: 240px;
+      margin: 0px 16px 16px 16px;
+      color: #FFFFFF;
+      background-color: var(--paper-blue-500);
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h3>radium-datagrid example (paging footer)</h3>
+    <div class="horizontal layout">
+      <div id="gridExample">
+        <radium-datagrid id="grid" items="[[_appliedItems]]" enable-paging="[[_pagingEnabled]]" items-per-page="[[_rowsPerPage]]"
+        per-page-options="[[_pageOptions]]" current-page="[[_currentPage]]" total-items="[[_getTotalCount(_initialItems)]]"
+        on-next-page="_nextPage" on-prev-page="_prevPage" on-first-page="_firstPage" on-last-page="_lastPage"
+        on-per-page-change="_pageSizeChanged">
+          <template>
+            <radium-datagrid-row>
+              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+            </radium-datagrid-row>
+          </template>
+        </radium-datagrid>
+      </div>
+      <div class="vertical layout">
+        <paper-button class="demo-button" raised on-click="_togglePaging">Paging Enabled: <span>[[_pagingEnabled]]</span></paper-button>
+      </div>
+    </div>
+  </template>
+  <script>
+      app._pagingEnabled = true;
+      app._currentPage = 1;
+      app._rowsPerPage = 10;
+      app._pageOptions = [5, 10, 20];
+      app._genFakeData = function() {
+        var data = [];
+        for (var i=0;i<260;i++) {
+          var a = Math.floor(65 + (i / 26));
+          var b = 65 + (i % 26);
+          var firstChar = String.fromCharCode(a);
+          var secondChar = String.fromCharCode(b);
+          data.push({
+            foo: firstChar + secondChar + firstChar + secondChar,
+            bar: secondChar + firstChar + secondChar + firstChar,
+            baz: a.toString() + b.toString(),
+            icon:'polymer'
+          });
+        }
+        return data;
+      };
+      app._refreshData = function() {
+        var sIdx = (app._currentPage - 1) * app._rowsPerPage;
+        var eIdx = sIdx + app._rowsPerPage;
+        app._appliedItems = app._initialItems.slice(sIdx, eIdx);
+      };
+      app._pageSizeChanged = function(e) {
+        app._currentPage = 1;
+        app._rowsPerPage = e.detail;
+        app._refreshData();
+      },
+      app._nextPage = function() {
+        if (app._initialItems.length <= (app._currentPage * app._rowsPerPage)) {
+          return;
+        }
+        app._currentPage += 1;
+        app._refreshData();
+      };
+      app._prevPage = function() {
+        if (app._currentPage === 1) {
+          return;
+        }
+        app._currentPage -= 1;
+        app._refreshData();
+      };
+      app._firstPage = function() {
+        app._currentPage = 1;
+        app._refreshData();
+      };
+      app._lastPage = function() {
+        app._currentPage = Math.floor((app._initialItems.length - 1) / app._rowsPerPage) + 1;
+        app._refreshData();
+      };
+      app._getTotalCount = function(fb) {
+        return fb.length;
+      };
+      app._togglePaging = function() {
+        app._pagingEnabled = !app._pagingEnabled;
+      };
+      app._initialItems = app._genFakeData();
+      app._refreshData();
+  </script>
+</body>
+</html>

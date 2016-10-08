@@ -1,0 +1,35 @@
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
+
+<dom-module id="paper-fab-menu-overlay">
+
+  <template>
+    <style>
+/*      :host {
+        background: white;
+        color: black;
+        padding: 24px;
+        box-shadow: rgba(0, 0, 0, 0.24) -2.3408942051048403px 5.524510324047423px 12.090680100755666px 0px, rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+        z-index: 10;
+      }*/
+    </style>
+    <div>
+      <content></content>
+    </div>
+  </template>
+
+</dom-module>
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+    is: 'paper-fab-menu-overlay',
+    behaviors: [
+      Polymer.IronOverlayBehavior
+    ]
+  });
+})();
+</script>

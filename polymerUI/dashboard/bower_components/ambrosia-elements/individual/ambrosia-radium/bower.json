@@ -1,0 +1,31 @@
+{
+  "name": "ambrosia-radium",
+  "version": "0.2.0",
+  "homepage": "http://www.kaseya.com",
+  "authors": [
+    "Kaseya, Inc"
+  ],
+  "description": "Radium elements (Kaseya open source Polymer elements).",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "kaseya",
+    "radium"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "radium-combo": "jasongardnerlv/radium-combo#master",
+    "radium-datagrid": "jasongardnerlv/radium-datagrid#0.0.2",
+    "radium-filters": "jasongardnerlv/radium-filters#master"
+  },
+  "resolutions": {
+    "polymer": "1.2.3"
+  }
+}

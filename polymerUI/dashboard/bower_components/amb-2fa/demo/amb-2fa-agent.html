@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-2fa-agent demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../amb-2fa-agent.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    paper-button {
+      background-color: #0072BC;
+      color: #FFFFFF;
+      width: 192px;
+      margin: 8px 0px;
+    }
+    #dialog1 ::content paper-dialog {
+      min-width: 560px;
+      max-width: 560px;
+    }
+    #divHandle {
+      display: none;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h2>amb-2fa-agent</h2>
+    <div class="flex-layout-vertical">
+      <div id="divPrompt">
+        <paper-button raised on-tap="_showDialog">Prompt for Passcode</paper-button>
+      </div>
+      <div id="divHandle" class="flex-layout-vertical">
+        <div id="divPasscode"></div>
+        <paper-button raised on-tap="_accept">Accept Passcode</paper-button>
+        <paper-button raised on-tap="_reject">Reject Passcode</paper-button>
+      </div>
+    </div>
+    <amb-2fa-agent id="dialog1" on-verify="_verifyPasscode" pattern="[0-9]+" note="[[twofaNote]]" image-dir="[[_imageDir]]"></amb-2fa-agent><!-- usually you would have "modal" attribute set -->
+  </template>
+  <script>
+    app._imageDir =  app.resolveUrl('../../ambrosia-assets/images');
+    app._i18n = {"lang": {
+                  "TWOFA_AGENT_TITLE": "Security policy for access to this system requires you to provide a strong authentication check using your AuthAnvil credential. Please enter it below.",
+                  "TWOFA_PASSCODE": "Passcode:",
+                  "INVALID_PASSCODE": "An invalid passcode was entered",
+                  "DENIED_PASSCODE": "The passcode provided was not valid"
+                }};
+    app.twofaNote = 'This is a *note*, which can be customized.';
+    app._showDialog = function() {
+      document.querySelector('#divPrompt').style.display = 'none';
+      document.querySelector('#dialog1').show();
+    };
+    app._verifyPasscode = function(e) {
+      document.querySelector('#divHandle').style.display = 'flex';
+      document.querySelector('#divPasscode').innerHTML = 'Code entered: ' + e.detail.passcode;
+    };
+    app._accept = function(e) {
+      document.querySelector('#divPrompt').style.display = 'block';
+      document.querySelector('#divHandle').style.display = 'none';
+      document.querySelector('#dialog1').hide();
+    };
+    app._reject = function(e) {
+      document.querySelector('#divHandle').style.display = 'none';
+      document.querySelector('#dialog1').setError('DENIED_PASSCODE');
+    };
+  </script>
+</body>
+</html>

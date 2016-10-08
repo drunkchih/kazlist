@@ -1,0 +1,101 @@
+<link rel="import" href="../polymer/polymer.html">
+<!--
+Avatar icon, fetched using the provided UUID
+
+@demo demo/index.html
+-->
+<dom-module id="amb-avatar">
+  <style is="custom-style">
+    .avatar {
+      border-radius: 50%;
+      max-width: 256px;
+    }
+    .avatar-small {
+      width: 32px;
+    }
+    .avatar-medium {
+      width: 96px;
+    }
+    .avatar-sm-med {
+      width: 65px;
+    }
+    .avatar-large {
+      width: 110px;
+    }
+    .animate {
+      -webkit-transition: -webkit-transform 0.3s 0.2s cubic-bezier(0.62, 0.35, 0.56, 1.55);
+      transition: transform 0.2s 0.1s cubic-bezier(0.62, 0.35, 0.56, 1.55);
+      -webkit-transform: scale(0);
+      -ms-transform: scale(0);
+      transform: scale(0);
+    }
+    .activated {
+      -webkit-transform: scale(1);
+      -ms-transform: scale(1);
+      transform: scale(1);
+    }
+  </style>
+  <template>
+    <img id="profileAvatar" class="avatar" on-error="_setDefaultAvatar" alt="" />
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-avatar',
+      properties: {
+        /**
+         * UUID of the user
+         */
+        uuid: {
+          type: String,
+          observer: '_uuidChanged'
+        },
+        /**
+         * Size to render the icon (small, sm-med, medium, large)
+         */
+        size: String,
+        /**
+         * Path to the avatar image
+         */
+        avatarImageSrc: String,
+        _setFail: {
+          type: Number,
+          value: 0
+        }
+      },
+      observers: [
+        '_defaultImgChanged(avatarImageSrc)',
+        '_sizeChanged(size)'
+      ],
+      _defaultImgChanged: function(n) {
+        this.$.profileAvatar.src = this.avatarImageSrc;
+      },
+      _sizeChanged: function(n) {
+        this.$.profileAvatar.className += ' avatar-' + this.size;
+      },
+      _uuidChanged: function(val) {
+        // TODO - wire to a service that will provide the users avatar image using the provided uuid
+        // this._setFail = 0;
+        // if (this.uuid !== undefined && this.uuid !== null && this.uuid !== '') {
+        //   this.$.profileAvatar.src = '/api/profile/i/' + this.uuid;
+        // } else {
+        //   this.$.profileAvatar.src = this.avatarImageSrc;
+        // }
+      },
+      _setDefaultAvatar: function(e) {
+        if (this._setFail > 3) {
+          return;
+        }
+        this.$.profileAvatar.src = this.avatarImageSrc;
+        this._setFail++;
+      },
+      // _startAnimation: function() {
+      //   this.$.profileAvatar.className += ' animate';
+      // },
+      // _endAnimation: function() {
+      //   this.$.profileAvatar.className += ' activated';
+      // }
+    });
+  })();
+</script>

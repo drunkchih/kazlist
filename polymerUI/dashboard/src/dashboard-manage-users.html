@@ -1,0 +1,243 @@
+<link rel="import" href="dashboard-imports.html">
+
+<dom-module id="dashboard-manage-users">
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      #moreMenuDropdown {
+        width: 192px;
+      }
+
+      #moreMenuDropdown ::content #contentWrapper > * {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      #moreMenuDropdown paper-item {
+        color: #666666;
+        cursor: pointer;
+        background-color: #FFFFFF;
+      }
+
+      #moreMenuDropdown paper-item:hover {
+        color: #000000;
+        background-color: #EEEEEE;
+      }
+
+      #moreMenuDropdown paper-item.iron-selected {
+        font-weight: initial;
+      }
+
+      #moreMenuDropdown paper-item paper-item-body {
+        margin-left: 16px;
+        white-space: nowrap;
+      }
+
+    </style>
+    <template is="dom-bind">
+
+      <div class="card">
+        <div class="circle">
+          <iron-icon icon="social:group"></iron-icon>
+        </div>
+
+        <h1>Manage Users</h1>
+
+        <div id="userContainer">
+          <iron-data-table id="userDataTable" selection-enabled  multi-selection on-selected-items-changed="_onSelectedItemsChanged">
+            <data-table-column name="Username">
+              <template>[[item.username]]</template>
+            </data-table-column>
+            <data-table-column name="First Name">
+              <template>[[item.first]]</template>
+            </data-table-column>
+            <data-table-column name="Last Name">
+              <template>[[item.last]]</template>
+            </data-table-column>
+            <data-table-column name="Role">
+              <template>[[item.role]]</template>
+            </data-table-column>
+            <data-table-column name="Status">
+              <template>[[item.status]]</template>
+            </data-table-column>
+            <data-table-column name="Action/Options">
+              <template>
+                <paper-icon-button id="moreMenuButton" class="light-bg-icon" icon="more-vert" noink
+                                 on-tap="_onMoreMenuButtonTap"></paper-icon-button>
+              </template>
+            </data-table-column>
+          </iron-data-table>
+        </div>
+      <br>
+      <paper-button id="multiDesactivateButton" raised on-tap="_onMultiDesactivateTap"><iron-icon icon="icons:block"></iron-icon>Desactivate Selected User(s)</paper-button>
+      <paper-button id="multiDeleteButton" raised on-tap="_onMultiDeleteTap"><iron-icon icon="icons:delete"></iron-icon>Delete Selected User(s)</paper-button>
+    </div>
+
+    <iron-dropdown id="moreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
+      <paper-material class="dropdown-content">
+        <paper-item id="infoButton" on-tap="_onInfoButtonTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:info" noink></paper-icon-button>
+          <paper-item-body>More Info</paper-item-body>
+        </paper-item>
+        <paper-item id="updateButton" on-tap="_onUpdateTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:create" noink></paper-icon-button>
+          <paper-item-body>Update/Edit</paper-item-body>
+        </paper-item>
+        <paper-item id="disactivateButton" on-tap="_onDisactivateTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:block" noink></paper-icon-button>
+          <paper-item-body>Disactive</paper-item-body>
+        </paper-item>
+        <paper-item id="deleteButton" on-tap="_onDeleteTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:delete" noink></paper-icon-button>
+          <paper-item-body>Delete</paper-item-body>
+        </paper-item>
+      </paper-material>
+    </iron-dropdown>
+
+    </template>
+
+
+  <script>
+    Polymer({
+      is: 'dashboard-manage-users',
+      behaviors: [
+        I18NBehavior
+      ],
+
+      ready: function () {
+        this._moreMenuTarget = null;
+        this.selectedUsers = [];
+      },
+
+      attached: function () {
+        this.async(function () {
+
+          this._users = [];
+          for( i = 0;i<10;i++){
+            this._users.push({
+              username: "user" + i,
+              first: "firstname" + i,
+              last: "lastname" + i,
+              role: "Read only",
+              status: "active",
+              phone: i+"-"+i+"-"+i,
+              email: "email"+i+"@example.com",
+              servicesNum: i,
+              services: [
+                {
+                  name: "service"+i,
+                  status: i+"/"+i+1
+                },
+                {
+                  name: "service"+i+1,
+                  status: i+"/"+i+2
+                },
+                {
+                  name: "service"+i+2,
+                  status: i+"/"+i+3
+                },
+                {
+                  name: "service"+i+4,
+                  status: i+"/"+i+2
+                },
+                {
+                  name: "service"+i+5,
+                  status: i+"/"+i+2
+                },
+                {
+                  name: "service"+i,
+                  status: i+"/"+i+1
+                },
+                {
+                  name: "service"+i+1,
+                  status: i+"/"+i+2
+                }
+              ]
+            });
+          }
+          this.$.userDataTable.items = this._users;
+          this._onSelectedItemsChanged();
+
+        }, 250);
+      },
+
+      _onMoreMenuDropdownClosed: function (evt) {
+        var iconButtonElement = evt.currentTarget.positionTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', false);
+      },
+
+      _onMoreMenuButtonTap: function (evt) {
+        evt.stopPropagation();
+        if (this.$.moreMenuDropdown.opened) {
+          return;
+        }
+        var iconButtonElement = evt.currentTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', true);
+        this._moreMenuTarget = evt.model.__data__;
+        console.log(this._moreMenuTarget.item); //this is waht we need to send to php
+        var targetY = iconButtonElement.getBoundingClientRect().bottom;
+        var targetHeight = 30;
+        var gapY = 0;
+        var menuHeight = this.$.moreMenuDropdown.childNodes.length * 48;
+
+        var offsetX = 0;
+        var offsetY = targetHeight + gapY;
+
+        this.$.moreMenuDropdown.positionTarget = iconButtonElement;
+        this.$.moreMenuDropdown.verticalOffset = offsetY;
+        this.$.moreMenuDropdown.horizontalOffset = offsetX;
+
+        this.$.moreMenuDropdown.open();
+      },
+
+      _onInfoButtonTap: function(evt) {
+        this.$.moreMenuDropdown.close();
+        var user = this._moreMenuTarget.item;
+        this.fire('user-info-tap', {user:user} );
+
+      },
+
+      _onUpdateTap: function(evt) {
+        this.$.moreMenuDropdown.close();
+        var user = this._moreMenuTarget.item;
+
+      },
+
+      _onDisactivateTap: function(evt) {
+        this.$.moreMenuDropdown.close();
+        var user = this._moreMenuTarget.item;
+        console.log(user);
+      },
+
+      _onDeleteTap: function(evt) {
+        var user = this._moreMenuTarget.item;
+        console.log(user);
+      },
+
+      _onMultiDesactivateTap: function() {
+        console.log(this.selectedUsers);
+      },
+
+      _onMultiDeleteTap: function() {
+        console.log(this.selectedUsers);
+      },
+
+      _onSelectedItemsChanged: function (evt) {
+        this.selectedUsers = this.$.userDataTable.selectedItems;
+        if(this.selectedUsers.length != 0){
+          this.$.multiDesactivateButton.disabled = false;
+          this.$.multiDeleteButton.disabled = false;
+        }
+        else{
+          this.$.multiDesactivateButton.disabled = true;
+          this.$.multiDeleteButton.disabled = true;
+        }
+      }
+
+
+    });
+  </script>
+</dom-module>

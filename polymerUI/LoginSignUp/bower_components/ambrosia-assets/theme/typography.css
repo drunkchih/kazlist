@@ -1,0 +1,45 @@
+.typo-display4 {
+  font-size: 112px !important;
+  font-weight: 300 !important;
+}
+.typo-display3 {
+  font-size: 56px !important;
+  font-weight: 400 !important;
+}
+.typo-display2 {
+  font-size: 45px !important;
+  font-weight: 400 !important;
+}
+.typo-display1 {
+  font-size: 34px !important;
+  font-weight: 400 !important;
+}
+.typo-headline {
+  font-size: 24px !important;
+  font-weight: 400 !important;
+}
+.typo-title {
+  font-size: 20px !important;
+  font-weight: 500 !important;
+}
+.typo-subheader {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+}
+.typo-body2 {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+.typo-body1 {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+.typo-caption {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+.typo-button {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-breadcrumbs demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-material/paper-material.html">
+  <link rel="import" href="../amb-breadcrumbs.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    h5 {
+      padding: 0px 16px;
+      margin-bottom: 0px;
+    }
+    paper-material {
+      margin: 4px 16px;
+      padding: 16px;
+    }
+    amb-breadcrumbs ::content #bcWrapper {
+      margin: 16px;
+    }
+    .ltBg {
+      background-color: #FFFFFF;
+    }
+    .dkBg {
+      background-color: #0072BC;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h2>amb-breadcrumbs</h2>
+    <h5>Light Background</h5>
+    <paper-material class="ltBg" elevation="2">
+      <amb-breadcrumbs light model="[[bcModel1]]"></amb-breadcrumbs>
+      <amb-breadcrumbs light model="[[bcModel2]]"></amb-breadcrumbs>
+      <amb-breadcrumbs light model="[[bcModel3]]"></amb-breadcrumbs>
+    </paper-material>
+    <h5>Dark Background</h5>
+    <paper-material class="dkBg" elevation="2">
+      <amb-breadcrumbs model="[[bcModel1]]"></amb-breadcrumbs>
+      <amb-breadcrumbs model="[[bcModel2]]"></amb-breadcrumbs>
+      <amb-breadcrumbs model="[[bcModel3]]"></amb-breadcrumbs>
+    </paper-material>
+    <h5>Truncated</h5>
+    <paper-material class="ltBg" elevation="2" style="width:320px">
+      <amb-breadcrumbs light model="[[bcModel4]]"></amb-breadcrumbs>
+    </paper-material>
+  </template>
+  <script>
+    app.nav = function(item) {
+      alert('Clicked: ' + item.label);
+    };
+    app.bcModel1 = {links:[{label:'Link 1',handler:app.nav.bind(app)}]};
+    app.bcModel2 = {links:[{label:'Link 2',handler:app.nav.bind(app)}, {label:'Link 3',handler:app.nav.bind(app)}]};
+    app.bcModel3 = {links:[{label:'Link 4',handler:app.nav.bind(app)},
+                    {label:'Link 5',handler:app.nav.bind(app)},
+                    {label:'Link 6',handler:app.nav.bind(app)}],
+                    actions:[{label:'Action 1',handler:app.nav.bind(app)},{label:'Action 2',handler:app.nav.bind(app)}]};
+    app.bcModel4 = {links:[
+                      {label:'Link 1',handler:app.nav.bind(app)},
+                      {label:'Link 2',handler:app.nav.bind(app)},
+                      {label:'Link 3',handler:app.nav.bind(app)},
+                      {label:'Link 4',handler:app.nav.bind(app)},
+                      {label:'Link 5',handler:app.nav.bind(app)},
+                      {label:'Link 6',handler:app.nav.bind(app)},
+                      {label:'Link 7',handler:app.nav.bind(app)},
+                      {label:'Link 8',handler:app.nav.bind(app)},
+                      {label:'Link 9',handler:app.nav.bind(app)},
+                      {label:'Link 10',handler:app.nav.bind(app)},
+                      {label:'Link 11',handler:app.nav.bind(app)},
+                      {label:'Link 12',handler:app.nav.bind(app)}
+                    ]};
+  </script>
+</body>
+</html>

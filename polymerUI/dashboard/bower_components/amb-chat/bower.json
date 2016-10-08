@@ -1,0 +1,6 @@
+{
+  "name": "amb-chat",
+  "description": "Chat component",
+  "main": "amb-chat.html",
+  "private": true
+}

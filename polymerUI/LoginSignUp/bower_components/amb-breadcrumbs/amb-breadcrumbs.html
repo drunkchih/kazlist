@@ -1,0 +1,298 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<!--
+Breadcrumbs element
+
+@demo demo/index.html
+-->
+<dom-module id="amb-breadcrumbs">
+  <style is="custom-style">
+    #bcWrapper {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #ellipses {
+      display: inline-block;
+    }
+    #ellipses ::content paper-icon-button {
+      width: 24px;
+      height: 24px;
+      padding: 0px;
+    }
+    #bcContainer {
+      display: inline-block;
+    }
+    #bcContainer ::content paper-button {
+      text-transform: initial;
+      padding: 0px;
+      margin: 0px;
+      min-width: 1px;
+    }
+    #bcContainer ::content paper-button[disabled] {
+     background: inherit;
+     color: inherit;
+    }
+    #bcContainer .bc-link {
+      font-size: 16px;
+      font-weight: 400;
+    }
+    :host ::content .breadcrumb-divider {
+      margin: 0px;
+    }
+    :host ::content .brdcrb-part {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .bcdd ::content paper-dropdown-overlay {
+      top: 20px;
+      left: 24px;
+      right: auto;
+    }
+    .bcdd ::content .brdcbmenu {
+      width: 192px;
+      padding: 0px;
+    }
+    .bcdd paper-item {
+      color: #666666;
+      cursor: pointer;
+      background-color: #FFFFFF;
+    }
+    .bcdd paper-item > div {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
+    .bcdd paper-item:hover {
+      color: #000000;
+      background-color: var(--hover-color);
+    }
+    .bcdd paper-item.iron-selected {
+      font-weight: initial;
+    }
+  </style>
+  <template>
+    <div id="bcWrapper">
+      <div id="ellipses"></div>
+      <div id="bcContainer"></div>
+    </div>
+    <iron-dropdown id="actionsDD" class="bcdd" horizontalAlign="right">
+      <paper-material class="dropdown-content">
+        <paper-listbox class="brdcbmenu" selected="0">
+          <template is="dom-repeat" items="[[model.actions]]">
+            <paper-item on-click="_breadcrumbActionHandler"><div>[[xlate(item.label)]]</div></paper-item>
+          </template>
+        </paper-listbox>
+      </paper-material>
+    </iron-dropdown>
+    <iron-dropdown id="truncDD" class="bcdd" horizontalAlign="right">
+      <paper-material class="dropdown-content">
+        <paper-listbox class="brdcbmenu" selected="0">
+          <template is="dom-repeat" items="[[_truncatedPaths]]">
+            <paper-item on-click="_truncLinkHandler"><div>[[item.label]]</div></paper-item>
+          </template>
+        </paper-listbox>
+      </paper-material>
+    </iron-dropdown>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-breadcrumbs',
+      behaviors: [I18NBehavior],
+      properties: {
+        /**
+         * Disable/Enable breadcrumb links
+         */
+        active: {
+          type: Boolean,
+          value: true,
+          observer: '_activeChanged'
+        },
+        /**
+         * Use light foreground colors, for display over dark backgrounds
+         */
+        light: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Data model describing the breadcrumb links to display
+         */
+        model: {
+          type: Object,
+          value: function() { return {links:[],actions:[]}; },
+          observer: '_modelChanged'
+        }
+      },
+      _boundResizeHandler: null,
+      _activeChanged: function() {
+        var buttons = this.$.bcContainer.querySelectorAll('paper-button') || [];
+        for (var i = 0; i < buttons.length; i++) {
+          if (!this.active) {
+            buttons[i].setAttribute('disabled', '');
+          } else {
+            buttons[i].removeAttribute('disabled');
+          }
+        }
+      },
+      _modelChanged: function() {
+        this._createCrumbs();
+      },
+      _linkNavHandler: function(e) {
+        var idx = e.target.getAttribute('data-index');
+        var link = this.model.links[idx];
+        link.handler(link);
+      },
+      _showActions: function(e) {
+        var arrow = Polymer.dom(this.root).querySelectorAll('#ddArrow')[0];
+        this.$.actionsDD.positionTarget = arrow;
+        this.$.actionsDD.open();
+        this.async(function() {
+          this.$.actionsDD.querySelector('paper-item').focus();
+          this.$.actionsDD.querySelector('paper-listbox')._onFocus();
+        }.bind(this));
+      },
+      _breadcrumbActionHandler: function(e) {
+        this.$.actionsDD.close();
+        e.model.__data__.item.handler(e.model.__data__.item);
+      },
+      _createCrumbs: function() {
+        var idx = 0, total = this.model.links.length, isEnd;
+        this._clearCrumbs();
+        this.model.links.forEach(function(link) {
+          isEnd = (idx === (total -1));
+          var div = document.createElement('div');
+          div.className = this._calcLinkClasses(this.light, isEnd);
+          if (idx > 0) {
+            this.$.bcContainer.appendChild(this._createCrumbDivider());
+          }
+          if (isEnd === true) {
+            if (idx === (total - 1) && this.model.actions && this.model.actions.length > 0) {
+              div.appendChild(this._createCrumbDropdown(link, idx));
+            } else {
+              div.appendChild(this._createCrumbLabel(link, idx));
+            }
+          } else {
+            div.appendChild(this._createCrumbLink(link, idx));
+          }
+          this.$.bcContainer.appendChild(div);
+          idx++;
+        }.bind(this));
+        this.async(this._truncate.bind(this));
+      },
+      _createCrumbDivider: function() {
+        var div = document.createElement('div');
+        div.className = this._calcLinkClasses(this.light, false, 'breadcrumb-divider');
+        var icon = document.createElement('iron-icon');
+        icon.setAttribute('icon', 'chevron-right');
+        div.appendChild(icon);
+        return div;
+      },
+      _createCrumbLabel: function(link, idx) {
+        var span = document.createElement('span');
+        span.className = 'bc-link';
+        span.innerHTML = this.xlate(link.label);
+        return span;
+      },
+      _createCrumbDropdown: function(link, idx) {
+        var anchor = document.createElement('paper-button');
+        anchor.id = 'ddArrow';
+        anchor.className = ' bc-link';
+        this.listen(anchor, 'click', '_showActions');
+        anchor.innerHTML = this.xlate(link.label) + ' ▾';
+        return anchor;
+      },
+      _createCrumbLink: function(link, idx) {
+        var anchor = document.createElement('paper-button');
+        anchor.setAttribute('data-index', idx);
+        anchor.className = 'bc-link';
+        this.listen(anchor, 'click', '_linkNavHandler');
+        anchor.innerHTML = this.xlate(link.label);
+        return anchor;
+      },
+      _calcLinkClasses: function(light, end, addl) {
+        var classes = 'brdcrb-part ';
+        if (light === true) {
+          classes += (end === true) ? 'light-bg-primary' : 'light-bg-secondary';
+        } else {
+          classes += (end === true) ? 'dark-bg-primary' : 'dark-bg-secondary';
+        }
+        if (addl) {
+          classes += ' ' + addl;
+        }
+        return classes;
+      },
+      _clearCrumbs: function() {
+        if (this.$.bcContainer.childNodes.length > 0) {
+          for (var c = this.$.bcContainer.childNodes.length - 1; c >= 0; c--) {
+            this.$.bcContainer.removeChild(this.$.bcContainer.childNodes[c]);
+          }
+        }
+        if (this.$.ellipses.childNodes.length > 0) {
+          for (var c = this.$.ellipses.childNodes.length - 1; c >= 0; c--) {
+            this.$.ellipses.removeChild(this.$.ellipses.childNodes[c]);
+          }
+        }
+      },
+      _truncate: function() {
+        var availWidth = this.$.bcWrapper.clientWidth - 48;
+        var used = 0, done = false, didTruncate = false, paths = [];
+        for (var i = this.$.bcContainer.children.length - 1; i >= 0; i--) {
+          var div = this.$.bcContainer.children[i];
+          done = done || (used + div.clientWidth > availWidth);
+          if (done === true) {
+            div.style.display = 'none';
+            if (div.classList.contains('breadcrumb-divider') === false) {
+              if (didTruncate === false && this.$.bcContainer.children[i+1] !== undefined) {
+                this.$.bcContainer.children[i+1].style.display = 'none';
+              }
+              paths.push({label:div.firstChild.innerHTML,idx:div.firstChild.getAttribute('data-index')});
+            }
+            didTruncate = true;
+          } else {
+            used = used + div.clientWidth;
+          }
+        }
+        if (didTruncate === true) {
+          var icon = document.createElement('paper-icon-button');
+          icon.setAttribute('icon', 'more-horiz');
+          icon.id = 'ddEllip';
+          icon.className = this._calcLinkClasses(this.light, false);
+          this.listen(icon, 'click', '_showTruncated');
+          this.$.ellipses.appendChild(icon);
+          this.$.ellipses.appendChild(this._createCrumbDivider());
+        }
+        this._truncatedPaths = paths;
+      },
+      _showTruncated: function(e) {
+        this.$.truncDD.open();
+        this.async(function() {
+          this.$.truncDD.querySelector('paper-item').focus();
+          this.$.truncDD.querySelector('paper-listbox')._onFocus();
+        }.bind(this));
+      },
+      _truncLinkHandler: function(e) {
+        this.$.truncDD.close();
+        var item = e.model.__data__.item;
+        var link = this.model.links[item.idx];
+        link.handler(link);
+      },
+      attached: function() {
+        this._boundResizeHandler = this._createCrumbs.bind(this);
+        window.addEventListener('resize:end', this._boundResizeHandler, false);
+      },
+      detached: function() {
+        window.removeEventListener('resize:end', this._boundResizeHandler, false);
+      },
+    });
+  })();
+</script>

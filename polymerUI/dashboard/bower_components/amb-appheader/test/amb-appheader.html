@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-appheader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-appheader.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="AppHeader">
+    <template>
+      <amb-appheader></amb-appheader>
+    </template>
+  </test-fixture>
+  <script>
+    suite('<amb-appheader>', function () {
+      var header;
+
+      suite('tests', function () {
+        setup(function () {
+          header = fixture('AppHeader');
+        });
+
+        test('_computeHeaderStyle', function (done) {
+          header.backgroundColor = 'ut-bg-color';
+          expect(header._computeHeaderStyle()).to.equal('background-color: ut-bg-color');
+          done();
+        });
+
+        test('_hideBadge', function (done) {
+          expect(header._hideBadge('abc')).to.equal(true);
+          expect(header._hideBadge(-2)).to.equal(true);
+          expect(header._hideBadge(100)).to.equal(false);
+          done();
+        });
+
+        test('_updatePosition', function (done) {
+          var obj = {style:{}};
+          obj.updatePosition = sinon.stub();
+          header.$$ = sinon.stub().returns(obj);
+          header.async = function(fn){fn();};
+          header._updatePosition();
+          expect(obj.updatePosition.calledOnce).to.equal(true);
+          expect(obj.style.opacity).to.equal('1.0');
+          done();
+        });
+
+        test('_logout', function (done) {
+          header.fire = sinon.stub();
+          header._logout();
+          expect(header.fire.calledOnce).to.equal(true);
+          expect(header.fire.firstCall.args[0]).to.equal('logout');
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

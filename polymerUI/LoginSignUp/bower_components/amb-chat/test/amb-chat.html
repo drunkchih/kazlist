@@ -1,0 +1,291 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-toast-with-list</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-chat.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="ChatTests">
+    <template>
+      <amb-chat></amb-chat>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<amb-chat>', function() {
+      var chat;
+
+      suite('tests', function() {
+        setup(function() {
+          chat = fixture('ChatTests');
+        });
+
+        test('_init', function(done) {
+          chat.async = sinon.stub();
+          chat._chat = sinon.stub();
+          chat._init();
+          expect(chat.async.calledOnce).to.equal(true);
+
+          chat.chatKey = null;
+          chat.canInitiateChat = false;
+          chat.async.firstCall.args[0]();
+          expect(chat._isChatting).to.equal(false);
+          expect(chat._chat.called).to.equal(false);
+
+          chat.chatKey = null;
+          chat.canInitiateChat = true;
+          chat.async.firstCall.args[0]();
+          expect(chat._isChatting).to.equal(false);
+          expect(chat._chat.called).to.equal(false);
+
+          chat.chatKey = '1234';
+          chat.async.firstCall.args[0]();
+          expect(chat._isChatting).to.equal(true);
+          expect(chat._chat.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_closeSession', function(done) {
+          chat.fire = sinon.stub();
+          chat._closeSession();
+          expect(chat.fire.calledOnce).to.equal(true);
+          expect(chat.fire.firstCall.args[0]).to.equal('close-session');
+          done();
+        });
+
+        test('_chatButtonClicked', function(done) {
+          chat._saveAllToNote = sinon.stub();
+          chat._launchChat = sinon.stub();
+          chat._isChatting = false;
+          chat._chatButtonClicked();
+          expect(chat._launchChat.calledOnce).to.equal(true);
+          expect(chat._saveAllToNote.called).to.equal(false);
+          chat._launchChat.reset();
+
+          chat._isChatting = true;
+          chat._chatButtonClicked();
+          expect(chat._launchChat.called).to.equal(false);
+          expect(chat._saveAllToNote.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_launchChat', function(done) {
+          chat._startChatSession = sinon.stub();
+          chat._startChatSessionForValidIncident = sinon.stub();
+          chat.hideIncidentNumber = false;
+          chat._launchChat();
+          expect(chat._startChatSessionForValidIncident.calledOnce).to.equal(true);
+          expect(chat._startChatSession.called).to.equal(false);
+          chat._startChatSessionForValidIncident.reset();
+
+          chat.hideIncidentNumber = true;
+          chat._launchChat();
+          expect(chat._startChatSessionForValidIncident.called).to.equal(false);
+          expect(chat._startChatSession.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_startChatSessionForValidIncident', function(done) {
+          chat._sendMessage = sinon.stub();
+          chat._startChatSession = sinon.stub();
+
+          chat.incidentNumber = null;
+          chat._startChatSessionForValidIncident();
+          expect(chat._sendMessage.called).to.equal(false);
+          expect(chat._startChatSession.calledOnce).to.equal(true);
+          chat._startChatSession.reset();
+
+          chat.incidentNumber = '123';
+          chat._startChatSessionForValidIncident();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+          expect(chat._startChatSession.called).to.equal(false);
+
+          chat._sendMessage.firstCall.args[3]({status:200});
+          expect(chat._startChatSession.calledOnce).to.equal(true);
+          chat._sendMessage.firstCall.args[3]({status:404});
+          expect(chat.$['incident-number'].errorMessage).to.equal('INVALID_INCIDENT_NUMBER');
+          done();
+        });
+
+        test('_startChatSession', function(done) {
+          chat.async = function(fn){fn();};
+          chat._sendMessage = sinon.stub();
+          chat._chat = sinon.stub();
+          chat._startChatSession();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+
+          chat._sendMessage.firstCall.args[3]({status:200, responseText:'{\"key\":\"ut-key-1\"}'});
+          expect(chat._sendMessage.calledTwice).to.equal(true);
+
+          chat._sendMessage.firstCall.args[3]({status:404});
+          expect(chat._sendMessage.calledTwice).to.equal(true);
+          done();
+        });
+
+        test('_chat', function(done) {
+          chat._sendMessage = sinon.stub();
+          chat._closeSession = sinon.stub();
+          chat._processMessages = sinon.stub();
+          chat.async = sinon.stub();
+          chat._stop = true;
+          chat._chat();
+          expect(chat._sendMessage.called).to.equal(false);
+
+          chat._stop = false;
+          chat._chat();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+
+          chat._sendMessage.firstCall.args[3]({status:200, responseText:'{\"status\":404}'});
+          expect(chat._closeSession.calledOnce).to.equal(true);
+
+          chat._sendMessage.firstCall.args[3]({status:200, responseText:'{\"status\":0}'});
+          expect(chat._processMessages.calledOnce).to.equal(true);
+
+          chat._sendMessage.firstCall.args[3]({status:0});
+          chat._chat = sinon.stub();
+          chat.async.firstCall.args[0]();
+          expect(chat._chat.calledOnce).to.equal(true);
+          chat.async.thirdCall.args[0]();
+          expect(chat._chat.calledTwice).to.equal(true);
+          done();
+        });
+
+        test('_processMessages', function(done) {
+          chat.xlateDateToLocal = sinon.stub().returnsArg(0);
+          chat._closeSession = sinon.stub();
+          chat.async = function(fn){fn();};
+          chat._lastMessageId = 400;
+          chat.querySelectorAll = sinon.stub().returns([{style:{}}]);
+
+          var messages = [
+            {id:123,timestamp:0},
+            {id:456,timestamp:1}
+          ];
+          chat._processMessages(messages);
+          expect(chat._closeSession.called).to.equal(false);
+
+          chat._processMessages([{id:-1000000,timestamp:0}]);
+          expect(chat._closeSession.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_saveAllToNote', function(done) {
+          chat._sendMessage = sinon.stub();
+          chat._closeSession = sinon.stub();
+          chat.incidentNumber = null;
+          chat._saveAllToNote();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+          expect(chat._sendMessage.firstCall.args[1].indexOf('/Chat/Close') === 0).to.equal(true);
+          expect(chat._closeSession.calledOnce).to.equal(true);
+          chat._sendMessage.reset();
+          chat._closeSession.reset();
+
+          chat.incidentNumber = '123';
+          chat._saveAllToNote();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+          expect(chat._sendMessage.firstCall.args[1].indexOf('/Chat/SaveSessionToTicket') === 0).to.equal(true);
+          expect(chat._closeSession.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_handleSendKeyUp', function(done) {
+          chat._sendChat = sinon.stub();
+          chat._handleSendKeyUp({keyCode:12});
+          expect(chat._sendChat.called).to.equal(false);
+          chat._handleSendKeyUp({keyCode:13});
+          expect(chat._sendChat.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_sendChat', function(done) {
+          chat._sendMessage = sinon.stub();
+          chat._chat = sinon.stub();
+          chat._sendChat();
+          expect(chat._sendMessage.called).to.equal(false);
+
+          chat._isGettingChatMessages = true;
+          chat.$.messageInput.value = 'ut-test-message1';
+          chat._sendChat();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+          expect(chat._sendMessage.firstCall.args[3]).to.be.undefined;
+          chat._sendMessage.reset();
+
+          chat._isGettingChatMessages = false;
+          chat.$.messageInput.value = 'ut-test-message2';
+          chat._sendChat();
+          expect(chat._sendMessage.calledOnce).to.equal(true);
+          expect(chat._sendMessage.firstCall.args[3]).to.not.be.undefined;
+          chat._sendMessage.firstCall.args[3]();
+          expect(chat._chat.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_sendMessage', function(done) {
+          var xhr = sinon.useFakeXMLHttpRequest();
+          var requests = [];
+          xhr.onCreate = function(request) {
+            requests.push(request);
+          };
+          chat._sendMessage('GET','ut-message-url','ut-message-1');
+          expect(requests.length).to.equal(1);
+          requests[0].respond(200, null, null);
+          requests.pop();
+
+          var cb = sinon.stub();
+          chat._sendMessage('GET','ut-message-url', undefined, cb);
+          expect(requests.length).to.equal(1);
+          requests[0].respond(200, null, null);
+          expect(cb.calledOnce).to.equal(true);
+          xhr.restore();
+          done();
+        });
+
+        test('_checkUser', function(done) {
+          expect(chat._checkUser()).to.equal(true);
+          expect(chat._checkUser('')).to.equal(true);
+          expect(chat._checkUser('unittest')).to.equal(true);
+          expect(chat._checkUser('unittest', true)).to.equal(false);
+          done();
+        });
+
+        test('_getUserInitial', function(done) {
+          expect(chat._getUserInitial()).to.equal('?');
+          expect(chat._getUserInitial('unittest')).to.equal('U');
+          done();
+        });
+
+        test('_getMessageClasses', function(done) {
+          chat.user = null;
+          expect(chat._getMessageClasses({user:{name:'unittest'}})).to.equal('left-message flex-layout-horizontal message-container');
+
+          chat.user = 'unittest';
+          expect(chat._getMessageClasses({user:{name:'unittest'}})).to.equal('right-message flex-layout-horizontal-reverse flex-layout-horizontal message-container');
+          done();
+        });
+
+        test('setIsChatting', function(done) {
+          chat._isChatting = false;
+          chat.setIsChatting(true);
+          expect(chat._isChatting).to.equal(true);
+          done();
+        });
+
+      });
+    });
+  </script>
+
+</body>
+</html>

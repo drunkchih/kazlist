@@ -1,0 +1,41 @@
+<style is="custom-style">
+/* mixin definitions */
+:root {
+  --date-picker-dialog: {
+    margin: 0;
+    max-height: 520px !important;
+  };
+  --date-picker-dialog-picker: {
+    margin-top: 0 !important;
+    padding: 0;
+  };
+  --date-picker-dialog-calendar: {
+    padding-bottom: 0;
+  };
+  --date-picker-dialog-heading: {
+    margin-bottom: -56px;
+  };
+}
+</style>
+
+<dom-module id="date-picker-dialog-style">
+  <template>
+    <style>
+      /* Application of mixins to local .date-picker-dialog elements */
+      .date-picker-dialog {
+        @apply(--date-picker-dialog);
+      }
+      .date-picker-dialog > amb-date-picker {
+        --amb-calendar: {
+          @apply(--date-picker-dialog-calendar);
+        };
+        @apply(--date-picker-dialog-picker);
+      }
+      .date-picker-dialog > amb-date-picker:not([narrow]) {
+        --amb-date-picker-heading: {
+          @apply(--date-picker-dialog-heading);
+        };
+      }
+    </style>
+  </template>
+</dom-module>

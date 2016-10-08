@@ -1,0 +1,6 @@
+{
+  "name": "amb-appheader",
+  "description": "Top-level toolbar for Ambrosia apps",
+  "main": "amb-appheader.html",
+  "private": true
+}

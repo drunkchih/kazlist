@@ -1,0 +1,6 @@
+{
+  "name": "amb-breadcrumbs",
+  "description": "Breadcrumbs element",
+  "main": "amb-breadcrumbs.html",
+  "private": true
+}

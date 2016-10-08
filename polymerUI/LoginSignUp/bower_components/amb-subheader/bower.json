@@ -1,0 +1,6 @@
+{
+  "name": "amb-subheader",
+  "description": "Subheader toolbar for Ambrosia apps",
+  "main": "amb-subheader.html",
+  "private": true
+}

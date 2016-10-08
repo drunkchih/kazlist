@@ -1,0 +1,10 @@
+{
+  "name": "amb-2fa",
+  "description": "Two factor auth prompts",
+  "main": [
+    "amb-2fa-login.html",
+    "amb-2fa-agent.html",
+    "amb-2fa-behavior.html"
+  ],
+  "private": true
+}

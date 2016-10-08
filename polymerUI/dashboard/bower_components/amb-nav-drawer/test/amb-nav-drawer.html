@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-nav-drawer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../paper-drawer-panel/paper-drawer-panel.html">
+  <link rel="import" href="../amb-nav-drawer.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="DrawerTest">
+    <template is="dom-template">
+      <paper-drawer-panel>
+        <amb-nav-drawer drawer nav-links="[[links]]"></amb-nav-drawer>
+        <div main><span>ut-item-1</span></div>
+      </paper-drawer-panel>
+    </template>
+  </test-fixture>
+  <script>
+    suite('<amb-nav-drawer>', function() {
+      var drawer;
+
+      suite('tests', function() {
+        setup(function () {
+          drawer = fixture('DrawerTest').querySelector('amb-nav-drawer');
+        });
+
+        test('_navLinksChanged', function(done) {
+          drawer.navLinks = [{label:'ut-item-1'},{label:'ut-item-2'}];
+          expect(drawer._shownLinks).to.be.eql([{label:'ut-item-1'},{label:'ut-item-2'}]);
+          done();
+        });
+
+        test('_getChipClass', function(done) {
+          expect(drawer._getChipClass()).to.equal('');
+          expect(drawer._getChipClass(['ut-item-1'])).to.equal('chip');
+          done();
+        });
+
+        test('_getChipStyle', function(done) {
+          expect(drawer._getChipStyle()).to.equal('');
+          expect(drawer._getChipStyle(1,['red','green','blue'])).to.equal('background-color: green');
+          done();
+        });
+
+        test('_prepareLabel', function(done) {
+          expect(drawer._prepareLabel('unittest-unittest-unittest-unittest-unittest')).to.equal('unittest-unittest-uni...');
+          done();
+        });
+
+        test('_handleNavClick', function(done) {
+          drawer.async = function(fn){fn();};
+          drawer.fire = sinon.stub();
+          drawer._resetLinks = sinon.stub();
+          drawer._toggleWidth = sinon.stub();
+          var item = {label:'ut-item-1'};
+          drawer._handleNavClick({model:{__data__:{item:item}}});
+          expect(drawer.fire.calledOnce).to.equal(true);
+          expect(drawer.fire.firstCall.args[0]).to.equal('selected');
+          expect(drawer.fire.firstCall.args[1]).to.equal(item);
+          drawer.fire.reset();
+
+          drawer._minimized = false;
+          drawer._subMenuParentIdx = 0;
+          drawer._handleNavClick({model:{__data__:{item:item}}});
+          expect(drawer.fire.calledOnce).to.equal(true);
+          expect(drawer.fire.firstCall.args[0]).to.equal('selected');
+          expect(drawer.fire.firstCall.args[1]).to.equal(item);
+          expect(drawer._resetLinks.calledOnce).to.equal(true);
+          expect(drawer._toggleWidth.calledOnce).to.equal(true);
+          drawer._toggleWidth.reset();
+
+          drawer._minimized = false;
+          item = {label:'ut-item-1',sublinks:[{label:'ut-sublink-1'},{label:'ut-sublink-2'}]};
+          drawer._handleNavClick({model:{__data__:{item:item,index:47}}});
+          expect(drawer._subMenuLink).to.equal('ut-item-1');
+          expect(drawer._shownLinks).to.equal(item.sublinks);
+          expect(drawer._subMenuParentIdx).to.equal(47);
+
+          drawer._minimized = true;
+          drawer._handleNavClick({model:{__data__:{item:item,index:48}}});
+          expect(drawer._toggleWidth.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_toggleWidth', function(done) {
+          drawer._hideMinimizeButton = sinon.stub();
+          drawer._showMinimizeButton = sinon.stub();
+          drawer._minimized = false;
+          drawer._toggleWidth();
+          expect(drawer.parentNode.style.width).to.equal('82px');
+          expect(drawer._hideMinimizeButton.calledOnce).to.equal(true);
+          expect(drawer._minimized).to.equal(true);
+
+          drawer._minimized = true;
+          drawer._toggleWidth();
+          expect(drawer.parentNode.style.width).to.equal('256px');
+          expect(drawer._showMinimizeButton.calledOnce).to.equal(true);
+          expect(drawer._minimized).to.equal(false);
+          done();
+        });
+
+        test('_showMinimizeButton', function(done) {
+          drawer._showMinimizeButton();
+          expect(drawer.$.btnMinimize.hasAttribute('fadeout')).to.equal(false);
+          expect(drawer.$.btnRestore.hasAttribute('fadeout')).to.equal(true);
+          done();
+        });
+
+        test('_hideMinimizeButton', function(done) {
+          drawer._hideMinimizeButton();
+          expect(drawer.$.btnMinimize.hasAttribute('fadeout')).to.equal(true);
+          expect(drawer.$.btnRestore.hasAttribute('fadeout')).to.equal(false);
+          done();
+        });
+
+        test('_minimizerClicked', function(done) {
+          drawer._resetLinks = sinon.stub();
+          drawer._toggleWidth = sinon.stub();
+
+          drawer._subMenuParentIdx = 0;
+          drawer._minimizerClicked();
+          expect(drawer._resetLinks.calledOnce).to.equal(true);
+
+          drawer._subMenuParentIdx = -1;
+          drawer._minimizerClicked();
+          expect(drawer._toggleWidth.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_resetLinks', function(done) {
+          drawer._updateSelection = sinon.stub();
+          drawer._resetLinks();
+          expect(drawer._updateSelection.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_selectItem', function(done) {
+          drawer._selectedIndex = -1;
+          drawer.navLinks = [{label:'ut-item-1'},{label:'ut-item-2',sublinks:[{label:'ut-sublink-1'},{label:'ut-sublink-2'}]}];
+          drawer._selectItem(drawer.navLinks[0]);
+          expect(drawer._selectedIndex).to.equal(0);
+
+          drawer._selectedIndex = -1;
+          drawer._selectItem(drawer.navLinks[1].sublinks[1]);
+          expect(drawer._selectedIndex).to.eql([1,1]);
+          done();
+        });
+
+        test('_updateSelection', function(done) {
+          drawer.$.navButtons = {querySelectorAll:function(){return [{dataHost:{item:{selected:true}}},{dataHost:{item:{selected:false}}}];}};
+          drawer.toggleClass = sinon.stub();
+          drawer._updateSelection();
+          expect(drawer.toggleClass.calledTwice).to.equal(true);
+          expect(drawer.toggleClass.firstCall.args[1]).to.equal(true);
+          expect(drawer.toggleClass.secondCall.args[1]).to.equal(false);
+          done();
+        });
+
+        test('_getButtonClasses', function(done) {
+          expect(drawer._getButtonClasses(0, 0, 0)).to.equal('nav-link');
+          expect(drawer._getButtonClasses(0, [0, 0], 0)).to.equal('nav-link selected');
+          expect(drawer._getButtonClasses(-1, 1, 1)).to.equal('nav-link selected');
+          expect(drawer._getButtonClasses(-1, [1, 1], 1)).to.equal('nav-link selected');
+          expect(drawer._getButtonClasses(-1, 1, 2)).to.equal('nav-link');
+          done();
+        });
+
+        test('disableTabbing', function(done) {
+          drawer._tabIdx = '';
+          drawer.disableTabbing();
+          expect(drawer._tabIdx).to.equal('-1');
+          done();
+        });
+
+        test('enableTabbing', function(done) {
+          drawer._tabIdx = '';
+          drawer.enableTabbing();
+          expect(drawer._tabIdx).to.equal('0');
+          done();
+        });
+
+      });
+
+    });
+  </script>
+
+</body>
+</html>

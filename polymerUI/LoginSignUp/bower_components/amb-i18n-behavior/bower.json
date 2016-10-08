@@ -1,0 +1,6 @@
+{
+  "name": "amb-i18n-behavior",
+  "description": "Localiation functions for languauge, number, data, and currency",
+  "main": "amb-i18n-behavior.html",
+  "private": true
+}

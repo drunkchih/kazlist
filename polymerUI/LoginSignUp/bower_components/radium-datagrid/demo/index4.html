@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>radium-datagrid demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../paper-styles/paper-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../radium-datagrid.html">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #gridExample {
+      min-width: 480px;
+      max-width: 480px;
+      height: 400px;
+      border: 1px solid #DDDDDD;
+      background-color: #FFFFFF;
+    }
+    .demo-button {
+      width: 240px;
+      margin: 0px 16px 16px 16px;
+      color: #FFFFFF;
+      background-color: var(--paper-blue-500);
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h3>radium-datagrid example (fixed-header-footer)</h3>
+    <div class="horizontal layout">
+      <div id="gridExample">
+        <radium-datagrid id="grid" items="[[_initialItems]]" fixed-header-footer>
+          <template>
+            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+            <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+          </template>
+        </radium-datagrid>
+      </div>
+      <div class="vertical layout">
+
+      </div>
+    </div>
+  </template>
+  <script>
+      app._genFakeData = function() {
+        var data = [];
+        for (var i=0;i<26;i++) {
+          var a = Math.floor(65 + (i / 26));
+          var b = 65 + (i % 26);
+          var firstChar = String.fromCharCode(a);
+          var secondChar = String.fromCharCode(b);
+          data.push({
+            foo: firstChar + secondChar + firstChar + secondChar,
+            bar: secondChar + firstChar + secondChar + firstChar,
+            baz: a.toString() + b.toString(),
+            icon:'polymer'
+          });
+        }
+        return data;
+      };
+      app._initialItems = app._genFakeData();
+  </script>
+</body>
+</html>

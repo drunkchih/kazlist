@@ -1,0 +1,9 @@
+{
+  "name": "amb-dialog",
+  "description": "Generic dialog element",
+  "main": "amb-dialog.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-dialog",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-dialog"
+}

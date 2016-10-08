@@ -1,0 +1,94 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/social-icons.html">
+<link rel="import" href="../paper-badge/paper-badge.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+
+<!--
+Top-level toolbar for Ambrosia apps
+
+@demo demo/index.html
+-->
+<dom-module id="amb-appheader">
+  <style is="custom-style">
+    :host #container {
+      height: 48px;
+      padding: 0px 16px;
+      background-color: var(--default-primary-color);
+    }
+    :host paper-badge {
+      pointer-events: none;
+      margin-left: -12px;
+      margin-top: 12px;
+      transition: opacity .25s ease-in-out;
+    }
+    :host paper-badge ::content #badge {
+      background-color: var(--accent-color);
+    }
+    :host paper-badge {
+      /* bug in vulcanize requires these to be added individually */
+      --paper-badge-width: 18px;
+    }
+    :host paper-badge {
+      --paper-badge-height: 18px;
+    }
+  </style>
+  <template>
+    <paper-material elevation="2">
+      <div id="container" style$="[[_computeHeaderStyle(backgroundColor)]]" class="flex-layout-horizontal flex-layout-center">
+        <div class="dark-bg-primary typo-title"><content select="[left-content]"></content></div>
+        <div class="dark-bg-primary typo-title flex-layout-flex flex-layout-horizontal flex-layout-center-center"><content select="[center-content]"></content></div>
+        <div class="flex-layout-horizontal">
+          <div style="display:inline-block">
+            <paper-icon-button class="dark-bg-icon" icon="social:notifications"></paper-icon-button>
+            <paper-badge label="[[notifications]]" style="opacity: 0" hidden$="[[_hideBadge(notifications)]]"></paper-badge>
+          </div>
+          <paper-icon-button class="dark-bg-icon" icon="icons:exit-to-app" on-tap="_logout" title="[[xlate('LOGOUT')]]"></paper-icon-button>
+        </div>
+      </div>
+    </paper-material>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-appheader',
+      behaviors: [I18NBehavior],
+      properties: {
+        /*
+         * Number to display as unread notifications
+         */
+        notifications: {
+          type: Number,
+          value: 0
+        },
+        /**
+         * Background color of the header (default is the app primary color)
+         */
+        backgroundColor: String
+      },
+      _computeHeaderStyle: function() {
+        return 'background-color: ' + this.backgroundColor;
+      },
+      _hideBadge: function(n) {
+        return isNaN(n) || n <= 0;
+      },
+      _updatePosition: function() {
+        var badge = this.$$('paper-badge');
+        badge.style.opacity = '0';
+        this.async(function() {
+          badge.updatePosition();
+          badge.style.opacity = '1.0';
+        }, 100);
+      },
+      _logout: function() {
+        this.fire('logout');
+      },
+      ready: function() {
+        this._updatePosition();
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>amb-2fa-login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../amb-2fa-login.html">
+</head>
+<body>
+  <test-fixture id="DialogImpl">
+    <template>
+      <amb-2fa-login></amb-2fa-login>
+    </template>
+  </test-fixture>
+  <script>
+    suite('amb-2fa-login', function() {
+      var dialog;
+
+      suite('2fadialog', function() {
+        setup(function() {
+          dialog = fixture('DialogImpl');
+        });
+
+        test('nothing to test for this guy yet', function(done) {
+          done();
+        });
+      });
+
+    });
+  </script>
+
+  </body>
+</html>

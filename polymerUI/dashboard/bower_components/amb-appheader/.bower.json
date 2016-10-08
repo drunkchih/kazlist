@@ -1,0 +1,9 @@
+{
+  "name": "amb-appheader",
+  "description": "Top-level toolbar for Ambrosia apps",
+  "main": "amb-appheader.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-appheader",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-appheader"
+}

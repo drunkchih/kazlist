@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-transfer-icon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-transfer-icon.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="XsferFixture">
+    <template>
+      <amb-transfer-icon></amb-transfer-icon>
+    </template>
+  </test-fixture>
+  <script>
+    suite('<amb-transfer-icon>', function () {
+      var icon;
+
+      suite('tests', function () {
+        setup(function () {
+          icon = fixture('XsferFixture');
+        });
+
+        test('_transferCountChanged', function (done) {
+          icon._processQueue = sinon.stub();
+          icon._queue = [];
+          icon._animInProgress = true;
+          icon._transferCountChanged(5);
+          expect(icon._queue.length).to.equal(1);
+          expect(icon._processQueue.called).to.equal(false);
+
+          icon._animInProgress = false;
+          icon._transferCountChanged(2);
+          expect(icon._queue.length).to.equal(2);
+          expect(icon._processQueue.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_processQueue', function (done) {
+          icon._queue = [];
+          icon._processQueue();
+
+          icon._queue = [2,7];
+          icon._styleProperties = {'--accent-color':'#123456'};
+          icon._processQueue();
+          expect(icon.$.badge.style.opacity).to.equal('1');
+          expect(icon.$.badge.querySelector('.badge').style.backgroundColor).to.equal('rgb(18, 52, 86)');
+          expect(icon._queue.length).to.equal(0);
+
+          delete icon._styleProperties;
+          icon.async = function(fn){fn();};
+          icon._completeAnim = sinon.stub();
+          icon._queue = [3];
+          icon._processQueue();
+          expect(icon._queue.length).to.equal(0);
+          expect(icon._completeAnim.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_completeAnim', function (done) {
+          icon.$.badge.style.opacity = 0.5;
+          icon._animInProgress = true;
+          icon._processQueue = sinon.stub();
+          icon._completeAnim();
+          expect(icon.$.badge.style.opacity).to.equal('0');
+          expect(icon._animInProgress).to.equal(false);
+          expect(icon._processQueue.calledOnce).to.equal(true);
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

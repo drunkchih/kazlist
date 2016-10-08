@@ -1,0 +1,41 @@
+<style is="custom-style">
+/* mixin definitions */
+:root {
+  --amb-time-picker-dialog: {
+    margin: 0;
+    max-height: 520px !important;
+  };
+  --amb-time-picker-dialog-picker: {
+    margin-top: 0 !important;
+    padding: 0;
+  };
+  --amb-time-picker-dialog-calendar: {
+    padding-bottom: 0;
+  };
+  --amb-time-picker-dialog-heading: {
+    margin-bottom: -56px;
+  };
+}
+</style>
+
+<dom-module id="amb-time-picker-dialog-style">
+  <template>
+    <style>
+      /* Application of mixins to local .amb-time-picker-dialog elements */
+      .amb-time-picker-dialog {
+        @apply(--amb-time-picker-dialog);
+      }
+      .amb-time-picker-dialog > amb-time-picker {
+        --amb-calendar: {
+          @apply(--amb-time-picker-dialog-calendar);
+        };
+        @apply(--amb-time-picker-dialog-picker);
+      }
+      .amb-time-picker-dialog > amb-time-picker:not([narrow]) {
+        --amb-time-picker-heading: {
+          @apply(--amb-time-picker-dialog-heading);
+        };
+      }
+    </style>
+  </template>
+</dom-module>

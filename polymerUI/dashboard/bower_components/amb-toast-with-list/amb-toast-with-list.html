@@ -1,0 +1,166 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+<!--
+Toast popup with a list of items (no auto-hide)
+
+@demo demo/index.html
+-->
+<dom-module id="amb-toast-with-list">
+  <style is="custom-style">
+    paper-toast {
+      padding: 0px;
+      min-height: 40px;
+      background-color: #FFFFFF;
+      color: var(--primary-text-color);
+    }
+    #header {
+      background: #323232;
+      color: #f1f1f1;
+      padding: 8px 8px 8px 16px;
+    }
+    #header > div {
+      line-height: 24px;
+    }
+    #header paper-icon-button {
+      padding: 0px;
+      width: 28px;
+      height: 24px;
+    }
+    #listWrapper {
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    #listWrapper.minimize {
+      transition: height .25s ease-in-out, opacity .25s;
+    }
+    #listWrapper.maximize {
+      transition: height .25s ease-in-out, opacity .5s ease-in-out;
+    }
+    #listWrapper ::content > * {
+      padding: 8px;
+    }
+  </style>
+  <template>
+    <paper-toast id="toast" text="">
+      <div id="header" class="flex-layout-horizontal">
+        <div class="flex-layout-flex">[[text]]</div>
+        <paper-icon-button icon="remove" on-tap="minimize" hidden$="[[_minimized]]"></paper-icon-button>
+        <paper-icon-button icon="launch" on-tap="maximize" hidden$="[[!_minimized]]"></paper-icon-button>
+        <paper-icon-button icon="close" on-tap="hide"></paper-icon-button>
+      </div>
+      <div id="listWrapper">
+        <content></content>
+      </div>
+    </paper-toast>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-toast-with-list',
+      properties: {
+        /**
+         * The text to display in the toast.
+         */
+        text: {
+          type: String,
+          value: ''
+        },
+        _minimized: {
+          type: Boolean,
+          value: false
+        },
+        _rowHeight: {
+          type: Number,
+          value: -1
+        },
+        _itemCount: {
+          type: Number,
+          value: -1
+        },
+        _boundTemplateChanged: {
+          type: Function,
+          value: function() {
+            return function() {
+              this.async(function() {
+                this._itemCount = this.$.listWrapper.children.length - 1;
+                this._rowHeight = this.$.listWrapper.querySelector('*').clientHeight;
+                if (this._minimized === false) {
+                  this.$.listWrapper.style.height = (this._itemCount * this._rowHeight) + 'px';
+                }
+              }.bind(this));
+            }.bind(this);
+          }
+        }
+      },
+      /**
+       * Toggle the opened state of the toast.
+       */
+      toggle: function() {
+        if (!this.$.toast.visible) {
+          this.show();
+        } else {
+          this.hide();
+        }
+      },
+      /**
+       * Hide the toast.
+       */
+      hide: function() {
+        this.$.toast.hide();
+      },
+      /**
+       * Show the toast.
+       */
+      show: function() {
+        this.$.toast.show();
+        this.$.toast.cancelDebouncer('close'); //dont auto hide
+      },
+      /**
+       * Toggle the minimize state the toast.
+       */
+      toggleMinimize: function() {
+        if (!this._minimized) {
+          this.minimize();
+        } else {
+          this.maximize();
+        }
+      },
+      /**
+       * Minimize the toast.
+       */
+      minimize: function() {
+        this._minimized = true;
+        this.toggleClass('minimize', true, this.$.listWrapper);
+        this.toggleClass('maximize', false, this.$.listWrapper);
+        this.$.listWrapper.style.height = '0px';
+        this.$.listWrapper.style.opacity = '0';
+      },
+      /**
+       * Maximize the toast.
+       */
+      maximize: function() {
+        this._minimized = false;
+        this.toggleClass('minimize', false, this.$.listWrapper);
+        this.toggleClass('maximize', true, this.$.listWrapper);
+        this.$.listWrapper.style.height = (this._itemCount * this._rowHeight) + 'px';
+        this.$.listWrapper.style.opacity = '1.0';
+      },
+      attached: function() {
+        var tmpl = this.$.listWrapper.querySelector('template');
+        if (tmpl !== undefined && tmpl !== null) {
+          tmpl.addEventListener('dom-change', this._boundTemplateChanged);
+        }
+      },
+      detached: function() {
+        var tmpl = this.$.listWrapper.querySelector('template');
+        if (tmpl !== undefined && tmpl !== null) {
+          tmpl.removeEventListener('dom-change', this._boundTemplateChanged);
+        }
+      },
+    });
+  })();
+</script>

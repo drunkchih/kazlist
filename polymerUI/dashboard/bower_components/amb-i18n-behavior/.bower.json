@@ -1,0 +1,9 @@
+{
+  "name": "amb-i18n-behavior",
+  "description": "Localiation functions for languauge, number, data, and currency",
+  "main": "amb-i18n-behavior.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-i18n-behavior",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-i18n-behavior"
+}

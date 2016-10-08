@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-i18n-behavior</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../amb-i18n-behavior.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="I18nTest">
+    <template>
+      <i18n-impl></i18n-impl>
+    </template>
+  </test-fixture>
+  <script>
+    (function() {
+      Polymer({
+        is: 'i18n-impl',
+        behaviors: [I18NBehavior]
+      });
+    })();
+
+    suite('amb-i18n-behavior', function() {
+      var impl;
+
+      suite('i18n tests', function() {
+        setup(function() {
+          impl = fixture('I18nTest');
+          impl._i18n = {
+                         "lang": {
+                            "FOOBAR":"Foo bar",
+                            "INTERPOLATE": "Baz {{a}} - {{b}} - {{c}}"
+                         },
+                         "dateFormats": {
+                            "AMPMS": [
+                              "am",
+                              "pm"
+                            ],
+                            "DAY": [
+                              "Sunday",
+                              "Monday",
+                              "Tuesday",
+                              "Wednesday",
+                              "Thursday",
+                              "Friday",
+                              "Saturday"
+                            ],
+                            "MONTH": [
+                              "January",
+                              "February",
+                              "March",
+                              "April",
+                              "May",
+                              "June",
+                              "July",
+                              "August",
+                              "September",
+                              "October",
+                              "November",
+                              "December"
+                            ],
+                            "SHORTDAY": [
+                              "Sun",
+                              "Mon",
+                              "Tue",
+                              "Wed",
+                              "Thu",
+                              "Fri",
+                              "Sat"
+                            ],
+                            "SHORTMONTH": [
+                              "Jan",
+                              "Feb",
+                              "Mar",
+                              "Apr",
+                              "May",
+                              "Jun",
+                              "Jul",
+                              "Aug",
+                              "Sep",
+                              "Oct",
+                              "Nov",
+                              "Dec"
+                            ],
+                            "fullDate": "EEEE, MMMM d, y",
+                            "longDate": "MMMM d, y",
+                            "medium": "MMM d, y h:mm:ss a",
+                            "mediumDate": "hh:mm:ss a dd-MMM-yy",
+                            "mediumDateOrig": "MMM d, y",
+                            "mediumTime": "h:mm:ss a",
+                            "short": "M/d/yy h:mm a",
+                            "shortDate": "M/d/yy",
+                            "shortTime": "h:mm a"
+                          },
+                          "numberFormats": {
+                            "CURRENCY_SYM": "$",
+                            "DECIMAL_SEP": ".",
+                            "GROUP_SEP": ",",
+                            "PATTERNS": [
+                              {
+                                "gSize": 3,
+                                "lgSize": 3,
+                                "macFrac": 0,
+                                "maxFrac": 3,
+                                "minFrac": 0,
+                                "minInt": 1,
+                                "negPre": "-",
+                                "negSuf": "",
+                                "posPre": "",
+                                "posSuf": ""
+                              },
+                              {
+                                "gSize": 3,
+                                "lgSize": 3,
+                                "macFrac": 0,
+                                "maxFrac": 2,
+                                "minFrac": 2,
+                                "minInt": 1,
+                                "negPre": "(¤",
+                                "negSuf": ")",
+                                "posPre": "¤",
+                                "posSuf": ""
+                              }
+                            ]
+                          },
+                          "id": "en-us"
+                       }
+        });
+
+        test('_geti18nData', function(done) {
+          var appref = 'appref-i18n';
+          impl._i18n = 'local-i18n';
+          expect(impl._geti18nData()).to.equal('local-i18n');
+          var qsStub = sinon.stub(document, 'querySelector');
+          qsStub.returns({_i18n:appref});
+          expect(impl._geti18nData()).to.equal('appref-i18n');
+          qsStub.restore();
+          done();
+        });
+
+        test('getDaysOfTheWeek', function(done) {
+          expect(impl.getDaysOfTheWeek()).to.eql(["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]);
+          done();
+        });
+
+        test('xlate', function(done) {
+          expect(impl.xlate()).to.be.undefined;
+          expect(impl.xlate('UNITTEST')).to.equal('UNITTEST');
+          expect(impl.xlate('FOOBAR')).to.equal('Foo bar');
+          expect(impl.xlate('INTERPOLATE', {a:'123',b:'456',c:'789'})).to.equal('Baz 123 - 456 - 789');
+          done();
+        });
+
+        test('xlateNumber', function(done) {
+          expect(impl.xlateNumber()).to.equal('');
+          expect(impl.xlateNumber(47)).to.equal('47');
+          expect(impl.xlateNumber(-47)).to.equal('-47');
+          expect(impl.xlateNumber(1234.56)).to.equal('1,234.56');
+          expect(impl.xlateNumber(123456789.12)).to.equal('123,456,789.12');
+          expect(impl.xlateNumber(1234.56, undefined, impl._i18n.numberFormats.PATTERNS[0])).to.equal('1,234.56');
+          expect(impl.xlateNumber(1234.56, undefined, undefined, '|', '+')).to.equal('1|234+56');
+          expect(impl.xlateNumber(Number.MAX_VALUE)).to.equal('1.7976931348623157e+308');
+          expect(impl.xlateNumber(Number.MIN_VALUE)).to.equal('5e-324');
+          expect(impl.xlateNumber(123456789e-20, 10)).to.equal('0.0000000000');
+          expect(impl.xlateNumber(5e-10, 10)).to.equal('0.0000000005');
+          done();
+        });
+
+        test('xlateCurrency', function(done) {
+          expect(impl.xlateCurrency()).to.be.undefined;
+          expect(impl.xlateCurrency(123.45)).to.equal('$123.45');
+          expect(impl.xlateCurrency(12345, '%')).to.equal('%12,345.00');
+          done();
+        });
+
+        test('xlateDateToLocal', function(done) {
+          var clock = sinon.useFakeTimers(43200000);
+          var tzStub = sinon.stub(window.Date.prototype, 'getTimezoneOffset');
+          tzStub.returns(300);
+          expect(impl.xlateDateToLocal(new Date(), 'yy')).to.equal('70');
+          tzStub.returns(-120);
+          expect(impl.xlateDateToLocal(new Date(), 'yy')).to.equal('70');
+          tzStub.restore();
+          clock.restore();
+          done();
+        });
+
+        test('xlateDate', function(done) {
+          expect(impl.xlateDate()).to.be.undefined;
+          expect(impl.xlateDate(true)).to.equal(true);
+          expect(impl.xlateDate(new Date(0))).to.equal('12:00:00 am 01-Jan-70');
+          var clock = sinon.useFakeTimers(43200000);
+          expect(impl.xlateDate(new Date())).to.equal('12:00:00 pm 01-Jan-70');
+          expect(impl.xlateDate(new Date(),'fullDate')).to.equal('Thursday, January 1, 1970');
+          expect(impl.xlateDate(new Date(),'longDate')).to.equal('January 1, 1970');
+          expect(impl.xlateDate(new Date(),'medium')).to.equal('Jan 1, 1970 12:00:00 pm');
+          expect(impl.xlateDate(new Date(),'mediumDate')).to.equal('12:00:00 pm 01-Jan-70');
+          expect(impl.xlateDate(new Date(),'mediumDateOrig')).to.equal('Jan 1, 1970');
+          expect(impl.xlateDate(new Date(),'mediumTime')).to.equal('12:00:00 pm');
+          expect(impl.xlateDate(new Date(),'short')).to.equal('1/1/70 12:00 pm');
+          expect(impl.xlateDate(new Date(),'shortDate')).to.equal('1/1/70');
+          expect(impl.xlateDate(new Date(),'shortTime')).to.equal('12:00 pm');
+          expect(impl.xlateDate(new Date(),'w')).to.equal('1');
+          expect(impl.xlateDate(new Date(31536000000 + 43200000),'w')).to.equal('0');
+          expect(impl.xlateDate(new Date(),'MMM|d,|y|h:mm:ss|a')).to.equal('Jan|1,|1970|12:00:00|pm');
+          var tzStub = sinon.stub(window.Date.prototype, 'getTimezoneOffset');
+          tzStub.returns(300);
+          expect(impl.xlateDate(new Date(),'h:mm a Z')).to.equal('9:00 am -0500');
+          tzStub.returns(-120);
+          expect(impl.xlateDate(new Date(),'h:mm a Z')).to.equal('2:00 am +0200');
+          tzStub.restore();
+          expect(impl.xlateDate(new Date(), undefined, '-200')).to.equal('10:00:00 am 01-Jan-70');
+          expect(impl.xlateDate(new Date(), undefined, '+200')).to.equal('02:00:00 pm 01-Jan-70');
+          expect(impl.xlateDate('0')).to.equal('12:00:00 am 01-Jan-70');
+          expect(impl.xlateDate('2016-01-06T13:59:59')).to.equal('01:59:59 pm 06-Jan-16');
+          clock.restore();
+          done();
+        });
+
+        test('convertTimezoneToLocal', function(done) {
+          var clock = sinon.useFakeTimers(43200000);
+          var tzStub = sinon.stub(window.Date.prototype, 'getTimezoneOffset');
+          tzStub.returns(300);
+          expect(impl.convertTimezoneToLocal(new Date(), 'UTC', true).toUTCString()).to.equal('Thu, 01 Jan 1970 17:00:00 GMT');
+          expect(impl.convertTimezoneToLocal(new Date(), 'UTC', false).toUTCString()).to.equal('Thu, 01 Jan 1970 07:00:00 GMT');
+          tzStub.restore();
+          clock.restore();
+          done();
+        });
+
+        test('timezoneToOffset', function(done) {
+          expect(impl.timezoneToOffset('UTC')).to.equal(0);
+          expect(impl.timezoneToOffset('UNITTEST', 'UTC')).to.equal('UTC');
+          done();
+        });
+
+      });
+
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+/******************************************************************************
+*****************************  Native Overrides  ******************************
+******************************************************************************/
+a {
+  text-decoration: none;
+  color: #0072BC;
+  cursor:pointer;
+}
+
+.link-overrides {
+  color: inherit;
+  background-color: inherit;
+}
+
+/******************************************************************************
+*****************************  Polymer Overrides  *****************************
+******************************************************************************/
+neon-animated-pages {
+  overflow-x: hidden;
+}
+
+iron-dropdown paper-material {
+  overflow-x: hidden !important;
+}
+
+paper-item:focus:before {
+  background: #0072BC;
+}

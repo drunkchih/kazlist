@@ -1,0 +1,468 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html">
+  <link rel="import" href="../iron-data-table.html">
+  <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+</head>
+
+<body>
+  <test-fixture id="grid">
+    <template>
+      <iron-data-table>
+        <data-table-column name="First" sort="value">
+          <template>[[item.value]]</template>
+        </data-table-column>
+        <data-table-column name="Second" sort="value2">
+          <template>[[item.value2]]</template>
+        </data-table-column>
+        <data-table-column name="Third">
+          <template>[[item.value]]</template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="table">
+    <template>
+      <iron-data-table selection-enabled>
+        <template is="row-details">
+          <div>[[selected]]</div>
+          <vaadin-combo-box items="[[items]]" selectedItem="{{selected}}"></vaadin-combo-box>
+        </template>
+        <data-table-column name="First">
+          <template>
+            <value-helper id="first" value="[[selected]]"></value-helper>
+          </template>
+        </data-table-column>
+        <data-table-column name="Second">
+          <template>
+            <value-helper id="second" value="[[selected]]"></value-helper>
+            <paper-input id="third" value="{{selected}}"></paper-input>
+          </template>
+        </data-table-column>
+      </iron-data-table>
+    </template>
+  </test-fixture>
+
+  <dom-module id="value-helper">
+    <template>
+      <style>
+        :host {
+          display: block;
+        }
+      </style>
+      <div>[[value]]</div>
+    </template>
+    <script>
+    document.addEventListener('WebComponentsReady', function() {
+      Polymer({
+        is: 'value-helper',
+
+        properties: {
+          value: {
+            type: Object,
+            notify: true
+          }
+        }
+      });
+    });
+    </script>
+  </dom-module>
+
+  <script>
+    describe('selecting items', function() {
+      var table;
+      var first, second, input;
+
+      function waitUntil(fn, done) {
+        setTimeout(function() {
+          if (!fn()) {
+            waitUntil(fn, done);
+          } else {
+            done();
+          }
+        }, 10);
+      }
+
+      beforeEach(function(done) {
+        table = fixture('table');
+        table.items = ['foo', 'bar', 'baz'];
+        first = table.querySelector("#first");
+        second = table.querySelector("#second");
+        input = table.querySelector("#third");
+
+        //100ms to take into account the debounce on _loadPage.
+        table.async(done, 100);
+      });
+
+      function assertSelected(selected) {
+        expect(table.selectedItem).to.eql(selected);
+      }
+
+      describe('by using select functions', function() {
+        it('should update selectedItem(s) on select', function() {
+          table.selectItem('foo');
+
+          expect(table.selectedItem).to.eql('foo');
+          expect(table.selectedItems).to.have.members(['foo']);
+        });
+
+        it('should fire `selected-item-changed`', function(done) {
+          table.addEventListener('selected-item-changed', function(e) {
+            expect(e.detail.value).to.eql('foo');
+
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should fire `selected-items-changed`', function(done) {
+          table.addEventListener('selected-items-changed', function(e) {
+            expect(e.detail.value.indexSplices[0].object[0]).to.eql('foo');
+
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should update selectedItem(s) on second select', function() {
+          table.selectItem('foo');
+          table.selectItem('bar');
+
+          expect(table.selectedItem).to.eql('bar');
+          expect(table.selectedItems).to.have.members(['bar']);
+        });
+
+        it('should update selectedItem(s) on deselect', function() {
+          table.selectItem('foo');
+          table.deselectItem('foo');
+
+          expect(table.selectedItem).to.be.null;
+          expect(table.selectedItems).to.have.members([]);
+        });
+
+        it('should update selectedItem also on invalid deselect', function() {
+          table.selectItem('foo');
+          table.deselectItem('bar');
+
+          expect(table.selectedItem).to.be.null;
+          expect(table.selectedItems).to.have.members(['foo']);
+        });
+
+        it('should update [[selected]] on select', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          table.selectItem('foo');
+        });
+
+        it('should update [[selected]] on deselect', function(done) {
+          table.selectItem('foo');
+
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(false);
+            done();
+          });
+
+          table.deselectItem('foo');
+        });
+
+        describe('multi-select', function() {
+          beforeEach(function() {
+            table.multiSelection = true;
+          });
+
+          it('should update selectedItems on multiple select', function() {
+            table.selectItem('foo');
+            table.selectItem('bar');
+
+            expect(table.selectedItems).to.have.members(['foo', 'bar']);
+          });
+
+          it('should update selectedItems on deselect', function() {
+            table.selectItem('foo');
+            table.selectItem('bar');
+            table.deselectItem('foo');
+
+            expect(table.selectedItems).to.have.members(['bar']);
+          });
+        });
+      });
+
+      describe('by clicking on rows', function() {
+        it('should not select row when selection-enabled is false', function(done) {
+          table.selectionEnabled = false;
+
+          first.addEventListener('value-changed', function(e) {
+            done(new Error('Value should not change.'));
+          });
+
+          first.click();
+
+          setTimeout(done, 250);
+        });
+
+        it('should select row when clicking', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should deselect row when clicking again', function(done) {
+          first.click();
+
+          first.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(false);
+            done();
+          });
+
+          first.click();
+        });
+
+        // can't be tested reliably because focus can't be trusted when testing.
+        it.skip('should not select row when clicking on focusable child', function(done) {
+          first.click();
+
+          var spy = sinon.spy();
+          first.addEventListener('value-changed', spy);
+
+          input.click();
+
+          table.async(function() {
+            expect(spy.callCount).to.eql(0);
+            done();
+          }, 250);
+        });
+
+        it('should update selectedItem(s)', function(done) {
+          first.addEventListener('value-changed', function(e) {
+            expect(table.selectedItem).to.eql('foo');
+            expect(table.selectedItems).to.have.members(['foo']);
+
+            done();
+          });
+
+          first.click();
+        });
+        it('should update [[selected]] on template instances', function(done) {
+          second.addEventListener('value-changed', function(e) {
+            expect(e.detail.value).to.eql(true);
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should fire `selecting-item` event', function(done) {
+          table.addEventListener('selecting-item', function(e) {
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should not select when `selecting-item` is cancelled', function(done) {
+          table.addEventListener('selecting-item', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItem).to.be.undefined;
+              done();
+            });
+          });
+
+          first.click();
+        });
+
+        it('should fire `deselecting-item` event', function(done) {
+          first.click();
+
+          table.addEventListener('deselecting-item', function(e) {
+            done();
+          });
+
+          first.click();
+        });
+
+        it('should not deselect when `deselecting-item` is cancelled', function(done) {
+          first.click();
+
+          table.addEventListener('deselecting-item', function(e) {
+            e.preventDefault();
+
+            table.async(function() {
+              expect(table.selectedItem).to.eql('foo');
+              done();
+            });
+          });
+
+          first.click();
+        });
+
+        it('should be able to select using checkbox when selection not enabled', function(done) {
+          table.selectionEnabled = false;
+          table.multiSelection = true;
+
+          table.querySelector('data-table-checkbox:not([header])').click();
+
+          table.async(function() {
+            expect(table.selectedItems[0]).to.eql('foo')
+            done();
+          });
+        });
+      });
+
+      describe('using two-way binding', function() {
+        it('should update [[selected]] on template instances with the same item', function() {
+          input.value = 'foo';
+
+          expect(first.children[0].innerHTML).to.eql('true');
+          expect(second.children[0].innerHTML).to.eql('true');
+        });
+
+        it('should update selectedItem(s)', function() {
+          input.value = 'foo';
+
+          expect(table.selectedItem).to.eql('foo');
+          expect(table.selectedItems).to.have.members(['foo']);
+        });
+      });
+      describe('using data-table-row selected property', function() {});
+
+      describe('using data-table-row selected attribute', function() {}
+
+      );
+    });
+
+    describe('Selecting', function() {
+      var grid;
+      beforeEach(function(done) {
+        grid = fixture('grid');
+        Polymer.dom.flush();
+        grid.items = [{
+          value: 'foo',
+          value2: 'fooz'
+        }, {
+          value: 'bar',
+          value2: 'bah'
+        }, {
+          value: 'qux',
+          value2: 'baz'
+        }];
+
+        Polymer.Base.async(done, 200);
+      });
+
+      it('should select item', function() {
+        grid.selectItem(0);
+
+        expect(grid.selectedItem).to.eql(grid.items[0]);
+      });
+
+      it('should fire `selected-item-changed` event', function() {
+        var spy = sinon.spy();
+        grid.addEventListener('selected-item-changed', spy);
+
+        grid.selectItem(0);
+
+        expect(spy.callCount).to.eql(1);
+      });
+
+      it('should deselect item', function() {
+        grid.selectItem(0);
+
+        grid.deselectItem(0);
+
+        expect(grid.selectedItem).to.be.null;
+      });
+
+      it('should deselect on clear', function() {
+        grid.selectItem(0);
+
+        grid.clearSelection();
+
+        expect(grid.selectedItem).to.be.null;
+      });
+
+      describe('multi-select', function() {
+        beforeEach(function() {
+          grid.multiSelection = true;
+        });
+
+        it('should select all', function() {
+          grid.selectAll();
+
+          expect(grid.selectedItems.inverted).to.be.true;
+          expect(grid.selectedItems).to.be.empty;
+        });
+
+        it('should select all on tap', function() {
+          grid.$.header.querySelector('data-table-checkbox').fire('tap');
+
+          expect(grid.selectedItems.inverted).to.be.true;
+          expect(grid.selectedItems).to.be.empty;
+        });
+
+        it('should deselect all', function() {
+          grid.selectAll();
+
+          grid.clearSelection();
+
+          expect(grid.selectedItems.inverted).to.be.false;
+          expect(grid.selectedItems).to.be.empty;
+        });
+
+        describe('select all checkbox', function() {
+          it('should be indeterminate', function() {
+            grid.selectItem(0);
+
+            expect(grid.$.header.querySelector('data-table-checkbox').indeterminate).to.be.true;
+          });
+
+          it('should be checked', function() {
+            grid.selectAll();
+
+            expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.true;
+          });
+
+          it('should be unchecked when items is empty', function(done) {
+            grid.items = [];
+
+            grid.async(function() {
+              expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.false;
+              done();
+            });
+          });
+
+          it('should be unchecked when all items are deselected manually', function() {
+            grid.selectAll();
+
+            grid.deselectItem(0);
+            grid.deselectItem(1);
+            grid.deselectItem(2);
+
+            expect(grid.$.header.querySelector('data-table-checkbox').checked).to.be.false;
+            expect(grid.$.header.querySelector('data-table-checkbox').indeterminate).to.be.false;
+          });
+        });
+      });
+    });
+  </script>
+
+</body>
+
+</html>

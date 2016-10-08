@@ -1,0 +1,9 @@
+{
+  "name": "amb-avatar",
+  "description": "User avatar icon control",
+  "main": "amb-avatar.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-avatar",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-avatar"
+}

@@ -1,0 +1,38 @@
+<link rel="import" href="dashboard-imports.html">
+<dom-module id="event-table">
+  <template>
+
+      <iron-data-table id="serviceDataTable">
+        <data-table-column name="Event Name">
+          <template>[[item.test]]</template>
+        </data-table-column>
+        <data-table-column name="Location">
+          <template>[[item.test2]]</template>
+        </data-table-column>
+        <data-table-column name="Time">
+          <template>[[item.test2]]</template>
+        </data-table-column>
+        <data-table-column name="Duration">
+          <template>[[item.test2]]</template>
+        </data-table-column>
+      </iron-data-table>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'event-table',
+
+      ready: function () {
+        this._events = [];
+        for( i = 0;i<10;i++){
+          this._events.push({
+            test: i,
+            test2: i-1
+          });
+        }
+        this.$.serviceDataTable.items = this._events;
+      }
+
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+  <script src="../../jquery.terminal/js/jquery-1.7.1.min.js"></script>
+  <script src="../../jquery.terminal/js/jquery.terminal-0.8.8.min.js"></script>
+  <script src="../../jquery.terminal/js/jquery.mousewheel-min.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-terminal.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="TerminalTest">
+    <template>
+      <amb-terminal></amb-terminal>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<amb-terminal>', function () {
+      var term;
+
+      suite('with something something', function () {
+        setup(function () {
+          term = fixture('TerminalTest');
+        });
+
+        test('_onData', function (done) {
+          term.fire = sinon.stub();
+          term._onData('ut-data');
+          expect(term.fire.calledOnce).to.equal(true);
+          expect(term.fire.firstCall.args[0]).to.equal('data');
+          expect(term.fire.firstCall.args[1]).to.equal('ut-data');
+          done();
+        });
+
+        test('_render', function (done) {
+          term.$.divTerm = {
+            offsetWidth: 200,
+            clientWidth: 600,
+            offsetHeight: 100,
+            clientHeight: 400
+          };
+          term._term = {
+            resize: sinon.stub(),
+            scrollDisp: sinon.stub(),
+            rows: 50,
+            y: 50,
+            ybase: 25
+          };
+          term._charDims = {width:20,height:15};
+          term._render();
+          expect(term._term.resize.calledOnce).to.equal(true);
+          expect(term._term.resize.firstCall.args[0]).to.equal(48);
+          expect(term._term.resize.firstCall.args[1]).to.equal(45);
+          expect(term._term.scrollDisp.calledOnce).to.equal(true);
+          expect(term._term.scrollDisp.firstCall.args[0]).to.equal(49);
+          done();
+        });
+
+        test('focus', function (done) {
+          term._term.focus = sinon.stub();
+          term.focus();
+          expect(term._term.focus.calledOnce).to.equal(true);
+          expect(term._term.focus.firstCall.args[0]).to.equal(true);
+          done();
+        });
+
+        test('write', function (done) {
+          term._term.write = sinon.stub();
+          term.write('ut-data');
+          expect(term._term.write.calledOnce).to.equal(true);
+          expect(term._term.write.firstCall.args[0]).to.equal('ut-data');
+          done();
+        });
+
+        test('backspace', function (done) {
+          term._term.cursorBackward = sinon.stub();
+          term._term.deleteChars = sinon.stub();
+          term._term.refresh = sinon.stub();
+          term.backspace();
+          expect(term._term.cursorBackward.calledOnce).to.equal(true);
+          expect(term._term.cursorBackward.firstCall.args[0][0]).to.equal(1);
+          expect(term._term.deleteChars.calledOnce).to.equal(true);
+          expect(term._term.deleteChars.firstCall.args[0][0]).to.equal(1);
+          expect(term._term.refresh.calledOnce).to.equal(true);
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "amb-color-behavior",
+  "description": "Helper functions for retrieving and calculating color values",
+  "main": "amb-color-behavior.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-color-behavior",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-color-behavior"
+}

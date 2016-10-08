@@ -1,0 +1,288 @@
+<link rel="import" href="radium-datagrid-column-filter.html">
+
+<dom-module id="radium-datagrid-column">
+  <style is="custom-style">
+    :host {
+      line-height: 48px;
+      min-height: 48px;
+      max-height: 48px;
+      cursor: default;
+      white-space: nowrap;
+      @apply(--layout-flex);
+    }
+    .splitter {
+      width: 4px;
+      cursor: col-resize;
+      display: inline-block;
+    }
+    #dgcolumnWrapper {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.87);
+      display: inline-block;
+      font-weight: 400;
+      width: calc(100% - 24px);
+      margin-left: 8px;
+      margin-right: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    :host.colHeader #dgcolumnWrapper {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      font-weight: 400;
+      height: 56px;
+    }
+    :host #dgcolumn ::content > iron-icon {
+      height: 48px;
+    }
+    :host.colHeader #dgcolumn ::content > iron-icon {
+      margin-right: 4px;
+      pointer-events: none;
+      display: none;
+      width: 16px;
+      height: 16px;
+    }
+    :host.colHeader:hover #dgcolumn ::content > iron-icon {
+      display: inline-block;
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      color: rgba(0, 0, 0, 0.26);
+    }
+    :host.colHeader #dgcolumn ::content > div {
+      pointer-events: none;
+      display: inline-block;
+      height: 56px;
+    }
+    :host.colHeader:not([data-sortable]) #dgcolumn ::content > iron-icon {
+      display: none;
+    }
+    :host.colHeader #dgcolumn.sort-asc ::content {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-asc ::content > iron-icon {
+      -ms-transform: rotate(-90deg);
+      -webkit-transform: rotate(-90deg);
+      transform: rotate(-90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-desc ::content {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    :host.colHeader #dgcolumn.sort-desc ::content > iron-icon {
+      -ms-transform: rotate(90deg);
+      -webkit-transform: rotate(90deg);
+      transform: rotate(90deg);
+      display: inline-block;
+      color: rgba(0, 0, 0, 0.87);
+    }
+  </style>
+  <template>
+    <div class="splitter">&nbsp;</div><!--
+ --><div id="dgcolumnWrapper">
+      <div id="dgcolumn" on-tap="_sortHandler" class$="[[_headerClasses]]" >
+        <content></content>
+      </div>
+      <template is="dom-if" if="[[isHeader]]">
+        <radium-datagrid-column-filter filter-type="[[filterType]]" filter-options="[[filterOptions]]"></radium-datagrid-column-filter>
+      </template>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-datagrid-column',
+      properties: {
+        /**
+         * Id value to use for the column.  Useful for correlating event callbacks like sorting
+         */
+        id: {
+          type: String,
+          value: ''
+        },
+        /**
+         * Indicates a column object is a header.  Only used internally and should not be set directly
+         */
+        isHeader: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Text to display as the header label of the column
+         */
+        header: String,
+        /**
+         * Width of the column. If omitted, the column will simply 'flex'
+         */
+        columnWidth: Number,
+        /**
+         * How to align content within the column - _left_, _center_, or _right_
+         */
+        alignment: {
+          type: String,
+          value: 'left'
+        },
+        /**
+         * Whether or not to enable the column for sorting
+         */
+        sortable: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Which type of filter control should be presented for the given column - _text_, _date_, or _options_
+         */
+        filterType: String,
+        /**
+         * For filterType _options_, the filterOptions is the array of possible values to filter on
+         */
+        filterOptions: {
+          type: Array,
+          value: null
+        },
+        /**
+         * Internally mapped configurations.  Should not be set directly.
+         */
+        config: {
+          type: Object,
+          value: function(){return null;}
+        },
+        _headerClasses: String,
+        _sortDirection: {
+          type:String,
+          value: null
+        }
+      },
+      observers: [
+        '_sortDirectionChanged(_sortDirection)',
+        '_headerChanged(header)',
+        '_widthChanged(columnWidth)',
+        '_alignmentChanged(alignment)',
+        '_filterOptionsChanged(filterOptions)',
+        '_configChange(config)'
+      ],
+      _sortDirectionChanged: function() {
+        this._computeHeaderClasses();
+      },
+      _headerChanged: function() {
+        this._bubbleUpdatesForHeaders('header');
+      },
+      _widthChanged: function() {
+        if (this.columnWidth > 0) {
+          this.style['min-width'] = this.columnWidth + 'px';
+          this.style['max-width'] = this.columnWidth + 'px';
+        } else {
+          this.style['min-width'] = 'initial';
+          this.style['max-width'] = 'initial';
+          this.style['flex'] = '';
+        }
+        this._bubbleUpdatesForHeaders('columnWidth');
+      },
+      _alignmentChanged: function() {
+        this._computeHeaderClasses();
+        this.$.dgcolumn.style['text-align'] = this.alignment;
+        this._bubbleUpdatesForHeaders('alignment');
+      },
+      _filterOptionsChanged: function() {
+        this._showFilterOptions = (this.filterOptions !== undefined && this.filterOptions !== null);
+      },
+      _computeHeaderClasses: function() {
+        var classes = '';
+        switch (this.alignment) {
+          case 'center':
+            classes +=  'center-justified';
+            break;
+          case 'right':
+            classes +=  'end-justified';
+            break;
+          default:
+            classes +=  'start-justified';
+            break;
+        }
+        classes +=  ' center horizontal layout';
+        if (isNaN(this.columnWidth) || this.columnWidth <= 0) {
+          classes +=  ' flex';
+        }
+        if (this._sortDirection !== null) {
+          classes += ' sort-' + this._sortDirection;
+        }
+        this._headerClasses = classes;
+      },
+      _configChange: function(cfg) {
+        if (cfg !== null) {
+          var applyProps = function(obj) {
+            Object.keys(obj).forEach(function(key) {
+              if (key !== 'config' && key.indexOf('_') !== 0) {
+                this[key] = obj[key];
+              }
+            }.bind(this));
+          }.bind(this);
+          applyProps(cfg.config);
+          applyProps(cfg.data);
+        }
+      },
+      _bubbleUpdatesForHeaders: function(prop) {
+        this.async(function() {
+          this.fire('update-header', {index:[].indexOf.call(this.parentNode.children, this),prop:prop});
+        }.bind(this));
+      },
+      _sortHandler: function(e) {
+        if (!this.isHeader || this.sortable !== true) {
+          return;
+        }
+        if (this._sortDirection !== null) {
+          if (this._sortDirection === 'asc') {
+            this._sortDirection = 'desc';
+          } else {
+            this._sortDirection = 'asc';
+          }
+        } else {
+          this._sortDirection = 'asc';
+        }
+        this.fire('sort', {id:this.id, direction:this._sortDirection});
+      },
+      _sortChanged: function(e) {
+        if (e.detail.id !== this.id && this._sortDirection !== null) {
+          this._sortDirection = null;
+        }
+      },
+      _onColumnDrag: function(e) {
+        var colIdx = [].indexOf.call(this.parentNode.children, this);
+        this.fire('column-resize', {idx:colIdx, delta:e.clientX - this._colDragX});
+        this._colDragX = e.clientX;
+      },
+      _onColumnEndDrag: function(e) {
+        window.removeEventListener('mousemove', this._boundColumnDragHandler);
+        window.removeEventListener('mouseup', this._boundColumnDragEndHandler);
+      },
+      _preventShiftSelect: function(e) {
+        if (e.ctrlKey || e.shiftKey) {
+          e.preventDefault();
+        }
+      },
+      attached: function() {
+        if (this.isHeader) {
+          this.domHost.addEventListener('sort', this._sortChanged.bind(this));
+        }
+      },
+      ready: function() {
+        this.listen(this, 'mousedown', '_preventShiftSelect');
+        this.async(function() {
+          if (this.domHost.disableColumnResize === false) {
+            this._boundColumnDragHandler = this._onColumnDrag.bind(this);
+            this._boundColumnDragEndHandler = this._onColumnEndDrag.bind(this);
+            var splitter = this.querySelector('.splitter');
+            splitter.addEventListener('mousedown', function(e) {
+              e.preventDefault();
+              this._colDragX = e.clientX;
+              window.addEventListener('mousemove', this._boundColumnDragHandler);
+              window.addEventListener('mouseup', this._boundColumnDragEndHandler);
+            }.bind(this));
+          }
+        }.bind(this));
+      }
+    });
+  })();
+</script>

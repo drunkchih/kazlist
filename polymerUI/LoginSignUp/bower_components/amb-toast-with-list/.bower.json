@@ -1,0 +1,9 @@
+{
+  "name": "amb-toast-with-list",
+  "description": "Toast popup with a list of items (no auto-hide)",
+  "main": "amb-toast-with-list.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-toast-with-list",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-toast-with-list"
+}

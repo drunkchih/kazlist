@@ -1,0 +1,9 @@
+{
+  "name": "amb-subheader",
+  "description": "Subheader toolbar for Ambrosia apps",
+  "main": "amb-subheader.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-subheader",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-subheader"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "amb-chat",
+  "description": "Chat component",
+  "main": "amb-chat.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-chat",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-chat"
+}

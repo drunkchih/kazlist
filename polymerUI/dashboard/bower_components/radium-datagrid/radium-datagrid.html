@@ -1,0 +1,727 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="datagrid-icons.html">
+<link rel="import" href="radium-iron-list.html">
+<link rel="import" href="radium-datagrid-row.html">
+<link rel="import" href="radium-datagrid-column.html">
+
+<!--
+A Material Design inspired data grid element for Polymer.js apps.
+
+This element uses, as an initial foundation, the Google Material Design specification for data tables:
+[Data Tables](https://www.google.com/design/spec/components/data-tables.html)
+
+However, the goal of the element is to support much richer _data grid_ functionality, so there will be necessary
+deviations or extrapolations, as features that are not included in the specification are added to this element.
+
+### Simple Example:
+
+    <radium-datagrid items="[[_myItems]]">
+      <template>
+        <radium-datagrid-row>
+          <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+          <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+        </radium-datagrid-row>
+      </template>
+    </radium-datagrid>
+
+A row will be rendered for each item of the collection, and the _row_ property will be available for the template of each
+column.
+
+@element radium-datagrid
+@demo demo/configs.html Basic configurations
+@demo demo/dataload.html Data loading states
+@demo demo/paging.html Paging footer
+@demo demo/selection.html Item selection
+@demo demo/infinitescroll.html Infinite scroll
+@demo demo/filters.html Column Filtering
+-->
+<dom-module id="radium-datagrid">
+  <style>
+    #dgwrapper {
+      height: 100%;
+      border: 1px solid #DDDDDD;
+      background-color: #FFFFFF;
+    }
+    #headerRow {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #headerRow.scroll-pad {
+      margin-right: 15px;
+    }
+    #headerRow ::content radium-datagrid-column:first-of-type #dgcolumn {
+      margin-left: 24px;
+    }
+    #headerRow ::content radium-datagrid-column:first-of-type radium-datagrid-column-filter #colFilter {
+      margin-left: 24px;
+    }
+    .colHeader {
+      min-height: 56px;
+      max-height: 56px;
+      line-height: 56px;
+    }
+    .colHeader[data-sortable] {
+      cursor: pointer;
+    }
+    :host #list {
+      background-color: #FFFFFF;
+      height: calc(100% - 57px);
+    }
+    :host[enable-paging] #list {
+      height: calc(100% - 113px);
+    }
+    .hztl-lines ::content radium-datagrid-column {
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      border-bottom-color: var(--grid-line-color,#DDDDDD);
+    }
+    .vert-lines ::content radium-datagrid-column {
+      border-right-style: solid;
+      border-right-width: 1px;
+      border-right-color: var(--grid-line-color,#DDDDDD);
+    }
+    .vert-lines ::content radium-datagrid-column:last-of-type {
+      border-right: none;
+    }
+    :host([filters-enabled]) ::content radium-datagrid-column.colHeader #dgcolumn {
+      height: 32px;
+    }
+    :host([filters-enabled]) ::content radium-datagrid-column.colHeader #colFilter {
+      display: block !important;
+    }
+    :host([selection-enabled]) ::content radium-datagrid-row:hover {
+      background-color: #EEEEEE;
+    }
+    :host([disable-column-resize]) ::content radium-datagrid-column .splitter {
+      display: none;
+    }
+    :host ::content radium-datagrid-column:first-of-type .splitter {
+      display: none;
+    }
+    .status-label {
+      height: calc(100% - 56px);
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+    #noRecordsLabel {
+      font-size: 12px;
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(0, 0, 0, 0.54);
+    }
+    #infiniteLoader {
+      background-color: #FFFFFF;
+      position: absolute;
+      bottom: 4px;
+      left: 0px;
+      right: 0px;
+    }
+    .loadingIcon iron-icon {
+      color: rgba(0, 0, 0, 0.4);
+      -webkit-animation: icon-spin 1s infinite linear;
+      animation: icon-spin 1s infinite linear;
+    }
+    @-webkit-keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
+    @keyframes icon-spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+      }
+    }
+    #footerRow {
+      height: 56px;
+      padding: 0px 6px;
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.54);
+      border-top: solid 1px #DDDDDD;
+    }
+    #footerRow > paper-icon-button {
+      margin: 0px 2px;
+    }
+    #pages {
+      margin-left: 32px;
+      margin-right: 32px;
+    }
+    #perPageArrow {
+      padding: 0px;
+      width: 24px;
+      height: 24px;
+    }
+    #perPage {
+      text-align: right;
+      width: 40px;
+    }
+    #optionsDropdown paper-item {
+      color: #666666;
+      cursor: pointer;
+      background-color: #FFFFFF;
+    }
+    #optionsDropdown paper-item:hover {
+      color: #000000;
+      background-color: #EEEEEE;
+    }
+    #optionsDropdown paper-item.iron-selected {
+      font-weight: initial;
+    }
+  </style>
+  <template>
+    <div id="dgwrapper">
+      <div id="headerRow" class="horizontal layout">
+        <template is="dom-repeat" items="[[_headers]]" as="header">
+          <radium-datagrid-column class="colHeader" config="[[header]]"
+              data-sortable$="[[header.config.sortable]]">
+            <iron-icon icon="arrow-forward"></iron-icon>
+            <div on-tap="_sortColumn">[[header.config.header]]</div>
+          </radium-datagrid-column>
+        </template>
+      </div>
+      <radium-iron-list id="list" items="[[items]]" as="row" hidden$="[[_checkListState(_listState, 0)]]"
+          selection-enabled="[[_checkSelectionEnabled(selectionEnabled,desktopMultiSelection)]]"
+          multi-selection="[[_checkMultiSelectionEnabled(multiSelection,desktopMultiSelection)]]"
+          selected-item="{{selectedItem}}" selected-items="{{selectedItems}}">
+        <content></content>
+      </radium-iron-list>
+      <div class="loadingIcon status-label" hidden$="[[_checkListState(_listState, 1)]]">
+        <iron-icon icon="refresh"></iron-icon>
+      </div>
+      <div id="noRecordsLabel" class="status-label" hidden$="[[_checkListState(_listState, 2)]]">
+        [[_computedTranslate(i18nFunction, 'NO_RECORDS_FOUND', 'No Records Found')]]
+      </div>
+      <div id="infiniteLoader" class="loadingIcon layout horizontal center-center" hidden$="[[!_infiniteScrolling]]"><iron-icon icon="refresh"></iron-icon></div>
+      <template is="dom-if" if="[[enablePaging]]">
+        <div id="footerRow" class="center horizontal layout">
+          <div class="flex"></div>
+          <span>[[_computedTranslate(i18nFunction,'ROWS_PER_PAGE','Rows per page:')]]</span>
+          <span id="perPage">[[itemsPerPage]]</span>
+          <div>
+            <paper-icon-button id="perPageArrow" icon="arrow-drop-down" noink on-click="_showPageOpts"></paper-icon-button>
+            <iron-dropdown id="optionsDropdown" horizontal-align="right" vertical-align="bottom">
+              <paper-material class="dropdown-content">
+                <div class="options">
+                  <template is="dom-repeat" items="[[perPageOptions]]">
+                    <paper-item on-click="_optHandler">[[item]]</paper-item>
+                  </template>
+                </div>
+              </paper-material>
+            </iron-dropdown>
+          </div>
+          <span id="pages">[[_calcPaging(currentPage,itemsPerPage,totalItems,i18nFunction)]]</span>
+          <paper-icon-button icon="datagrid:first-page" on-click="_firstPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:prev-page" on-click="_prevPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:next-page" on-click="_nextPage"></paper-icon-button>
+          <paper-icon-button icon="datagrid:last-page" on-click="_lastPage"></paper-icon-button>
+        </div>
+      </template>
+    </div>
+    <content id="template" select="template"></content>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-datagrid',
+      /*
+       * A column is being sorted
+       *
+       * @event sort
+       */
+
+      /*
+       * A row was double-clicked
+       *
+       * @event row-dblclick
+       */
+
+      /*
+       * A new page size was selected
+       *
+       * @event per-page-change
+       */
+
+      /*
+       * The user desires to navigate to the next page
+       *
+       * @event next-page
+       */
+
+      /*
+       * The user desires to navigate to the previous page
+       *
+       * @event prev-page
+       */
+
+      /*
+       * The user desires to navigate to the first page
+       *
+       * @event first-page
+       */
+
+      /*
+       * The user desires to navigate to the last page
+       *
+       * @event last-page
+       */
+
+      /*
+       * When infinite scrolling is enabled, this indicates the need to fetch more data
+       *
+       * @event scroll-more
+       */
+      properties: {
+        _listState: -1,
+        _columnWidths: {
+          type: Object,
+          value: function(){return {};},
+        },
+        _headers: {
+          type: Array,
+          value: function(){return null;}
+        },
+        /**
+         * Function invoked for string translations.
+         * The first arg is the string key to be translated.
+         */
+        i18nFunction: {
+          type: Function,
+          value: null
+        },
+        /**
+         * An array containing the objects that will correspond to each row of the grid
+         */
+        items: {
+          type: Array,
+          value: function(){return null;}
+        },
+        /**
+         * Which row/column border lines to draw - _none_, _horizontal_, _vertical_, or _both_
+         */
+        gridLines: {
+          type: String,
+          value: 'horizontal'
+        },
+        /**
+         * Whether to disallow columns from resizing
+         */
+        disableColumnResize: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        /**
+         * Whether or not activate and display the paging footer controls
+         */
+        enablePaging: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        /**
+         * Current page displayed, when paging
+         */
+        currentPage: {
+          type: Number,
+          value: 1
+        },
+        /**
+         * Number of items shown per page, when paging
+         */
+        itemsPerPage: {
+          type: Number,
+          value: 10
+        },
+        /**
+         * Total number of items available, when paging
+         */
+        totalItems: {
+          type: Number,
+          value: 0
+        },
+        /**
+         * Page sizes avilable for the user to choose from, when paging
+         */
+        perPageOptions: {
+          type: Array,
+          value: function() { return []; }
+        },
+        /**
+         * Whether or not row selection is enabled
+         */
+        selectionEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        /**
+         * When `multiSelection` is false, this is the currently selected item, or `null`
+         * if no item is selected.
+         */
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+        /**
+         * When `multiSelection` is true, this is an array that contains the selected items.
+         */
+        selectedItems: {
+          type: Object,
+          notify: true
+        },
+        /**
+         * Whether or not row multi selection is enabled
+         */
+        multiSelection: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Whether or not _desktop like_ row multi selection is enabled.  By default, multi-selection will behave in a
+         * manner that is useful for both mobile and desktop scenarios, i.e. each click will select/deselect a given
+         * row, and keyboard combinations like _ctrl+click_ and _shift+click_ have no effect.  With
+         * `desktop-multii-selection`, these keyboard combinations are supported.
+         */
+        desktopMultiSelection: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Whether or not to show column filters in the header
+         */
+        filtersEnabled: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+        /**
+         * Element name to use for the date picker (defaults as "paper-date-picker").  Assumed to be imported already.
+         */
+        datePickerElement: String
+      },
+      behaviors: [],
+      observers: [
+        '_itemsChanged(items.*)',
+        '_gridLinesChanged(gridLines)',
+        '_desktopMultiSelectChanged(desktopMultiSelection)',
+        '_filtersEnabledChanged(filtersEnabled)'
+      ],
+      _infiniteScrolling: false,
+      _itemsChanged: function(change) {
+        this._listState = (this.items && this.items.length === 0) ? 2 : 0;
+        if (this._infiniteScrolling) {
+          this.$.list._resetScrollPosition(this._infiniteScrollPos);
+        }
+        this._hideInfiniteScrollIcon();
+        this._applyColumnWidths();
+        this.async(function() {
+          this.toggleClass('scroll-pad', (this.$.list.scrollHeight > this.$.list.clientHeight), this.$.headerRow);
+        }.bind(this), 1);
+      },
+      _gridLinesChanged: function() {
+        this._updateGridLines(this.$.list);
+        this._updateGridLines(this.$.headerRow);
+      },
+      _desktopMultiSelectChanged: function() {
+        var handler = (this.selectionEnabled && this.desktopMultiSelection) ? this.listen : this.unlisten;
+        handler.call(this, this.$.list, 'tap', '_desktopMultiSelectHandler');
+      },
+      _filtersEnabledChanged: function() {
+        var firstFilter = this.$.headerRow.querySelector('#colFilter[data-filter] input');
+        if (firstFilter !== null) {
+          firstFilter.focus();
+        }
+      },
+      _desktopMultiSelectHandler: function(e) {
+        if (this.selectionEnabled) {
+          var evt = e.detail.sourceEvent;
+          if (evt.ctrlKey === false && evt.metaKey === false && evt.shiftKey === false) {
+            this.clearSelection();
+          }
+          var model = this.$.list.modelForElement(e.target);
+          if (model) {
+            var item = model[this.$.list.as];
+            var idx = this.items.indexOf(item);
+            if (evt.shiftKey === true) {
+              if (!isNaN(this._lastSelectedIndex)) {
+                var smaller = (idx < this._lastSelectedIndex) ? idx : this._lastSelectedIndex;
+                var bigger = (idx < this._lastSelectedIndex) ? this._lastSelectedIndex : idx;
+                for (var i = smaller; i <= bigger; i++) {
+                  this.$.list.selectItem(this.items[i]);
+                }
+              }
+            } else {
+              this.$.list.toggleSelectionForItem(item);
+            }
+            this._lastSelectedIndex = idx;
+          }
+        }
+      },
+      _updateGridLines: function(node) {
+        this.toggleClass('hztl-lines', false, node);
+        this.toggleClass('vert-lines', false, node);
+        if (this.gridLines.toLowerCase() === 'horizontal' || this.gridLines.toLowerCase() === 'both') {
+          this.toggleClass('hztl-lines', true, node);
+        }
+        if (this.gridLines.toLowerCase() === 'vertical' || this.gridLines.toLowerCase() === 'both') {
+          this.toggleClass('vert-lines', true, node);
+        }
+      },
+      _setHeaders: function(row) {
+        var columns = row.querySelectorAll('radium-datagrid-column');
+        var headers = [];
+        for (var i = 0; i < columns.length; i++) {
+          var data = JSON.parse(JSON.stringify(columns[i].__data__));
+          data.isHeader = true;
+          headers.push({data:data,config:columns[i]._aboveConfig});
+        };
+        this._headers = headers;
+      },
+      _handleHeaderUpdate: function(e,detail) {
+        if (e.detail.prop === 'columnWidth') {
+          this._columnWidths = {};
+        }
+        if (e.detail.prop === 'header') {
+          this.set('_headers.' + detail.index + '.config.header', e.target.header);
+        }
+        this.$.headerRow.children[detail.index][detail.prop] = e.target[detail.prop];
+      },
+      _computedTranslate: function(i18n, key, defaultVal) {
+        return this._translate(key, defaultVal);
+      },
+      _translate: function(key, defaultVal) {
+        if (this.i18nFunction) {
+          return this.i18nFunction(key);
+        } else {
+          return defaultVal;
+        }
+      },
+      _listScroll: function(e) {
+        this.$.headerRow.scrollLeft = this.$.list.scrollLeft;
+      },
+      _columnResize: function(e) {
+        var idx = e.detail.idx;
+        var delta = e.detail.delta;
+        this._resizeHeaders(idx, delta);
+        this._applyColumnWidths();
+      },
+      _applyColumnWidths: function() {
+        Object.keys(this._columnWidths).forEach(function(key) {
+          var rows = this.$.list.$.items.querySelectorAll('radium-datagrid-row');
+          for (var i = 0; i < rows.length; i++) {
+            this._resizeCell(rows[i].children[key], this._columnWidths[key]);
+          }
+        }.bind(this));
+      },
+      _resizeHeaders: function(idx, delta) {
+        var minColWidth = 48;
+        var col = this.$.headerRow.children[idx];
+        var colWidth = document.defaultView.getComputedStyle(col, '').getPropertyValue('width');
+        var newColWidth = (parseInt(colWidth, 10) - delta);
+        var prev = this.$.headerRow.children[idx - 1];
+        var prevWidth = document.defaultView.getComputedStyle(prev, '').getPropertyValue('width');
+        var newPrevWidth = (parseInt(prevWidth, 10) + delta);
+        if (newColWidth > minColWidth && newPrevWidth > minColWidth) {
+          this._columnWidths[idx] = newColWidth;
+          this._columnWidths[idx-1] = newPrevWidth;
+          this._resizeCell(col, newColWidth);
+          this._resizeCell(prev, newPrevWidth);
+        }
+      },
+      _resizeCell: function(cell, width) {
+        cell.style['min-width'] = width + 'px';
+        cell.style['max-width'] = width + 'px';
+        cell.style.flex = 'initial';
+      },
+      _checkListState: function(state, idx) {
+        return state !== idx;
+      },
+      _getColumnHeaderById: function(colId) {
+        for (var i = 0; i < this.$.headerRow.children.length; i++) {
+          var header = this.$.headerRow.children[i];
+          if (colId === header.id) {
+            return header;
+          }
+        }
+        return null;
+      },
+      _calcPaging: function(cp, pp, ttl, i18n) {
+        var sIdx = ((cp - 1) * pp) + 1;
+        var eIdx = (sIdx + pp) - 1;
+        eIdx = (eIdx < ttl) ? eIdx : ttl;
+        var args = [null,sIdx,eIdx,ttl];
+        var pcl = this._computedTranslate(i18n, 'CURRENT_PAGE_LABEL', '{1}-{2} of {3}');
+        return pcl.replace(/{(\d+)}/g, function(match, number) {
+          return typeof args[number] != 'undefined' ? args[number] : match;
+        });
+      },
+      _optHandler: function(e) {
+        this.$$('#optionsDropdown').close();
+        this.fire('per-page-change', e.model.__data__.item)
+      },
+      _nextPage: function(e) {
+        this.fire('next-page');
+      },
+      _prevPage: function(e) {
+        this.fire('prev-page');
+      },
+      _firstPage: function(e) {
+        this.fire('first-page')
+      },
+      _lastPage: function(e) {
+        this.fire('last-page')
+      },
+      _showPageOpts: function(e) {
+        var dd = this.$$('#optionsDropdown');
+        if (dd.opened) { return; }
+        dd.open();
+      },
+      _checkSelectionEnabled: function(sel, dms) {
+        return sel && !dms;
+      },
+      _checkMultiSelectionEnabled: function(ms, dms) {
+        return ms || dms;
+      },
+      _showInfiniteScrollIcon: function() {
+        this._infiniteScrolling = true;
+      },
+      _hideInfiniteScrollIcon: function() {
+        this._infiniteScrolling = false;
+      },
+      _scrollHandler: function() {
+        var h1 = this.$.list.scrollHeight;
+        var h2 = parseInt(document.defaultView.getComputedStyle(this.$.list, '').getPropertyValue('height'), 10);
+        if (this._infiniteScrolling === false && this.$.list.scrollTop >= (h1 - h2)) {
+          this._infiniteScrollPos = this.$.list.scrollTop;
+          this._showInfiniteScrollIcon();
+          this.fire('scroll-more');
+        }
+      },
+      /**
+       * Clear any currently selected rows
+       *
+       * @method clearSelection
+       */
+      clearSelection: function() {
+        this.$.list.clearSelection();
+      },
+      /**
+       * Select the row that corresponds to the provided item
+       *
+       * @method selectItem
+       * @param {Object} Item to select
+       */
+      selectItem: function(item) {
+        this.$.list.selectItem(item);
+      },
+      /**
+       * Deselect the row that corresponds to the provided item
+       *
+       * @method deselectItem
+       * @param {Object} Item to deselect
+       */
+      deselectItem: function(item) {
+        this.$.list.deselectItem(item);
+      },
+      /**
+       * Select or deselect the row that corresponds to the provided item, depending on its current selected state
+       *
+       * @method toggleSelectionForItem
+       * @param {Object} Item to select/deselect
+       */
+      toggleSelectionForItem: function(item) {
+        this.$.list.toggleSelectionForItem(item);
+      },
+      /**
+       * Set the current sort
+       *
+       * @method setColumnSort
+       * @param {String} Id of the column to show as sorted
+       * @param {Boolean} Sort descending (default is ascending)
+       */
+      setColumnSort: function(colId, desc) {
+        var column = this._getColumnHeaderById(colId);
+        if (column !== null) {
+          column._sortDirection = (desc) ? 'desc' : 'asc';
+        }
+      },
+      /**
+       * Clears the current items and shows a loading spinner.  Clear this by setting the items property to an array
+       *
+       * @method showLoading
+       */
+      setLoading: function() {
+        this.items = null;
+        this._listState = 1;
+      },
+      /**
+       * Remove the values from all column header filter inputs.
+       *
+       * @method clearFilters
+       */
+      clearFilters: function() {
+        var filterInputs = this.$.headerRow.querySelectorAll('#colFilter[data-filter] input');
+        for (var i = 0; i < filterInputs.length; i++) {
+          filterInputs[i].value = '';
+        }
+      },
+      /**
+       * Enable infinite scroll
+       *
+       * @method enableInfiniteScroll
+       */
+      enableInfiniteScroll: function() {
+        this._scrollListener = this._scrollHandler.bind(this);
+        this.$.list.addEventListener('scroll', this._scrollListener);
+      },
+      /**
+       * When using the infinite scroll feature, this method can be called during the on-scroll-more handler to indicate
+       * there is no additional data available.
+       *
+       * @method infiniteScrollDone
+       */
+      infiniteScrollDone: function() {
+        this._hideInfiniteScrollIcon();
+      },
+      /**
+       * Force the grid to repaint its rows, based on new scroll boundaries
+       *
+       * @method refit
+       */
+      refit: function() {
+        this.$.list._resizeHandler();
+      },
+      _boundScrollListener: null,
+      attached: function() {
+        this._boundScrollListener = this._listScroll.bind(this);
+        this.$.list.addEventListener('scroll', this._boundScrollListener);
+      },
+      detached: function() {
+        this.$.list.removeEventListener('scroll', this._boundScrollListener);
+      },
+      ready: function() {
+        this.listen(this, 'update-header', '_handleHeaderUpdate');
+        this.listen(this, 'column-resize', '_columnResize');
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,146 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="radium-filter-behavior.html">
+<!--
+Header bar Polymer element for doing filters / faceted search.
+
+@element radium-filter-bar
+@demo demo/index.html Basic demo
+-->
+<dom-module id="radium-filter-bar">
+  <style is="custom-style">
+    .filterbar {
+      background-color: #F5F5F5;
+      border-radius: 16px;
+      color: rgba(0, 0, 0, 0.87);
+      line-height: 40px;
+      padding: 4px 8px;
+    }
+    .filterbar > div {
+      margin-right: 8px;
+    }
+    .filterbar > div:last-child {
+      margin-right: 0;
+    }
+    .filterbar .chip-container {
+      overflow: hidden;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    #clearIcon {
+      cursor: pointer;
+    }
+    .filterbar paper-button {
+      display: inline-block;
+      box-sizing: border-box;
+      padding: 0 6px 0 12px;
+      margin: 4px;
+      min-width: initial;
+      height: 32px;
+      line-height: 32px;
+      text-transform: none;
+      white-space: nowrap;
+      cursor: pointer;
+      background-color: #E0E0E0;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .filterbar paper-button > ::content paper-material {
+      padding: 0px;
+    }
+    .filterbar paper-button .chip-label-container {
+      display: inline-flex;
+      max-width: calc(100% - 20px);
+      margin: 0;
+    }
+    .filterbar paper-button .chip-label {
+      font-size: 14px;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .filterbar paper-button iron-icon {
+      color: #9E9E9E;
+      width: 20px;
+      height: 20px;
+      margin-top: -2px;
+      line-height: 14px;
+    }
+    .filterbar paper-button:hover {
+      color: #ffffff;
+      background-color: #616161;
+    }
+    .filterbar paper-button:hover iron-icon {
+      color: #ffffff;
+    }
+
+    @media (min-width: 600px) {
+      .filterbar .chip-container {
+        overflow: hidden;
+        max-height: 140px;
+        overflow-y: auto;
+      }
+    }
+  </style>
+  <template>
+    <div class="filterbar horizontal layout">
+      <div hidden$="[[hideFilterIcon]]">
+        <iron-icon icon="filter-list"></iron-icon>
+      </div>
+      <div class="chip-container flex">
+        <div class="horizontal layout wrap">
+          <template is="dom-repeat" items="[[_getChipsForFiltersAndTerms(filters, terms)]]">
+            <paper-button data-term$="[[item]]" on-click="_termClicked">
+              <div class="chip-label-container">
+                <span class="chip-label">[[item.label]]</span>
+              </div>
+              <iron-icon icon="cancel"></iron-icon>
+            </paper-button>
+          </template>
+        </div>
+      </div>
+      <div>
+        <iron-icon id="clearIcon" icon="clear" on-click="_clearAllClicked"></iron-icon>
+      </div>
+    </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-filter-bar',
+
+      behaviors: [RadiumFilterBehavior],
+
+      properties: {
+        hideFilterIcon: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      _getChipsForFiltersAndTerms: function() {
+        return this.terms.map(function(term){
+          return {
+            label: this.getLabelForTerm(term),
+            key: term.key,
+            value: term.value
+          }
+        }.bind(this));
+      },
+
+      _clearAllClicked: function() {
+        this.removeAllTerms();
+      },
+
+      _termClicked: function(evt) {
+        var term = JSON.parse(evt.currentTarget.getAttribute('data-term'));
+        this.removeTerm(term.key, term.value);
+      }
+    });
+  })();
+</script>

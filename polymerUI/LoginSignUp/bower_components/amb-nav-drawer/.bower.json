@@ -1,0 +1,9 @@
+{
+  "name": "amb-nav-drawer",
+  "description": "Navigation drawer for paper-drawer-panel",
+  "main": "amb-nav-drawer.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-nav-drawer",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-nav-drawer"
+}

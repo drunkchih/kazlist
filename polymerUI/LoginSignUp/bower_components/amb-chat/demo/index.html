@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>amb-toast-with-list demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../amb-chat.html">
+  <link rel="import" href="../../ambrosia-assets/theme/ambrosia-theme.html">
+  <style>body { font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; }</style>
+  <style is="custom-style">
+    .transferRow > div {
+      margin-right: 8px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .transferRow > paper-progress {
+      --paper-progress-active-color: var(--light-primary-color);
+      --paper-progress-container-color: #FFFFFF;
+      --paper-progress-height: 16px;
+    }
+    .transferRow > paper-progress ::content #progressContainer {
+      border: 1px solid #EEEEEE;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <div style="position:absolute;top:0px">
+      <h2>amb-chat</h2>
+    </div>
+    <br />
+    <br />
+    <div>
+      <amb-chat agent-guid="123456" domain="http://localhost/UserPortal" incident-number="" partition-id="1" user="padmin"></amb-chat>
+    </div>
+  </template>
+  <script>
+    app._i18n = {"lang": {
+              "INCIDENT_NUMBER": "Incident Number",
+              "INVALID_INCIDENT_NUMBER": "Invalid incident number",
+              "LAUNCH_CHAT_SESSION": "LAUNCH CHAT SESSION",
+              "PROMPT_USER_NAME": "Your user name here",
+              "CLOSE_CHAT_SESSION": "CLOSE CHAT SESSION",
+              "PROMPT_MESSAGE": "Your message here"
+            }};
+  </script>
+</body>
+</html>

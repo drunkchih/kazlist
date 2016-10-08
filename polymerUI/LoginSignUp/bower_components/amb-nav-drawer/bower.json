@@ -1,0 +1,6 @@
+{
+  "name": "amb-nav-drawer",
+  "description": "Navigation drawer for paper-drawer-panel",
+  "main": "amb-nav-drawer.html",
+  "private": true
+}

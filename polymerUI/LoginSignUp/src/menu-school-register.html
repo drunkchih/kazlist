@@ -1,0 +1,81 @@
+<link rel="import" href="menu-imports.html">
+
+<dom-module id="menu-school-register">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      .infoContainer {
+        width: 280px;
+        margin-right: 16px;
+        margin-left: 16px;
+      }
+
+      #signUpBtn {
+        box-shadow: 1px 1px 1px grey;
+      }
+
+      #schoolInfoSection, #addressSection, #contactInfoSection {
+        display: flex;
+        flex-wrap:wrap;
+        position: relative;
+      }
+
+    </style>
+    <div class="card">
+      <div class="circle">
+        <iron-icon icon="social:school"></iron-icon>
+      </div>
+
+      <h1>Register your School</h1>
+      <div>
+        <h3>School Information</h3>
+        <div id="schoolInfoSection">
+          <paper-input class="infoContainer" id="schoolName" always-float-label="true" label="School Name" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="social:school" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="schoolPhone" always-float-label="true" label="School Phone number" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:call" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="schoolEmail" always-float-label="true" label="School Email" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:email" prefix></iron-icon>
+          </paper-input>
+          <paper-textarea class="infoContainer" id="otherInfo" label="Other information" max-rows="5" rows="5" always-float-label>
+		      </paper-textarea>
+        </div>
+        <h3><iron-icon icon="communication:location-on"></iron-icon> School Location</h3>
+        <div id="addressSection">
+          <paper-input class="infoContainer" id="streetName" always-float-label="true" label="Street Name" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+          <paper-input class="infoContainer" id="city" always-float-label="true" label="City" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+          <paper-input class="infoContainer" id="country" always-float-label="true" label="Country/Region" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+          <paper-input class="infoContainer" id="state" always-float-label="true" label="State/Province" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+          <paper-input class="infoContainer" id="zip" always-float-label="true" label="Zip Code" required error-message="[[xlate('REQUIRED')]]"></paper-input>
+        </div>
+        <h3><iron-icon icon="communication:contacts"></iron-icon>Contact Information</h3>
+        <div id="contactInfoSection">
+          <paper-input class="infoContainer" id="contactName" always-float-label="true" label="Name of the person to contact" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="social:person-outline" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="contactPhone" always-float-label="true" label="Phone number of the person to contact" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:call" prefix></iron-icon>
+          </paper-input>
+          <paper-input class="infoContainer" id="contactEmail" always-float-label="true" label="Email of the person to contact" required error-message="[[xlate('REQUIRED')]]">
+            <iron-icon icon="communication:email" prefix></iron-icon>
+          </paper-input>
+        </div>
+      </div>
+      <br>
+      <br>
+      <paper-button id="signUpBtn" toggles> Register School </paper-button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'menu-school-register'
+    });
+  </script>
+</dom-module>

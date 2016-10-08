@@ -1,0 +1,9 @@
+{
+  "name": "amb-asset-subheader",
+  "description": "Subheader with asset info",
+  "main": "amb-asset-subheader.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-asset-subheader",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-asset-subheader"
+}

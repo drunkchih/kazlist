@@ -1,0 +1,45 @@
+<dom-module id="radium-datagrid-row">
+  <style is="custom-style">
+    :host {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+    :host ::content radium-datagrid-column:first-of-type #dgcolumn {
+      margin-left: 24px;
+    }
+    :host[selected] {
+      background-color: #F5F5F5;
+    }
+  </style>
+  <template>
+    <content></content>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'radium-datagrid-row',
+      properties: {
+        /**
+         * If using row selection, be sure to bind this to the 'selected' variable in scope
+         * i.e. selected="[[selected]]"
+         */
+        selected: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
+      },
+      _dblclickHander: function() {
+        this.fire('row-dblclick', this.dataHost.row);
+      },
+      attached: function() {
+        var grid = this.domHost;
+        if (!grid._headers) {
+          grid._setHeaders(this);
+        }
+        this.listen(this, 'dblclick', '_dblclickHander')
+      },
+    });
+  })();
+</script>

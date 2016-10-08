@@ -1,0 +1,197 @@
+<script>
+  /**
+   * Filter value.
+   *
+   * @typedef {(
+   *  label: (string),
+   *  value: (number|string)
+   * )} FilterValue
+   */
+
+  /**
+   * Filters.
+   *
+   * @typedef {(
+   *  type: (string),
+   *  label: (string),
+   *  key: (string),
+   *  values: (Array<FilterValue>)
+   * )} Filter
+   */
+
+  /**
+   * Filter term - the (persistable) result of selecting a filter value.
+   *
+   * @typedef {(
+   *  key: (string),
+   *  value: (number|string)
+   * )} FilterTerm
+   */
+
+  /**
+   * Common properties and helper methods shared by filter components.
+   *
+   * @polymerBehavior
+   */
+  RadiumFilterBehavior = {
+
+    properties: {
+      /**
+       * Available set of filters.
+       *
+       * @type Array<Filter>
+       */
+      filters: {
+        type: Array,
+        value: function () { return []; }
+      },
+      /**
+       * Selected filter terms.
+       *
+       * @type Array<FilterTerm>
+       */
+      terms: {
+        type: Array,
+        value: function () { return []; },
+        notify: true
+      }
+    },
+
+    /**
+     * Finds the filter that corresponds to the specified term (if available).
+     *
+     * @param {FilterTerm} term
+     * @returns {Filter|undefined}
+     */
+    getFilterForTerm: function(term) {
+      return this.filters.find(function(filter) {
+        return filter.key === term.key;
+      });
+    },
+
+    /**
+     * Finds the filter value that corresponds to the specified term (if available).
+     *
+     * @param {FilterTerm} term
+     * @returns {FilterValue|undefined}
+     */
+    getFilterValueForTerm: function(term) {
+      var filter = this.getFilterForTerm(term);
+      if (filter) {
+        var filterValues = filter.values || [];
+        return filterValues.find(function(filterValue) {
+          return (filterValue.value == term.value);
+        });
+      }
+      return undefined;
+    },
+
+    /**
+     * Gets the label that corresponds to the specified term (if available), or returns the term value.
+     *
+     * @param {FilterTerm} term
+     * @returns {number|string}
+     */
+    getLabelForTerm: function(term) {
+      var filterValue = this.getFilterValueForTerm(term);
+      if (filterValue) {
+        return filterValue.label;
+      }
+      return term.value;
+    },
+
+    /**
+     * Adds a new term for the specified filter key and value.
+     *
+     * @param {string} key
+     * @param {number|string} value
+     */
+    addTerm: function(key, value) {
+      this.terms = (this.terms || []).concat({
+        key: key,
+        value: value
+      });
+    },
+
+    /**
+     * Finds the term corresponding to the specified filter key and value (if present).
+     *
+     * @param {string} key
+     * @param {number|string} value
+     * @returns {FilterTerm|undefined}
+     */
+    findTerm: function(key, value) {
+      if (value !== undefined) {
+        return (this.terms || []).find(function(term) {
+          return (term.key === key && term.value === value);
+        });
+      }
+      else {
+        return (this.terms || []).find(function(term) {
+          return (term.key === key);
+        });
+      }
+    },
+
+    /**
+     * Finds the term corresponding to the specified filter key and value (if present).
+     *
+     * @param {string} key
+     * @param {number|string} value
+     * @returns {Array<FilterTerm>|undefined}
+     */
+    findTerms: function(key, value) {
+      if (value !== undefined) {
+        return (this.terms || []).filter(function(term) {
+          return (term.key === key && term.value === value);
+        });
+      }
+      else {
+        return (this.terms || []).filter(function(term) {
+          return (term.key === key);
+        });
+      }
+    },
+
+    /**
+     * Replaces (or adds) a term for the specified filter key and value.
+     *
+     * @param {string} key
+     * @param {number|string} value
+     */
+    replaceTerm: function(key, value) {
+      this.terms = (this.terms || []).filter(function(term) {
+        return !(term.key === key);
+      }).concat({
+        key: key,
+        value: value
+      });
+    },
+
+    /**
+     * Removes all terms.
+     */
+    removeAllTerms: function() {
+      this.terms = [];
+    },
+
+    /**
+     * Removes the term that corresponds to the specified filter key and/or value (if present).
+     *
+     * @param {string} key
+     * @param {number|string|undefined} value
+     */
+    removeTerm: function(key, value) {
+      if (value !== undefined) {
+        this.terms = (this.terms || []).filter(function(term) {
+          return !(term.key === key && term.value === value);
+        });
+      }
+      else {
+        this.terms = (this.terms || []).filter(function(term) {
+          return !(term.key === key);
+        });
+      }
+    }
+  };
+</script>

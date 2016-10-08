@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>radium-datagrid demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../paper-styles/paper-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../radium-datagrid.html">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #gridContainer {
+      top: 64px;
+    }
+    #gridExample {
+      background-color: #FFFFFF;
+      border: 1px solid #DDDDDD;
+      overflow-y: auto;
+      height: 400px;
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h3>radium-datagrid example (infinite scroll w/ fixed header)</h3>
+    <div id="gridContainer" class="horizontal layout fit">
+      <div id="gridExample" class="flex">
+        <radium-datagrid id="grid" items="[[_initialItems]]" on-scroll-more="_addMoreItems" fixed-header-footer>
+          <template>
+            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+            <radium-datagrid-column id="foo" header="Foo"><span>[[row.foo]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="baz" header="Baz"><span>[[row.baz]]</span></radium-datagrid-column>
+          </template>
+        </radium-datagrid>
+      </div>
+    </div>
+  </template>
+  <script>
+      app._numRecords = 0;
+      app._genFakeData = function(howMany) {
+        var data = [];
+        for (var i=app._numRecords;i<app._numRecords+howMany;i++) {
+          var a = Math.floor(65 + (i / 26));
+          var b = 65 + (i % 26);
+          var firstChar = String.fromCharCode(a);
+          var secondChar = String.fromCharCode(b);
+          data.push({
+            foo: firstChar + secondChar + firstChar + secondChar,
+            bar: secondChar + firstChar + secondChar + firstChar,
+            baz: a.toString() + b.toString(),
+            icon:'polymer'
+          });
+        }
+        return data;
+      };
+      app._addMoreItems = function() {
+        if (app._numRecords < 130) {
+          //fake some latency
+          app.async(function() {
+            this._initialItems = this._initialItems.concat(this._genFakeData(26));
+            this._numRecords += 26;
+          }.bind(app), 1500);
+        } else {
+          this.$.grid.infiniteScrollDone();
+        }
+      };
+      app._initialItems = app._genFakeData(26);
+      app._numRecords = 26;
+      app.addEventListener('dom-change', function() {
+        this.$.grid.enableInfiniteScroll();
+      }.bind(app));
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-breadcrumbs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-breadcrumbs.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="BCTests">
+    <template is="dom-template">
+      <amb-breadcrumbs></amb-breadcrumbs>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<amb-breadcrumbs>', function() {
+      var crumb;
+
+      suite('tests', function() {
+        setup(function() {
+          crumb = fixture('BCTests');
+          for (var i = 0; i < Polymer.Async._callbacks.length; i++) {
+            Polymer.Async._callbacks[i] = function(){};
+          }
+        });
+
+        test('_activeChanged', function(done) {
+          var buttons = [{setAttribute:sinon.stub(),removeAttribute:sinon.stub()}];
+          crumb.$.bcContainer = {querySelectorAll:function(){return buttons;}};
+          crumb.active = false;
+          expect(buttons[0].setAttribute.calledOnce).to.equal(true);
+          crumb.active = true;
+          expect(buttons[0].removeAttribute.calledOnce).to.equal(true);
+          crumb.$.bcContainer = {querySelectorAll:function(){return null;}};
+          crumb.active = false;
+          done();
+        });
+
+        test('_modelChanged', function(done) {
+          var spy = sinon.spy(crumb, "_createCrumbs");
+          crumb.model = {actions:[{handler:sinon.stub()}],links:[{handler:sinon.stub()},{handler:sinon.stub()}]};
+          expect(crumb._createCrumbs.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_linkNavHandler', function(done) {
+          crumb.model = {links:[{handler:sinon.stub()},{handler:sinon.stub()}]};
+          crumb._linkNavHandler({target:{getAttribute:function(){return 1;}}});
+          expect(crumb.model.links[0].handler.called).to.equal(false);
+          expect(crumb.model.links[1].handler.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_showActions', function(done) {
+          crumb.async = function(fn){fn();};
+          crumb.$.actionsDD = {open:sinon.stub(),querySelector:function(){return {focus:function(){},_onFocus:function(){}};}};
+          crumb._showActions();
+          expect(crumb.$.actionsDD.open.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_breadcrumbActionHandler', function(done) {
+          var e = {model:{__data__:{item:{handler:sinon.stub()}}}};
+          crumb._breadcrumbActionHandler(e);
+          expect(e.model.__data__.item.handler.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_calcLinkClasses', function(done) {
+          expect(crumb._calcLinkClasses(true, true)).to.equal('brdcrb-part light-bg-primary');
+          expect(crumb._calcLinkClasses(true, false)).to.equal('brdcrb-part light-bg-secondary');
+          expect(crumb._calcLinkClasses(false, true)).to.equal('brdcrb-part dark-bg-primary');
+          expect(crumb._calcLinkClasses(false, false)).to.equal('brdcrb-part dark-bg-secondary');
+          expect(crumb._calcLinkClasses(false, false, 'unittest')).to.equal('brdcrb-part dark-bg-secondary unittest');
+          done();
+        });
+
+        test('_clearCrumbs', function(done) {
+          crumb.$.bcContainer = {childNodes:[{}],removeChild:sinon.stub()};
+          crumb.$.ellipses = {childNodes:[{}],removeChild:sinon.stub()};
+          crumb._clearCrumbs();
+          expect(crumb.$.bcContainer.removeChild.calledOnce).to.equal(true);
+          expect(crumb.$.ellipses.removeChild.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_truncate', function(done) {
+          crumb.listen = sinon.stub();
+          crumb.$.bcWrapper = {clientWidth:100};
+          crumb.$.bcContainer = {children:[
+                                {style:{},classList:{contains:function(){return true;}},clientWidth:100000,firstChild:{innerHTML:'ut-innerhtml0',getAttribute:sinon.stub()}},
+                                {style:{},classList:{contains:function(){return false;}},clientWidth:50000,firstChild:{innerHTML:'ut-innerhtml1',getAttribute:sinon.stub()}},
+                                {style:{},classList:{contains:function(){return false;}},clientWidth:20000,firstChild:{innerHTML:'ut-innerhtml1',getAttribute:sinon.stub()}},
+                                {style:{},classList:{contains:function(){return true;}},clientWidth:0,firstChild:{innerHTML:'ut-innerhtml2',getAttribute:sinon.stub()}}]};
+          crumb._truncate();
+          expect(crumb.listen.calledOnce).to.equal(true);
+
+          crumb.listen.reset();
+          crumb.$.bcContainer.children = [];
+          crumb._truncate();
+          expect(crumb.listen.called).to.equal(false);
+          done();
+        });
+
+        test('_showTruncated', function(done) {
+          crumb.async = function(fn){fn();};
+          crumb.$.truncDD = {open:sinon.stub(),querySelector:function(){return {focus:function(){},_onFocus:function(){}};}};
+          crumb._showTruncated();
+          expect(crumb.$.truncDD.open.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_truncLinkHandler', function(done) {
+          crumb.model = {links:[{handler:sinon.stub()},{handler:sinon.stub()}]};
+          crumb._truncLinkHandler({model:{__data__:{item:{idx:1}}}});
+          expect(crumb.model.links[0].handler.called).to.equal(false);
+          expect(crumb.model.links[1].handler.calledOnce).to.equal(true);
+          done();
+        });
+
+      });
+
+    });
+  </script>
+
+</body>
+</html>

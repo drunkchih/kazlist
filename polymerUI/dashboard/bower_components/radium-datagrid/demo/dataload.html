@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>radium-datagrid demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../paper-styles/paper-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../radium-datagrid.html">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #gridExample {
+      min-width: 480px;
+      max-width: 480px;
+      height: 400px;
+    }
+    .demo-button {
+      width: 240px;
+      margin: 0px 16px 16px 16px;
+      color: #FFFFFF;
+      background-color: var(--paper-blue-500);
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h3>radium-datagrid example (data loading states)</h3>
+    <div class="horizontal layout">
+      <div id="gridExample">
+        <radium-datagrid id="grid" items="[[_appliedItems]]" on-sort="_sortHandler">
+          <template>
+            <radium-datagrid-row>
+              <radium-datagrid-column id="icon" column-width="72"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+              <radium-datagrid-column id="foo" header="Foo" sortable><span>[[row.foo]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="bar" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+              <radium-datagrid-column id="baz" header="Baz" sortable><span>[[row.baz]]</span></radium-datagrid-column>
+            </radium-datagrid-row>
+          </template>
+        </radium-datagrid>
+      </div>
+      <div class="vertical layout">
+        <paper-button class="demo-button" raised on-click="_setLoading">Set Loading</paper-button>
+        <paper-button class="demo-button" raised on-click="_loadData">Load Data</paper-button>
+        <paper-button class="demo-button" raised on-click="_setNoRecords">No Records</paper-button>
+      </div>
+    </div>
+  </template>
+  <script>
+      app._genFakeData = function() {
+        var data = [];
+        for (var i=0;i<26;i++) {
+          var a = Math.floor(65 + (i / 26));
+          var b = 65 + (i % 26);
+          var firstChar = String.fromCharCode(a);
+          var secondChar = String.fromCharCode(b);
+          data.push({
+            foo: firstChar + secondChar + firstChar + secondChar,
+            bar: secondChar + firstChar + secondChar + firstChar,
+            baz: a.toString() + b.toString(),
+            icon:'polymer'
+          });
+        }
+        return data;
+      };
+      app._sortHandler = function(e) {
+        if (e.detail.id !== null) {
+          var sorted = app._initialItems.slice(0);
+          var col = e.detail.id;
+          var dir = e.detail.direction;
+          sorted.sort(function(a, b) {
+            if (a[col] < b[col]) {
+              return (dir === 'asc') ? -1 : 1;
+            } else if (a[col] > b[col]) {
+              return (dir === 'asc') ? 1 : -1;
+            } else {
+              return 0;
+            }
+          });
+          app._appliedItems = sorted;
+        }
+      };
+      app._setLoading = function() {
+        app.$.grid.setLoading();
+      };
+      app._loadData = function() {
+        app._appliedItems = app._initialItems.slice(0);
+      };
+      app._setNoRecords = function() {
+        app._appliedItems = [];
+      };
+      app._initialItems = app._genFakeData();
+  </script>
+</body>
+</html>

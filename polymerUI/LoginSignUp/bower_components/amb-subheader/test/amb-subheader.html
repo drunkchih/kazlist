@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-subheader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../amb-subheader.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="WithBGColor">
+    <template>
+      <amb-subheader background-color="#F1F2F3"></amb-subheader>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="WithNoBGColor">
+    <template>
+      <amb-subheader></amb-subheader>
+    </template>
+  </test-fixture>
+
+  <script>
+    /*
+    * These tests are just something to get started.  Need to write
+    * the real tests soon.
+    */
+    suite('<amb-subheader>', function () {
+      var header;
+
+      suite('with backgroundColor', function () {
+        setup(function () {
+          header = fixture('WithBGColor');
+        });
+
+        test('should render properly', function (done) {
+          expect(header.backgroundColor).to.be.eql('#F1F2F3');
+          done();
+        });
+      });
+
+      suite('with no backgroundColor', function () {
+        setup(function () {
+          header = fixture('WithNoBGColor');
+        });
+
+        test('should render properly', function (done) {
+          expect(header.backgroundColor).to.be.undefined;
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

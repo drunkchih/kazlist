@@ -1,0 +1,67 @@
+<script>
+
+/**
+ * Helper functions for retrieving and calculating color values
+ *
+ * @polymerBehavior
+ */
+  ColorBehavior = {
+
+    _getStyleSheets: function() {
+      return document.styleSheets;
+    },
+
+    /**
+     * Get a value from a loaded CSS file
+     *
+     * @param {String} sheet The name of css file to locate.
+     * @param {String} selector The selector within the file to match.
+     * @param {String} prop The property key to find.
+     * @return {String} The CSS value (or null).
+     */
+    getStyleValue: function(sheet, selector, prop) {
+      var stylesheet = null;
+      var sheets = this._getStyleSheets();
+      for (var i in sheets) {
+        if (sheets[i].href && sheets[i].href.indexOf(sheet) >= 0) {
+          stylesheet = sheets[i];
+          break;
+        }
+      }
+      if (stylesheet != null) {
+        var classes = stylesheet.rules || stylesheet.cssRules;
+        for (var x = 0; x < classes.length; x++) {
+          if (classes[x].selectorText === selector) {
+            return classes[x].style[prop];
+          }
+        }
+      }
+      return null;
+    },
+
+    /**
+     * Lighten or darken a html color by the desired amount
+     *
+     * @param {String} color The HTML color code to lighten/darken.
+     * @param {Number} amount Amount to lighten/darken (range: -255 to 255)
+     * @return {String} The new HTML color code, after transformation.
+     */
+    lightenDarkenColor: function(color, amount) {
+      var usePound = false;
+      if (color[0] == "#") {
+        color = color.slice(1);
+        usePound = true;
+      }
+      var num = parseInt(color,16);
+      var r = (num >> 16) + amount;
+      r = Math.min(Math.max(r, 0), 255);
+      var b = ((num >> 8) & 0x00FF) + amount;
+      b = Math.min(Math.max(b, 0), 255);
+      var g = (num & 0x0000FF) + amount;
+      g = Math.min(Math.max(g, 0), 255);
+      return (usePound?"#":"") + String("000000" + (g | (b << 8) | (r << 16)).toString(16)).slice(-6);
+    },
+
+  };
+
+</script>

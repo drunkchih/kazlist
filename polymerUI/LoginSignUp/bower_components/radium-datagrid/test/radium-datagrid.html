@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>radium-datagrid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../radium-datagrid.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="datagridTest">
+    <template>
+      <radium-datagrid></radium-datagrid>
+    </template>
+  </test-fixture>
+
+  <script>
+    /*
+    * Real tests coming soon
+    */
+    suite('<radium-datagrid>', function () {
+      var grid;
+
+      suite('sample test', function () {
+        setup(function () {
+          grid = fixture('datagridTest');
+        });
+
+        test('datagrid should be defined', function (done) {
+          expect(grid).to.not.be.undefined;
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-2fa-behavior</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../../iron-input/iron-input.html">
+  <link rel="import" href="../amb-2fa-behavior.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <dom-module id="twofa-impl">
+    <template>
+      <input is="iron-input" id="passcode" type="password"></input>
+    </template>
+  </dom-module>
+  <test-fixture id="TwofaTest">
+    <template>
+      <twofa-impl></twofa-impl>
+    </template>
+  </test-fixture>
+  <script>
+    (function() {
+      Polymer({
+        is: 'twofa-impl',
+        behaviors: [TwoFactorAuthBehavior]
+      });
+    })();
+
+    suite('amb-2fa-behavior', function () {
+      var impl;
+
+      suite('2fa tests', function () {
+        setup(function () {
+          impl = fixture('TwofaTest');
+        });
+
+        test('_getImageUrl', function(done) {
+          expect(impl._getImageUrl('ut-dir','ut-file')).to.equal('ut-dir/ut-file');
+          done();
+        });
+
+        test('_onEnter', function(done) {
+          impl._verify = sinon.stub();
+          impl._onEnter();
+          expect(impl._verify.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('_inputKeyPressed', function(done) {
+          impl._signinError = 'ut-initial';
+          impl._inputKeyPressed({keyCode:13});
+          expect(impl._signinError).to.equal('ut-initial');
+          impl._signinError = 'ut-initial-2';
+          impl._inputKeyPressed({keyCode:14});
+          expect(impl._signinError).to.equal('');
+          done();
+        });
+
+        test('_verify', function(done) {
+          impl.async = function(fn){fn();};
+          impl.fire = sinon.stub();
+          impl._verifying = true;
+          impl._verify();
+
+          impl._verifying = false;
+          impl._verify();
+          expect(impl._verifying).to.equal(false);
+          expect(impl._signinError).to.equal('INVALID_PASSCODE');
+
+          impl.$.passcode.value = 'ut-passcode';
+          impl._verify();
+          expect(impl._verifying).to.equal(true);
+          expect(impl._signinError).to.equal('');
+          expect(impl.fire.calledOnce).to.equal(true);
+          expect(impl.fire.firstCall.args[0]).to.equal('verify');
+          done();
+        });
+
+        test('_overlayClosed', function(done) {
+          impl._verifying = true;
+          impl.$.passcode.value = 'ut-passcode';
+          impl._overlayClosed();
+          expect(impl._verifying).to.equal(false);
+          expect(impl.$.passcode.value).to.equal('');
+          done();
+        });
+
+        test('_dialogResized', function(done) {
+          impl.async = function(fn){fn();};
+          impl.$.dialog = {refit: sinon.stub()};
+          impl._dialogResized();
+          expect(impl.$.dialog.refit.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('setError', function(done) {
+          impl.async = function(fn){fn();};
+          impl._signinError = null;
+          impl._verifying = true;
+          impl.setError('ut-error');
+          expect(impl._signinError).to.equal('ut-error');
+          expect(impl._verifying).to.equal(false);
+          done();
+        });
+
+        test('hide', function(done) {
+          impl.$.dialog = {close: sinon.stub()};
+          impl.hide();
+          expect(impl.$.dialog.close.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('show', function(done) {
+          impl.async = function(fn){fn();};
+          impl.$.dialog = {open: sinon.stub(), refit: sinon.stub()};
+          impl.show();
+          expect(impl.$.dialog.open.calledOnce).to.equal(true);
+          expect(impl.$.dialog.refit.calledOnce).to.equal(true);
+          done();
+        });
+
+        test('isOpen', function(done) {
+          impl.$.dialog = {opened: false};
+          expect(impl.isOpen()).to.equal(false);
+          impl.$.dialog.opened = true;
+          expect(impl.isOpen()).to.equal(true);
+          done();
+        });
+
+      });
+
+    });
+  </script>
+
+</body>
+</html>

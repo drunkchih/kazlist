@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>amb-color-behavior</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
+
+  <link rel="import" href="../../test-fixture/test-fixture.html">
+  <link rel="import" href="../../polymer/polymer.html">
+  <link rel="import" href="../amb-color-behavior.html">
+
+  <style>
+
+  </style>
+</head>
+<body>
+  <test-fixture id="colorTest">
+    <template>
+      <color-impl></color-impl>
+    </template>
+  </test-fixture>
+  <script>
+    (function() {
+      Polymer({
+        is: 'color-impl',
+        behaviors: [ColorBehavior]
+      });
+    })();
+
+    suite('amb-color-behavior', function () {
+      var impl;
+
+      suite('color tests', function () {
+        setup(function () {
+          impl = fixture('colorTest');
+        });
+
+        test('getStyleValue', function (done) {
+          expect(impl.getStyleValue('ut-style-sheet', 'ut-selector', 'ut-prop')).to.equal(null);
+          impl._getStyleSheets = sinon.stub().returns([
+            {href:'ut-style-sheet',cssRules:[{selectorText:'ut-foo',style:{}},{selectorText:'ut-selector',style:{'ut-prop':'ut-prop-value'}}]}
+          ]);
+          expect(impl.getStyleValue('ut-style-sheet', 'ut-selector', 'ut-prop')).to.equal('ut-prop-value');
+          done();
+        });
+
+        test('lightenDarkenColor', function (done) {
+          expect(impl.lightenDarkenColor('#FF0000', -50).toUpperCase()).to.be.eql('#CD0000');
+          expect(impl.lightenDarkenColor('#FF0000', 50).toUpperCase()).to.be.eql('#FF3232');
+          expect(impl.lightenDarkenColor('FF0000', 50).toUpperCase()).to.be.eql('FF3232');
+          done();
+        });
+      });
+
+    });
+  </script>
+
+</body>
+</html>

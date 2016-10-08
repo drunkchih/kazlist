@@ -1,0 +1,9 @@
+{
+  "name": "amb-transfer-icon",
+  "description": "Icon depicting the number of active/completed transfers",
+  "main": "amb-transfer-icon.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-transfer-icon",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-transfer-icon"
+}

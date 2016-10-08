@@ -1,0 +1,213 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../amb-i18n-behavior/amb-i18n-behavior.html">
+<link rel="import" href="../amb-avatar/amb-avatar.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+<!--
+Sign in component for Kaseya Apps
+
+@demo demo/index.html
+@demo demo/index2.html
+-->
+<dom-module id="amb-signin">
+  <style is="custom-style">
+    #container {
+      width: 400px;
+    }
+    #logo {
+      max-height: 50px;
+    }
+    #signinHeader {
+      padding: 8px 0px;
+      font-weight: 400;
+    }
+    #signinForm {
+      background-color: #FFFFFF;
+      padding: 32px 56px 24px;
+    }
+    #signinForm paper-input {
+      width: 256px;
+    }
+    .error-label {
+      color: var(--paper-red-500);
+    }
+    #btnSignin {
+      width: 100%;
+      margin: 20px 0 0 0;
+    }
+    #btnSignin paper-spinner {
+      width: 24px;
+      height: 24px;
+    }
+    /* bug when vulcanizing css with vars */
+    #btnSignin paper-spinner {
+      --paper-spinner-layer-1-color: var(--paper-light-blue-200);
+    }
+    #btnSignin paper-spinner {
+      --paper-spinner-layer-2-color: var(--paper-light-blue-200);
+    }
+    #btnSignin paper-spinner {
+      --paper-spinner-layer-3-color: var(--paper-light-blue-200);
+    }
+    #btnSignin paper-spinner {
+      --paper-spinner-layer-4-color: var(--paper-light-blue-200);
+    }
+    .help-links {
+      margin-top: 8px;
+      width: 100%;
+    }
+    .footer {
+      width: calc(100% - 48px);
+      padding: 12px 0px;
+    }
+  </style>
+  <template>
+    <div id="container" class="flex-layout-vertical flex-layout-center">
+      <img id="logo"/>
+      <div>
+        <div id="signinHeader" class="typo-title primary-color">[[xlate('SIGNIN_HEADER')]]</div>
+      </div>
+      <paper-material elevation="2">
+        <div id="signinForm" class="flex-layout-vertical flex-layout-center">
+          <amb-avatar uuid="[[currentUser.id]]" size="large" avatar-image-src="[[avatarImageSrc]]"></amb-avatar>
+          <div>
+            <paper-input id="inputDomain" value="[[currentUser.domain]]" bind-value="{{currentUser.domain}}"
+              label="[[xlate('DOMAIN')]]" hidden$="[[!includeDomain]]"
+              autofocus="[[_autofocusDomain(includeDomain, currentUser)]]"></paper-input>
+            <paper-input id="inputUn" value="[[currentUser.username]]" bind-value="{{currentUser.username}}"
+              label="[[xlate('USERNAME')]]"
+              autofocus="[[_autofocusUsername(includeDomain, currentUser)]]"></paper-input>
+            <paper-input id="inputPass" value="[[currentUser.password]]" bind-value="{{currentUser.password}}"
+              label="[[xlate('PASSWORD')]]" type="password"
+              autofocus="[[_autofocusPassword(includeDomain, currentUser)]]"></paper-input>
+          </div>
+          <template is="dom-if" if="[[_signinError]]">
+            <label class="typo-body2 error-label">[[xlate(_signinError)]]</label>
+          </template>
+          <paper-button id="btnSignin" raised class="primary-bg dark-bg-primary" on-click="_signin">
+            <template is="dom-if" if="{{!_loading}}">
+              <span>[[xlate('SIGN_IN')]]</span>
+            </template>
+            <template is="dom-if" if="{{_loading}}">
+              <paper-spinner active></paper-spinner>
+            </template>
+          </paper-button>
+          <div class="help-links typo-body1">
+            <!-- <a></a> -->
+          </div>
+        </div>
+      </paper-material>
+      <div class="footer typo-caption flex-layout-horizontal">
+        <span class="flex-layout-flex">&copy;<span>[[xlate('KASEYA_COPYRIGHT')]]</span></span>
+        <span><a href="javascript:void(0);"><span>[[xlate('HELP_AND_SUPPORT')]]</span></a></span>
+      </div>
+  </template>
+</dom-module>
+<script>
+  (function() {
+    Polymer({
+      is: 'amb-signin',
+
+      /**
+       * Fired when signin is attempted
+       *
+       * @event signin
+       */
+
+      behaviors: [I18NBehavior],
+      properties: {
+        /**
+         * The user model to bind to the signin element.  Set this to pre-populate input values
+         */
+        currentUser: {
+          type: Object,
+          value: function(){return {id:'',domain:'',username:'',password:''}}
+        },
+        /**
+         * Whether or not to include the domain input field
+         */
+        includeDomain: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Path to the logo image
+         */
+        logoImageSrc: String,
+        /**
+         * Path to the avatar image
+         */
+        avatarImageSrc: String,
+        _signinError: {
+          type: String,
+          value: ''
+        },
+        _loading: {
+          type: Boolean,
+          value: false
+        },
+        _boundEnterHandler: {
+          type: Function,
+          value: function() {
+            return function(e) {
+              if (e.keyCode == 13) {
+                this._signin.call(this);
+              }
+            }.bind(this);
+          }
+        }
+      },
+      observers: [
+        '_logoChanged(logoImageSrc)',
+      ],
+      _logoChanged: function(logo) {
+        this.$.logo.src = this.logoImageSrc;
+      },
+      _autofocusDomain: function(incl, user) {
+        return (incl && (user.domain === undefined || user.domain === ''));
+      },
+      _autofocusUsername: function(incl, user) {
+        return (!incl || (user.domain !== undefined && user.domain !== '')) && (user.username === undefined || user.username === '');
+      },
+      _autofocusPassword: function(incl,user) {
+        return (!incl || (user.domain !== undefined && user.domain !== '')) && (user.username !== undefined && user.username !== '');
+      },
+      _signin: function() {
+        if (this.includeDomain === true && !this.currentUser.domain) {
+          this._signinError = 'INVALID_DOMAIN';
+          return;
+        } else if (!this.currentUser.username) {
+          this._signinError = 'INVALID_USERNAME';
+          return;
+        } else if (!this.currentUser.password) {
+          this._signinError = 'INVALID_PASSWORD';
+          return;
+        }
+        this._signinError = null;
+        this._loading = true;
+        this.async(function(){this.fire('signin', this.currentUser)}.bind(this),100); //give the spinner a chance to render
+      },
+      /**
+       * Causes an error message to be shown to the user and stops the loading spinner.
+       *
+       * @param {String} error The error message to display.
+       */
+      setError: function(error) {
+        this._signinError = error;
+        this._loading = false;
+      },
+      attached: function() {
+        this.$.inputDomain.addEventListener('keypress', this._boundEnterHandler);
+        this.$.inputUn.addEventListener('keypress', this._boundEnterHandler);
+        this.$.inputPass.addEventListener('keypress', this._boundEnterHandler);
+      },
+      detached: function() {
+        this.$.inputDomain.removeEventListener('keypress', this._boundEnterHandler);
+        this.$.inputUn.removeEventListener('keypress', this._boundEnterHandler);
+        this.$.inputPass.removeEventListener('keypress', this._boundEnterHandler);
+      }
+    });
+  })();
+</script>

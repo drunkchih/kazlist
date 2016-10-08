@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+  <title>radium-datagrid demo</title>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../../paper-styles/paper-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-date-picker/paper-date-picker.html">
+  <link rel="import" href="../radium-datagrid.html">
+  <style is="custom-style">
+    :root {
+      --default-primary-color: #0072BC;
+    }
+    body {
+      font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    #gridExample {
+      min-width: 720px;
+      max-width: 720px;
+      border: 1px solid #DDDDDD;
+      background-color: #FFFFFF;
+    }
+    .demo-button {
+      width: 240px;
+      margin: 0px 16px 16px 16px;
+      color: #FFFFFF;
+      background-color: var(--paper-blue-500);
+    }
+  </style>
+</head>
+<body unresolved>
+  <template is="dom-bind" id="app">
+    <h3>radium-datagrid example (column filters)</h3>
+    <div class="vertical layout">
+      <div class="vertical layout">
+        <paper-button class="demo-button" raised on-click="_toggleFilters">Filters shown: <span>[[_showFilters]]</span></paper-button>
+      </div>
+      <div id="gridExample">
+        <radium-datagrid id="grid" items="[[_appliedItems]]" filters-enabled="[[_showFilters]]" on-filter="_filterChanged">
+          <template>
+            <radium-datagrid-column id="icon" column-width="72px"><iron-icon icon="[[row.icon]]"></iron-icon></radium-datagrid-column>
+            <radium-datagrid-column id="foo" column-width="72px" header="Foo" filter-type="text"><span>[[row.foo]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="bar" column-width="72px" header="Bar"><span>[[row.bar]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="baz" column-width="72px" header="Baz" filter-type="text"><span>[[row.baz]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="thedate" header="Date" filter-type="date"><span>[[_formatDate(row.thedate)]]</span></radium-datagrid-column>
+            <radium-datagrid-column id="status" column-width="120px" header="Status" filter-type="options" filter-options="[[_statusArr]]"><span>[[_getStatusLabel(row.status, _statusArr)]]</span></radium-datagrid-column>
+          </template>
+        </radium-datagrid>
+      </div>
+    </div>
+  </template>
+  <script>
+      app._showFilters = false;
+      app._currentFilters = {};
+      app._statusArr = ['Good','Fair','Bad'];
+      app._genFakeData = function() {
+        var data = [];
+        var currentDate = new Date().getTime();
+        for (var i=0;i<26;i++) {
+          var a = Math.floor(65 + (i / 26));
+          var b = 65 + (i % 26);
+          var firstChar = String.fromCharCode(a);
+          var secondChar = String.fromCharCode(b);
+          data.push({
+            foo: firstChar + secondChar + firstChar + secondChar,
+            bar: secondChar + firstChar + secondChar + firstChar,
+            baz: a.toString() + b.toString(),
+            thedate: new Date(currentDate - (i * 28800000)),
+            status: i % 3,
+            icon:'polymer'
+          });
+        }
+        return data;
+      };
+      app._toggleFilters = function() {
+        app._showFilters = !app._showFilters;
+      };
+      app._applyFilters = function() {
+        var filtered = app._initialItems.slice(0);
+        for (var prop in app._currentFilters) {
+          filtered = filtered.filter(function(obj) {
+            if (prop === 'status') {
+              return (app._currentFilters[prop] === -1 ||
+                obj[prop] === app._currentFilters[prop]);
+            } else if (prop === 'thedate') {
+                return (app._currentFilters[prop] === null ||
+                obj[prop] >= app._currentFilters[prop][0] && obj[prop] <= app._currentFilters[prop][1]);
+            } else {
+              return (app._currentFilters[prop] === '' ||
+                obj[prop].toLowerCase().indexOf(app._currentFilters[prop].toLowerCase()) >= 0);
+            }
+          });
+        }
+        app._appliedItems = filtered;
+      };
+      app._filterChanged = function(e) {
+        app._currentFilters[e.detail.id] = e.detail.value;
+        app._applyFilters();
+      };
+      app._getStatusLabel = function(status, items) {
+        return items[status];
+      };
+      app._formatDate = function(date) {
+        return date.toUTCString();
+      };
+      app._initialItems = app._genFakeData();
+      app._appliedItems = app._initialItems;
+  </script>
+</body>
+</html>

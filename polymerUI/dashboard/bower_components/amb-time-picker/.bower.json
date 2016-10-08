@@ -1,0 +1,9 @@
+{
+  "name": "amb-time-picker",
+  "description": "Material Design Date Picker - based on paper-date-picker",
+  "main": "amb-time-picker.html",
+  "private": true,
+  "_source": "C:\\Users\\kasra.kazemi\\git\\ambrosia\\src\\core\\amb-time-picker",
+  "_target": "*",
+  "_originalSource": "../../ambrosia/src/core/amb-time-picker"
+}
