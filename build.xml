@@ -1,0 +1,55 @@
+<project name="kazlist" basedir="." default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <!-- build properties -->
+  <property name="src.dir"     value="src"/>
+  <property name="build.dir"   value="build"/>
+  <property name="lib.dir"     value="${build.dir}/lib"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+
+  <!-- kazlist main -->
+  <property name="main-class"  value="com.kaz.kazlist.main.Main"/>
+
+  <!-- classpath -->
+  <path id="classpath">
+    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+  </path>
+
+  <!-- clean target -->
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <!-- init target -->
+  <target name="init" depends="clean">
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${lib.dir}"/>
+    <ivy:resolve />
+    <ivy:retrieve sync="true" type="jar" pattern="${lib.dir}/[artifact].[ext]" />
+  </target>
+
+  <!-- compile target -->
+  <target name="compile" depends="init">
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" />
+  </target>
+
+  <!-- jar target -->
+  <target name="jar" depends="compile">
+    <jar destfile="${lib.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- run target -->
+  <target name="run" depends="jar">
+    <java jar="${lib.dir}/${ant.project.name}.jar" fork="true"/>
+  </target>
+
+  <!-- clean build target -->
+  <target name="clean-build" depends="jar"/>
+
+  <!-- main target -->
+  <target name="main" depends="jar,run"/>
+
+</project>

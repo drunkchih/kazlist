@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ivy-module version="2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+  <info organisation="com.kaz" module="kazlist" status="integration">
+  </info>
+  <dependencies>
+    <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.2.3.v20140905" />
+    <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.2.3.v20140905" />
+    <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.7" />
+    <dependency org="org.glassfish.jersey.containers" name="jersey-container-servlet-core" rev="2.7" />
+    <dependency org="org.glassfish.jersey.containers" name="jersey-container-jetty-http" rev="2.7" />
+    <dependency org="org.glassfish.jersey.media" name="jersey-media-moxy" rev="2.7" />
+  </dependencies>
+</ivy-module>
