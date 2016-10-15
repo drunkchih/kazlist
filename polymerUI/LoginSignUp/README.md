@@ -13,8 +13,6 @@ Install [polymer-cli]:
 
 ##### Initialize project from template
 
-    mkdir my-app
-    cd my-app
     polymer init starter-kit
 
 ### Start the development server
