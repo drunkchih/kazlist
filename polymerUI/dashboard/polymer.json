@@ -5,7 +5,8 @@
     "src/dashboard-main-dashboard.html",
     "src/dashboard-manage-users.html",
     "src/dashboard-view404.html",
-    "src/event-table.html"
+    "src/event-table.html",
+    "src/dashboard-my-services.html"
   ],
   "sourceGlobs": [
    "src/**/*",

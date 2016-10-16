@@ -113,7 +113,7 @@
                 attr-for-selected="name"
                 fallback-selection="view404"
                 role="main">
-              <dashboard-main-dashboard name="main-dashboard" on-event-info-tap="_onEventInfoTap" on-service-info-tap="_onServiceInfoTap" ></dashboard-main-dashboard>
+              <dashboard-main-dashboard name="main-dashboard" on-event-info-tap="_onEventInfoTap" on-service-info-tap="_onServiceInfoTap" on-my-service-info-tap="_onMyServiceInfoTap" ></dashboard-main-dashboard>
               <dashboard-manage-users name="manage-users" on-user-info-tap="_onUserInfoTap" ></dashboard-manage-users>
               <dashboard-view404 name="view404"></dashboard-view404>
             </iron-pages>
@@ -121,8 +121,8 @@
         </app-drawer-layout>
 
         <paper-fab-menu id="createOptions" icon="add" closeIcon="close" duration="0.3">
-          <paper-fab-menu-item id="cloudFabItem" icon="communication:contact-phone" color="green;" tooltip="test" on-tap=""></paper-fab-menu-item>
-          <paper-fab-menu-item id="CSVFabItem" icon="icons:event" color="green;" tooltip="test" on-tap=""></paper-fab-menu-item>
+          <paper-fab-menu-item id="cloudFabItem" icon="communication:contact-phone" color="green;" tooltip="Create a Service" on-tap=""></paper-fab-menu-item>
+          <paper-fab-menu-item id="CSVFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap=""></paper-fab-menu-item>
         </paper-fab-menu>
 
         <paper-fab id="createUserBtn" icon="add" on-tap="_createUser"></paper-fab>
@@ -301,6 +301,14 @@
         this.$.infoDrawerPanel.openDrawer();
         this.service = evt.detail.service;
         console.log(evt.detail.service);
+        this.$.eventInfoDiv.hidden = true;
+        this.$.servicesInfoDiv.hidden = false;
+      },
+
+      _onMyServiceInfoTap: function(evt) {
+        this.$.infoDrawerPanel.openDrawer();
+        this.service = evt.detail.myService;
+        console.log(evt.detail.myService);
         this.$.eventInfoDiv.hidden = true;
         this.$.servicesInfoDiv.hidden = false;
       },
