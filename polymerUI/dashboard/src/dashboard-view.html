@@ -71,6 +71,10 @@
         width: 300px !important;
       }
 
+      #createServiceDialog {
+        width: 400px;
+      }
+
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -121,11 +125,38 @@
         </app-drawer-layout>
 
         <paper-fab-menu id="createOptions" icon="add" closeIcon="close" duration="0.3">
-          <paper-fab-menu-item id="cloudFabItem" icon="communication:contact-phone" color="green;" tooltip="Create a Service" on-tap=""></paper-fab-menu-item>
-          <paper-fab-menu-item id="CSVFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap=""></paper-fab-menu-item>
+          <paper-fab-menu-item id="serviceFabItem" icon="communication:contact-phone" color="green;" tooltip="Create a Service" on-tap="_onCreateServiceTap"></paper-fab-menu-item>
+          <paper-fab-menu-item id="eventFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap=""></paper-fab-menu-item>
         </paper-fab-menu>
 
         <paper-fab id="createUserBtn" icon="add" on-tap="_createUser"></paper-fab>
+
+        <paper-dialog id="createServiceDialog" modal>
+          <h2>Create a Service</h2>
+          <br>
+          <paper-input id="createServiceName" always-float-label label="Name/Title">
+            <iron-icon icon="communication:contact-phone" prefix></iron-icon>
+          </paper-input>
+          <paper-input id="createServiceType" always-float-label label="Type"></paper-input>
+          <paper-input id="createServiceStatus" always-float-label label="Status"></paper-input>
+          <paper-input id="createServiceContactPoint" always-float-label label="Point of Contact">
+            <iron-icon icon="social:person" prefix></iron-icon>
+          </paper-input>
+          <paper-input id="createServicePhone" always-float-label label="Contact Phone #">
+            <iron-icon icon="communication:call" prefix></iron-icon>
+          </paper-input>
+          <paper-input id="createServiceEmail" always-float-label label="Contact Email Address">
+            <iron-icon icon="communication:email" prefix></iron-icon>
+          </paper-input>
+          <paper-textarea id="createServiceComment" label="Description/Comment" always-float-label max-rows="5" rows="5" >
+          </paper-textarea>
+
+
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
 
       </div>
       <div drawer>
@@ -183,7 +214,7 @@
             <paper-input id="eventContactPoint" always-float-label label="Point of Contact" readonly value="[[event.contactPoint]]">
               <iron-icon icon="social:person" prefix></iron-icon>
             </paper-input>
-            <paper-input id="eventEmail" always-float-label label="Contact Email" readonly value="[[event.email]]">
+            <paper-input id="eventEmail" always-float-label label="Contact Email Address" readonly value="[[event.email]]">
               <iron-icon icon="communication:email" prefix></iron-icon>
             </paper-input>
             <paper-input id="eventPhone" always-float-label label="Contact Phone #" readonly value="[[event.phone]]">
@@ -211,13 +242,12 @@
             <paper-input id="servicePhone" always-float-label label="Contact Phone #" readonly value="[[service.phone]]">
               <iron-icon icon="communication:call" prefix></iron-icon>
             </paper-input>
-            <paper-input id="serviceEmail" always-float-label label="Contact Phone #" readonly value="[[service.email]]">
+            <paper-input id="serviceEmail" always-float-label label="Contact Email Address" readonly value="[[service.email]]">
               <iron-icon icon="communication:email" prefix></iron-icon>
             </paper-input>
             <paper-textarea id="serviceComment" label="Description/Comment" always-float-label readonly value="[[service.comment]]">
   		      </paper-textarea>
           </div>
-
 
         </div>
 
@@ -332,6 +362,19 @@
 
       _onViewUserServicesTap: function() {
         this.$.userServiceDialog.open();
+      },
+
+      _onCreateServiceTap: function() {
+
+        this.$.createServiceDialog.open();
+        this.$.createServiceName.value = "";
+        this.$.createServiceType.value = "";
+        this.$.createServiceStatus.value = "";
+        this.$.createServiceContactPoint.value = "";
+        this.$.createServicePhone.value = "";
+        this.$.createServiceEmail.value = "";
+        this.$.createServiceComment.value = "";
+
       }
 
     });
