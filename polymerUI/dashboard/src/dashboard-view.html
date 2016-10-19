@@ -71,7 +71,7 @@
         width: 300px !important;
       }
 
-      #createServiceDialog {
+      #createServiceDialog, #createEventDialog, #createUserDialog {
         width: 400px;
       }
 
@@ -126,32 +126,99 @@
 
         <paper-fab-menu id="createOptions" icon="add" closeIcon="close" duration="0.3">
           <paper-fab-menu-item id="serviceFabItem" icon="communication:contact-phone" color="green;" tooltip="Create a Service" on-tap="_onCreateServiceTap"></paper-fab-menu-item>
-          <paper-fab-menu-item id="eventFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap=""></paper-fab-menu-item>
+          <paper-fab-menu-item id="eventFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap="_onCreateEventTap"></paper-fab-menu-item>
         </paper-fab-menu>
 
-        <paper-fab id="createUserBtn" icon="add" on-tap="_createUser"></paper-fab>
+        <paper-fab id="createUserBtn" icon="add" on-tap="_createUserTap"></paper-fab>
 
         <paper-dialog id="createServiceDialog" modal>
           <h2>Create a Service</h2>
-          <br>
-          <paper-input id="createServiceName" always-float-label label="Name/Title">
-            <iron-icon icon="communication:contact-phone" prefix></iron-icon>
-          </paper-input>
-          <paper-input id="createServiceType" always-float-label label="Type"></paper-input>
-          <paper-input id="createServiceStatus" always-float-label label="Status"></paper-input>
-          <paper-input id="createServiceContactPoint" always-float-label label="Point of Contact">
-            <iron-icon icon="social:person" prefix></iron-icon>
-          </paper-input>
-          <paper-input id="createServicePhone" always-float-label label="Contact Phone #">
-            <iron-icon icon="communication:call" prefix></iron-icon>
-          </paper-input>
-          <paper-input id="createServiceEmail" always-float-label label="Contact Email Address">
-            <iron-icon icon="communication:email" prefix></iron-icon>
-          </paper-input>
-          <paper-textarea id="createServiceComment" label="Description/Comment" always-float-label max-rows="5" rows="5" >
-          </paper-textarea>
+          <paper-dialog-scrollable>
+            <paper-input id="createServiceName" always-float-label label="Name/Title">
+              <iron-icon icon="communication:contact-phone" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServiceType" always-float-label label="Type"></paper-input>
+            <paper-input id="createServiceStatus" always-float-label label="Status"></paper-input>
+            <paper-input id="createServiceContactPoint" always-float-label label="Point of Contact">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServicePhone" always-float-label label="Contact Phone #">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServiceEmail" always-float-label label="Contact Email Address">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-textarea id="createServiceComment" label="Description/Comment" always-float-label max-rows="5" rows="5" >
+            </paper-textarea>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
 
+        <paper-dialog id="createEventDialog" modal>
+          <h2>Create an Event</h2>
+          <paper-dialog-scrollable>
+            <paper-input id="createEventName" always-float-label label="Event Name">
+              <iron-icon icon="icons:event" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventLocation" always-float-label label="Location">
+              <iron-icon icon="communication:location-on" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventDate" always-float-label label="Date">
+              <iron-icon icon="icons:date-range" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventTime" always-float-label label="Time">
+              <iron-icon icon="image:timer" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventDuration" always-float-label label="Duration">
+              <iron-icon icon="image:timelapse" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventContactPoint" always-float-label label="Point of Contact">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventEmail" always-float-label label="Contact Email Address">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventPhone" always-float-label label="Contact Phone #">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventCoordinates" always-float-label label="Event Coordinates">
+              <iron-icon icon="maps:my-location" prefix></iron-icon>
+            </paper-input>
+            <paper-textarea id="createEventAddress" label="Event Address" max-rows="3" rows="3" always-float-label>
+            </paper-textarea>
+            <paper-textarea id="createEventComment" label="Description/Comment" always-float-label max-rows="5" rows="5">
+            </paper-textarea>
+            <paper-input id="createEventLink" always-float-label label="Event Link"></paper-input>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
 
+        <paper-dialog id="createUserDialog" modal>
+          <h2>Create a User</h2>
+          <paper-dialog-scrollable>
+            <paper-input id="createUserFirst" always-float-label label="First Name"></paper-input>
+            <paper-input id="createUserLast" always-float-label label="Last Name"></paper-input>
+            <paper-input id="createUserName" always-float-label label="Username">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserPhone" always-float-label label="User Phone number">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserEmail" always-float-label label="User Email">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserRole" always-float-label label="User Role">
+              <iron-icon icon="icons:account-circle" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserStatus" always-float-label label="Status"></paper-input>
+            <paper-input id="createUserServiceNumber" always-float-label label="Number of services"></paper-input>
+          </paper-dialog-scrollable>
           <div class="buttons">
             <paper-button dialog-dismiss>Cancel</paper-button>
             <paper-button dialog-confirm autofocus>Create</paper-button>
@@ -365,7 +432,6 @@
       },
 
       _onCreateServiceTap: function() {
-
         this.$.createServiceDialog.open();
         this.$.createServiceName.value = "";
         this.$.createServiceType.value = "";
@@ -374,7 +440,33 @@
         this.$.createServicePhone.value = "";
         this.$.createServiceEmail.value = "";
         this.$.createServiceComment.value = "";
+      },
 
+      _onCreateEventTap: function() {
+        this.$.createEventDialog.open();
+        this.$.createEventName.value = "";
+        this.$.createEventDate.value = "";
+        this.$.createEventTime.value = "";
+        this.$.createEventDuration.value = "";
+        this.$.createEventContactPoint.value = "";
+        this.$.createEventEmail.value = "";
+        this.$.createEventPhone.value = "";
+        this.$.createEventCoordinates.value = "";
+        this.$.createEventAddress.value = "";
+        this.$.createEventComment.value = "";
+        this.$.createEventLink.value = "";
+      },
+
+      _createUserTap: function() {
+        this.$.createUserDialog.open();
+        this.$.createUserFirst.value = "";
+        this.$.createUserLast.value = "";
+        this.$.createUserName.value = "";
+        this.$.createUserPhone.value = "";
+        this.$.createUserEmail.value = "";
+        this.$.createUserRole.value = "";
+        this.$.createUserStatus.value = "";
+        this.$.createUserServiceNumber.value = "";
       }
 
     });
