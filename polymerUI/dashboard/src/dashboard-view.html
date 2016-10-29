@@ -6,7 +6,6 @@
       :host {
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
-
         display: block;
       }
 
@@ -24,13 +23,9 @@
 
       .drawer-list a {
         display: block;
-
         padding: 0 16px;
-
         text-decoration: none;
-
         color: var(--app-secondary-color);
-
         line-height: 40px;
       }
 
@@ -63,17 +58,25 @@
       }
 
       #userServiceDialog {
-        max-width: 350px !important;
+        max-width: 350px;
         width: 350px;
       }
 
       #userServicesDataTable {
-        width: 300px !important;
+        width: 300px;
+        position: initial;
       }
 
       #createServiceDialog, #createEventDialog, #createUserDialog {
         width: 400px;
       }
+
+      .drawerContent {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow-y: auto;
+        }
 
     </style>
 
@@ -84,7 +87,7 @@
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-    <paper-drawer-panel id="infoDrawerPanel" on-selected-changed="_onInfoDrawerPanelSelectedChanged" right-drawer disable-swipe force-narrow>
+    <paper-drawer-panel id="infoDrawerPanel" on-selected-changed="_onInfoDrawerPanelSelectedChanged" right-drawer force-narrow disable-swipe>
       <div main>
 
         <app-drawer-layout fullbleed>
@@ -227,7 +230,7 @@
 
       </div>
       <div drawer>
-        <div id="infoContainer">
+        <div id="infoContainer" class="drawerContent">
           <h3>More Info</h3>
           <div id="userInfoDiv">
             <paper-input id="userFirst" always-float-label label="First Name" readonly value="[[user.first]]"></paper-input>
@@ -251,14 +254,16 @@
 
             <paper-dialog id="userServiceDialog">
               <h2>List of User Services</h2>
-              <iron-data-table id="userServicesDataTable" items="[[user.services]]">
-                <data-table-column name="Name">
-                  <template>[[item.name]]</template>
-                </data-table-column>
-                <data-table-column name="Status">
-                  <template>[[item.status]]</template>
-                </data-table-column>
-              </iron-data-table>
+              <paper-dialog-scrollable>
+                <iron-data-table id="userServicesDataTable" items="[[user.services]]">
+                  <data-table-column name="Name">
+                    <template>[[item.name]]</template>
+                  </data-table-column>
+                  <data-table-column name="Status">
+                    <template>[[item.status]]</template>
+                  </data-table-column>
+                </iron-data-table>
+              </paper-dialog-scrollable>
             </paper-dialog>
           </div>
 
