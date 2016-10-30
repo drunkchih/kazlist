@@ -7,30 +7,7 @@
         padding: 10px;
       }
 
-      /*#container {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-
-        overflow-x: auto;
-        overflow-y: hidden;
-      }*/
-
-      #eventContainer, #serviceContainer {
-        height: 250px;
-      }
-
-      #eventDataTable, #serviceDataTable {
-        display: block;
-        position: relative;
-        width: 100%;
-        height: 100%;
-        border-top: 1px solid #e8e8e8;
-      }
-
-      #eventMoreMenuDropdown, #serviceMoreMenuDropdown {
+      #eventMoreMenuDropdown, #serviceMoreMenuDropdown, #myServiceMoreMenuDropdown {
         width: 192px;
       }
 
@@ -82,6 +59,35 @@
       #serviceMoreMenuDropdown paper-item paper-item-body {
         margin-left: 16px;
         white-space: nowrap;
+      }
+
+      #myServiceMoreMenuDropdown ::content #contentWrapper > * {
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      #myServiceMoreMenuDropdown paper-item {
+        color: #666666;
+        cursor: pointer;
+        background-color: #FFFFFF;
+      }
+
+      #myServiceMoreMenuDropdown paper-item:hover {
+        color: #000000;
+        background-color: #EEEEEE;
+      }
+
+      #myServiceMoreMenuDropdown paper-item.iron-selected {
+        font-weight: initial;
+      }
+
+      #myServiceMoreMenuDropdown paper-item paper-item-body {
+        margin-left: 16px;
+        white-space: nowrap;
+      }
+
+      #updateServiceDialog, #updateEventDialog {
+        width: 400px;
       }
 
   </style>
@@ -160,7 +166,41 @@
         <br>
         <paper-button id="multiServiceDeleteButton" raised on-tap="_onMultiServiceDeleteTap"><iron-icon icon="icons:delete"></iron-icon>Delete Selected Service(s)</paper-button>
       </iron-collapse>
+
       <br>
+      <paper-button id="serviceArrowIcon" on-tap="toggleMyServices">
+        <iron-icon id="myServiceIcon" icon="icons:chevron-right"> </iron-icon>
+        <iron-icon icon="communication:ring-volume"> </iron-icon>
+        My Services
+      </paper-button>
+      <iron-collapse id="myServicesCollapse">
+        <div id="myServiceContainer" hidden>
+          <iron-data-table id="myServiceDataTable" selection-enabled  multi-selection hidden on-selected-items-changed="_onSelectedMyServiceItemsChanged">
+            <data-table-column name="Name/Title">
+              <template>[[item.name]]</template>
+            </data-table-column>
+            <data-table-column name="Type">
+              <template>[[item.type]]</template>
+            </data-table-column>
+            <data-table-column name="Status">
+              <template>[[item.status]]</template>
+            </data-table-column>
+            <data-table-column name="Point of Contact">
+              <template>[[item.contactPoint]]</template>
+            </data-table-column>
+            <data-table-column name="Action/Options">
+              <template>
+                <paper-icon-button id="moreMenuButtonMyServices" class="light-bg-icon" icon="more-vert" noink
+                                 on-tap="_onMyServiceMoreMenuButtonTap"></paper-icon-button>
+              </template>
+            </data-table-column>
+          </iron-data-table>
+        </div>
+        <br>
+        <paper-button id="multiMyServiceDeleteButton" raised on-tap="_onMultiMyServiceDeleteTap"><iron-icon icon="icons:delete"></iron-icon>Delete Selected Service(s)</paper-button>
+      </iron-collapse>
+      <br>
+
     </div>
 
     <iron-dropdown id="eventMoreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
@@ -178,20 +218,101 @@
 
     <iron-dropdown id="serviceMoreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
       <paper-material class="dropdown-content">
-        <paper-item id="eventInfoButton" on-tap="_onServiceInfoButtonTap">
+        <paper-item id="serviceInfoButton" on-tap="_onServiceInfoButtonTap">
           <paper-icon-button class="light-bg-icon" icon="icons:info" noink></paper-icon-button>
           <paper-item-body>More Info</paper-item-body>
         </paper-item>
-        <paper-item id="eventUpdateButton" on-tap="_onServiceUpdateTap">
+        <paper-item id="serviceUpdateButton" on-tap="_onServiceUpdateTap">
           <paper-icon-button class="light-bg-icon" icon="icons:create" noink></paper-icon-button>
           <paper-item-body>Update/Edit</paper-item-body>
         </paper-item>
-        <paper-item id="eventUpdateButton" on-tap="_onServiceSignUpTap">
+        <paper-item id="serviceUpdateButton" on-tap="_onServiceSignUpTap">
           <paper-icon-button class="light-bg-icon" icon="social:group-add" noink></paper-icon-button>
           <paper-item-body>Sign Up</paper-item-body>
         </paper-item>
       </paper-material>
     </iron-dropdown>
+
+    <iron-dropdown id="myServiceMoreMenuDropdown" on-iron-overlay-closed="_onMoreMenuDropdownClosed">
+      <paper-material class="dropdown-content">
+        <paper-item id="myServiceInfoButton" on-tap="_onMyServiceInfoButtonTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:info" noink></paper-icon-button>
+          <paper-item-body>More Info</paper-item-body>
+        </paper-item>
+        <paper-item id="myServiceUpdateButton" on-tap="_onMyServiceUpdateTap">
+          <paper-icon-button class="light-bg-icon" icon="icons:create" noink></paper-icon-button>
+          <paper-item-body>Update/Edit</paper-item-body>
+        </paper-item>
+      </paper-material>
+    </iron-dropdown>
+
+    <paper-dialog id="updateServiceDialog">
+      <h2>Udpdate Selected Service</h2>
+      <paper-dialog-scrollable>
+        <paper-input id="updateServiceName" always-float-label label="Name/Title">
+          <iron-icon icon="communication:contact-phone" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateServiceType" always-float-label label="Type"></paper-input>
+        <paper-input id="updateServiceStatus" always-float-label label="Status"></paper-input>
+        <paper-input id="updateServiceContactPoint" always-float-label label="Point of Contact">
+          <iron-icon icon="social:person" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateServicePhone" always-float-label label="Contact Phone #">
+          <iron-icon icon="communication:call" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateServiceEmail" always-float-label label="Contact Email Address">
+          <iron-icon icon="communication:email" prefix></iron-icon>
+        </paper-input>
+        <paper-textarea id="updateServiceComment" label="Description/Comment" always-float-label max-rows="5" rows="5" >
+        </paper-textarea>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Update</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="updateEventDialog">
+      <h2>Update Event</h2>
+      <paper-dialog-scrollable>
+        <paper-input id="updateEventName" always-float-label label="Event Name">
+          <iron-icon icon="icons:event" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventLocation" always-float-label label="Location">
+          <iron-icon icon="communication:location-on" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventDate" always-float-label label="Date">
+          <iron-icon icon="icons:date-range" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventTime" always-float-label label="Time">
+          <iron-icon icon="image:timer" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventDuration" always-float-label label="Duration">
+          <iron-icon icon="image:timelapse" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventContactPoint" always-float-label label="Point of Contact">
+          <iron-icon icon="social:person" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventEmail" always-float-label label="Contact Email Address">
+          <iron-icon icon="communication:email" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventPhone" always-float-label label="Contact Phone #">
+          <iron-icon icon="communication:call" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateEventCoordinates" always-float-label label="Event Coordinates">
+          <iron-icon icon="maps:my-location" prefix></iron-icon>
+        </paper-input>
+        <paper-textarea id="updateEventAddress" label="Event Address" max-rows="3" rows="3" always-float-label>
+        </paper-textarea>
+        <paper-textarea id="updateEventComment" label="Description/Comment" always-float-label max-rows="5" rows="5">
+        </paper-textarea>
+        <paper-input id="updateEventLink" always-float-label label="Event Link"></paper-input>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Update</paper-button>
+      </div>
+    </paper-dialog>
 
   </template>
 
@@ -241,6 +362,9 @@
           this.$.serviceContainer.hidden = true;
           this.$.serviceDataTable.hidden = true;
           this.$.servicesCollapse.opened = false;
+          this.$.myServiceContainer.hidden = true;
+          this.$.myServiceDataTable.hidden = true;
+          this.$.myServicesCollapse.opened = false;
           this.$.eventContainer.hidden = false;
           this.$.eventDataTable.hidden = false;
           this.$.eventDataTable.items = this._events;
@@ -267,10 +391,43 @@
           this.$.eventContainer.hidden = true;
           this.$.eventDataTable.hidden = true;
           this.$.eventsCollapse.opened = false;
+          this.$.myServiceContainer.hidden = true;
+          this.$.myServiceDataTable.hidden = true;
+          this.$.myServicesCollapse.opened = false;
           this.$.serviceContainer.hidden = false;
           this.$.serviceDataTable.hidden = false;
           this.$.serviceDataTable.items = this._services;
           this.$.servicesCollapse.toggle();
+        }
+      },
+
+      toggleMyServices: function() {
+        if(!this.$.myServicesCollapse.opened){
+          this._myServices = [];
+          for( i = 0;i<10;i++){
+            this._myServices.push({
+              name: "name"+i,
+              type: "tutor/ride",
+              status: i+"/"+i+1,
+              contactPoint: "Person"+i,
+              phone: i+"-"+i+"-"+i,
+              email: "email"+i+"@example.com",
+              comment: "description about the service ..."
+            });
+          }
+          this.$.myServiceIcon.icon = 'icons:expand-more';
+          this.$.serviceIcon.icon = 'icons:chevron-right';
+          this.$.eventIcon.icon = 'icons:chevron-right';
+          this.$.eventContainer.hidden = true;
+          this.$.eventDataTable.hidden = true;
+          this.$.eventsCollapse.opened = false;
+          this.$.serviceContainer.hidden = true;
+          this.$.serviceDataTable.hidden = true;
+          this.$.servicesCollapse.opened = false;
+          this.$.myServiceContainer.hidden = false;
+          this.$.myServiceDataTable.hidden = false;
+          this.$.myServiceDataTable.items = this._myServices;
+          this.$.myServicesCollapse.toggle();
         }
       },
 
@@ -347,6 +504,40 @@
         }
       },
 
+      _onMyServiceMoreMenuButtonTap: function (evt) {
+        evt.stopPropagation();
+        if (this.$.myServiceMoreMenuDropdown.opened) {
+          return;
+        }
+        var iconButtonElement = evt.currentTarget;
+        Polymer.dom(iconButtonElement).classList.toggle('selected', true);
+        this._moreMenuTarget = evt.model.__data__;
+        console.log(this._moreMenuTarget.item); //this is what we need to send to php
+        var targetY = iconButtonElement.getBoundingClientRect().bottom;
+        var targetHeight = 30;
+        var gapY = 0;
+        var menuHeight = this.$.myServiceMoreMenuDropdown.childNodes.length * 48;
+
+        var offsetX = 0;
+        var offsetY = targetHeight + gapY;
+
+        this.$.myServiceMoreMenuDropdown.positionTarget = iconButtonElement;
+        this.$.myServiceMoreMenuDropdown.verticalOffset = offsetY;
+        this.$.myServiceMoreMenuDropdown.horizontalOffset = offsetX;
+
+        this.$.myServiceMoreMenuDropdown.open();
+      },
+
+      _onSelectedMyServiceItemsChanged: function (evt) {
+        this.selectedMyServices = this.$.myServiceDataTable.selectedItems;
+        if(this.selectedMyServices.length != 0){
+          this.$.multiMyServiceDeleteButton.disabled = false;
+        }
+        else{
+          this.$.multiMyServiceDeleteButton.disabled = true;
+        }
+      },
+
       _onMultiServiceDeleteTap: function() {
         console.log(this.selectedServices);
       },
@@ -359,35 +550,68 @@
         this.$.eventMoreMenuDropdown.close();
         var event = this._moreMenuTarget.item;
         this.fire('event-info-tap', {event:event} );
-
-      },
-
-      _onEventUpdateTap: function(evt) {
-        this.$.eventMoreMenuDropdown.close();
-        var event = this._moreMenuTarget.item;
-        console.log(event);
-
       },
 
       _onServiceSignUpTap: function(evt) {
         this.$.eventMoreMenuDropdown.close();
         var event = this._moreMenuTarget.item;
         console.log(event);
-
       },
 
       _onServiceInfoButtonTap: function(evt) {
         this.$.serviceMoreMenuDropdown.close();
         var service = this._moreMenuTarget.item;
         this.fire('service-info-tap', {service:service} );
-
       },
 
       _onServiceUpdateTap: function(evt) {
         this.$.serviceMoreMenuDropdown.close();
         var service = this._moreMenuTarget.item;
-        console.log(service);
+        this.$.updateServiceName.value = service.name;
+        this.$.updateServiceType.value = service.type;
+        this.$.updateServiceStatus.value = service.status;
+        this.$.updateServiceContactPoint.value = service.contactPoint;
+        this.$.updateServicePhone.value = service.phone;
+        this.$.updateServiceEmail.value = service.email;
+        this.$.updateServiceComment.value = service.comment;
+        this.$.updateServiceDialog.open();
+      },
 
+      _onMyServiceInfoButtonTap: function(evt) {
+        this.$.myServiceMoreMenuDropdown.close();
+        var myService = this._moreMenuTarget.item;
+        this.fire('my-service-info-tap', {myService:myService} );
+      },
+
+      _onMyServiceUpdateTap: function(evt) {
+        this.$.myServiceMoreMenuDropdown.close();
+        var myService = this._moreMenuTarget.item;
+        this.$.updateServiceName.value = myService.name;
+        this.$.updateServiceType.value = myService.type;
+        this.$.updateServiceStatus.value = myService.status;
+        this.$.updateServiceContactPoint.value = myService.contactPoint;
+        this.$.updateServicePhone.value = myService.phone;
+        this.$.updateServiceEmail.value = myService.email;
+        this.$.updateServiceComment.value = myService.comment;
+        this.$.updateServiceDialog.open();
+      },
+
+      _onEventUpdateTap: function(evt) {
+        this.$.eventMoreMenuDropdown.close();
+        var event = this._moreMenuTarget.item;
+        this.$.updateEventName.value = event.eventName;
+        this.$.updateEventLocation.value = event.location;
+        this.$.updateEventDate.value = event.date;
+        this.$.updateEventTime.value = event.time;
+        this.$.updateEventDuration.value = event.duration;
+        this.$.updateEventContactPoint.value = event.contactPoint;
+        this.$.updateEventEmail.value = event.email;
+        this.$.updateEventPhone.value = event.phone;
+        this.$.updateEventCoordinates.value = event.googleMapsCoordinates;
+        this.$.updateEventAddress.value = event.address;
+        this.$.updateEventComment.value = event.comment;
+        this.$.updateEventLink.value = event.link;
+        this.$.updateEventDialog.open();
       }
 
     });

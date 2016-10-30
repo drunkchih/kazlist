@@ -6,7 +6,6 @@
       :host {
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
-
         display: block;
       }
 
@@ -24,13 +23,9 @@
 
       .drawer-list a {
         display: block;
-
         padding: 0 16px;
-
         text-decoration: none;
-
         color: var(--app-secondary-color);
-
         line-height: 40px;
       }
 
@@ -63,13 +58,25 @@
       }
 
       #userServiceDialog {
-        max-width: 350px !important;
+        max-width: 350px;
         width: 350px;
       }
 
       #userServicesDataTable {
-        width: 300px !important;
+        width: 300px;
+        position: initial;
       }
+
+      #createServiceDialog, #createEventDialog, #createUserDialog {
+        width: 400px;
+      }
+
+      .drawerContent {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow-y: auto;
+        }
 
     </style>
 
@@ -80,7 +87,7 @@
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-    <paper-drawer-panel id="infoDrawerPanel" on-selected-changed="_onInfoDrawerPanelSelectedChanged" right-drawer disable-swipe force-narrow>
+    <paper-drawer-panel id="infoDrawerPanel" on-selected-changed="_onInfoDrawerPanelSelectedChanged" right-drawer force-narrow disable-swipe>
       <div main>
 
         <app-drawer-layout fullbleed>
@@ -103,7 +110,7 @@
             <app-header condenses reveals effects="waterfall">
               <app-toolbar>
                 <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-                <div main-title>School Board App</div>
+                <div main-title>Kazlist</div>
               </app-toolbar>
             </app-header>
 
@@ -113,7 +120,7 @@
                 attr-for-selected="name"
                 fallback-selection="view404"
                 role="main">
-              <dashboard-main-dashboard name="main-dashboard" on-event-info-tap="_onEventInfoTap" on-service-info-tap="_onServiceInfoTap" ></dashboard-main-dashboard>
+              <dashboard-main-dashboard name="main-dashboard" on-event-info-tap="_onEventInfoTap" on-service-info-tap="_onServiceInfoTap" on-my-service-info-tap="_onMyServiceInfoTap" ></dashboard-main-dashboard>
               <dashboard-manage-users name="manage-users" on-user-info-tap="_onUserInfoTap" ></dashboard-manage-users>
               <dashboard-view404 name="view404"></dashboard-view404>
             </iron-pages>
@@ -121,15 +128,109 @@
         </app-drawer-layout>
 
         <paper-fab-menu id="createOptions" icon="add" closeIcon="close" duration="0.3">
-          <paper-fab-menu-item id="cloudFabItem" icon="communication:contact-phone" color="green;" tooltip="test" on-tap=""></paper-fab-menu-item>
-          <paper-fab-menu-item id="CSVFabItem" icon="icons:event" color="green;" tooltip="test" on-tap=""></paper-fab-menu-item>
+          <paper-fab-menu-item id="serviceFabItem" icon="communication:contact-phone" color="green;" tooltip="Create a Service" on-tap="_onCreateServiceTap"></paper-fab-menu-item>
+          <paper-fab-menu-item id="eventFabItem" icon="icons:event" color="green;" tooltip="Create an Event" on-tap="_onCreateEventTap"></paper-fab-menu-item>
         </paper-fab-menu>
 
-        <paper-fab id="createUserBtn" icon="add" on-tap="_createUser"></paper-fab>
+        <paper-fab id="createUserBtn" icon="add" on-tap="_createUserTap"></paper-fab>
+
+        <paper-dialog id="createServiceDialog" modal>
+          <h2>Create a Service</h2>
+          <paper-dialog-scrollable>
+            <paper-input id="createServiceName" always-float-label label="Name/Title">
+              <iron-icon icon="communication:contact-phone" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServiceType" always-float-label label="Type"></paper-input>
+            <paper-input id="createServiceStatus" always-float-label label="Status"></paper-input>
+            <paper-input id="createServiceContactPoint" always-float-label label="Point of Contact">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServicePhone" always-float-label label="Contact Phone #">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createServiceEmail" always-float-label label="Contact Email Address">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-textarea id="createServiceComment" label="Description/Comment" always-float-label max-rows="5" rows="5" >
+            </paper-textarea>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
+
+        <paper-dialog id="createEventDialog" modal>
+          <h2>Create an Event</h2>
+          <paper-dialog-scrollable>
+            <paper-input id="createEventName" always-float-label label="Event Name">
+              <iron-icon icon="icons:event" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventLocation" always-float-label label="Location">
+              <iron-icon icon="communication:location-on" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventDate" always-float-label label="Date">
+              <iron-icon icon="icons:date-range" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventTime" always-float-label label="Time">
+              <iron-icon icon="image:timer" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventDuration" always-float-label label="Duration">
+              <iron-icon icon="image:timelapse" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventContactPoint" always-float-label label="Point of Contact">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventEmail" always-float-label label="Contact Email Address">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventPhone" always-float-label label="Contact Phone #">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createEventCoordinates" always-float-label label="Event Coordinates">
+              <iron-icon icon="maps:my-location" prefix></iron-icon>
+            </paper-input>
+            <paper-textarea id="createEventAddress" label="Event Address" max-rows="3" rows="3" always-float-label>
+            </paper-textarea>
+            <paper-textarea id="createEventComment" label="Description/Comment" always-float-label max-rows="5" rows="5">
+            </paper-textarea>
+            <paper-input id="createEventLink" always-float-label label="Event Link"></paper-input>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
+
+        <paper-dialog id="createUserDialog" modal>
+          <h2>Create a User</h2>
+          <paper-dialog-scrollable>
+            <paper-input id="createUserFirst" always-float-label label="First Name"></paper-input>
+            <paper-input id="createUserLast" always-float-label label="Last Name"></paper-input>
+            <paper-input id="createUserName" always-float-label label="Username">
+              <iron-icon icon="social:person" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserPhone" always-float-label label="User Phone number">
+              <iron-icon icon="communication:call" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserEmail" always-float-label label="User Email">
+              <iron-icon icon="communication:email" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserRole" always-float-label label="User Role">
+              <iron-icon icon="icons:account-circle" prefix></iron-icon>
+            </paper-input>
+            <paper-input id="createUserStatus" always-float-label label="Status"></paper-input>
+            <paper-input id="createUserServiceNumber" always-float-label label="Number of services"></paper-input>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm autofocus>Create</paper-button>
+          </div>
+        </paper-dialog>
 
       </div>
       <div drawer>
-        <div id="infoContainer">
+        <div id="infoContainer" class="drawerContent">
           <h3>More Info</h3>
           <div id="userInfoDiv">
             <paper-input id="userFirst" always-float-label label="First Name" readonly value="[[user.first]]"></paper-input>
@@ -153,14 +254,16 @@
 
             <paper-dialog id="userServiceDialog">
               <h2>List of User Services</h2>
-              <iron-data-table id="userServicesDataTable" items="[[user.services]]">
-                <data-table-column name="Name">
-                  <template>[[item.name]]</template>
-                </data-table-column>
-                <data-table-column name="Status">
-                  <template>[[item.status]]</template>
-                </data-table-column>
-              </iron-data-table>
+              <paper-dialog-scrollable>
+                <iron-data-table id="userServicesDataTable" items="[[user.services]]">
+                  <data-table-column name="Name">
+                    <template>[[item.name]]</template>
+                  </data-table-column>
+                  <data-table-column name="Status">
+                    <template>[[item.status]]</template>
+                  </data-table-column>
+                </iron-data-table>
+              </paper-dialog-scrollable>
             </paper-dialog>
           </div>
 
@@ -183,7 +286,7 @@
             <paper-input id="eventContactPoint" always-float-label label="Point of Contact" readonly value="[[event.contactPoint]]">
               <iron-icon icon="social:person" prefix></iron-icon>
             </paper-input>
-            <paper-input id="eventEmail" always-float-label label="Contact Email" readonly value="[[event.email]]">
+            <paper-input id="eventEmail" always-float-label label="Contact Email Address" readonly value="[[event.email]]">
               <iron-icon icon="communication:email" prefix></iron-icon>
             </paper-input>
             <paper-input id="eventPhone" always-float-label label="Contact Phone #" readonly value="[[event.phone]]">
@@ -211,13 +314,12 @@
             <paper-input id="servicePhone" always-float-label label="Contact Phone #" readonly value="[[service.phone]]">
               <iron-icon icon="communication:call" prefix></iron-icon>
             </paper-input>
-            <paper-input id="serviceEmail" always-float-label label="Contact Phone #" readonly value="[[service.email]]">
+            <paper-input id="serviceEmail" always-float-label label="Contact Email Address" readonly value="[[service.email]]">
               <iron-icon icon="communication:email" prefix></iron-icon>
             </paper-input>
             <paper-textarea id="serviceComment" label="Description/Comment" always-float-label readonly value="[[service.comment]]">
   		      </paper-textarea>
           </div>
-
 
         </div>
 
@@ -305,6 +407,14 @@
         this.$.servicesInfoDiv.hidden = false;
       },
 
+      _onMyServiceInfoTap: function(evt) {
+        this.$.infoDrawerPanel.openDrawer();
+        this.service = evt.detail.myService;
+        console.log(evt.detail.myService);
+        this.$.eventInfoDiv.hidden = true;
+        this.$.servicesInfoDiv.hidden = false;
+      },
+
       _onInfoDrawerPanelSelectedChanged: function(evt) {
         this._isInfoPanelOpen = (this.$.infoDrawerPanel.selected === 'drawer');
         if(this._isInfoPanelOpen && this.$.currentPage.selected == "manage-users"){
@@ -324,6 +434,44 @@
 
       _onViewUserServicesTap: function() {
         this.$.userServiceDialog.open();
+      },
+
+      _onCreateServiceTap: function() {
+        this.$.createServiceDialog.open();
+        this.$.createServiceName.value = "";
+        this.$.createServiceType.value = "";
+        this.$.createServiceStatus.value = "";
+        this.$.createServiceContactPoint.value = "";
+        this.$.createServicePhone.value = "";
+        this.$.createServiceEmail.value = "";
+        this.$.createServiceComment.value = "";
+      },
+
+      _onCreateEventTap: function() {
+        this.$.createEventDialog.open();
+        this.$.createEventName.value = "";
+        this.$.createEventDate.value = "";
+        this.$.createEventTime.value = "";
+        this.$.createEventDuration.value = "";
+        this.$.createEventContactPoint.value = "";
+        this.$.createEventEmail.value = "";
+        this.$.createEventPhone.value = "";
+        this.$.createEventCoordinates.value = "";
+        this.$.createEventAddress.value = "";
+        this.$.createEventComment.value = "";
+        this.$.createEventLink.value = "";
+      },
+
+      _createUserTap: function() {
+        this.$.createUserDialog.open();
+        this.$.createUserFirst.value = "";
+        this.$.createUserLast.value = "";
+        this.$.createUserName.value = "";
+        this.$.createUserPhone.value = "";
+        this.$.createUserEmail.value = "";
+        this.$.createUserRole.value = "";
+        this.$.createUserStatus.value = "";
+        this.$.createUserServiceNumber.value = "";
       }
 
     });

@@ -36,6 +36,10 @@
         white-space: nowrap;
       }
 
+      #updateUserDialog {
+        width: 400px;
+      }
+
     </style>
     <template is="dom-bind">
 
@@ -96,6 +100,32 @@
         </paper-item>
       </paper-material>
     </iron-dropdown>
+
+    <paper-dialog id="updateUserDialog">
+      <h2>Create a User</h2>
+      <paper-dialog-scrollable>
+        <paper-input id="updateUserFirst" always-float-label label="First Name"></paper-input>
+        <paper-input id="updateUserLast" always-float-label label="Last Name"></paper-input>
+        <paper-input id="updateUserName" always-float-label label="Username">
+          <iron-icon icon="social:person" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateUserPhone" always-float-label label="User Phone number">
+          <iron-icon icon="communication:call" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateUserEmail" always-float-label label="User Email">
+          <iron-icon icon="communication:email" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateUserRole" always-float-label label="User Role">
+          <iron-icon icon="icons:account-circle" prefix></iron-icon>
+        </paper-input>
+        <paper-input id="updateUserStatus" always-float-label label="Status"></paper-input>
+        <paper-input id="updateUserServiceNumber" always-float-label label="Number of services"></paper-input>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Update</paper-button>
+      </div>
+    </paper-dialog>
 
     </template>
 
@@ -189,7 +219,6 @@
         this.$.moreMenuDropdown.positionTarget = iconButtonElement;
         this.$.moreMenuDropdown.verticalOffset = offsetY;
         this.$.moreMenuDropdown.horizontalOffset = offsetX;
-
         this.$.moreMenuDropdown.open();
       },
 
@@ -197,13 +226,20 @@
         this.$.moreMenuDropdown.close();
         var user = this._moreMenuTarget.item;
         this.fire('user-info-tap', {user:user} );
-
       },
 
       _onUpdateTap: function(evt) {
         this.$.moreMenuDropdown.close();
         var user = this._moreMenuTarget.item;
-
+        this.$.updateUserFirst.value = user.first;
+        this.$.updateUserLast.value = user.last;
+        this.$.updateUserName.value = user.username;
+        this.$.updateUserPhone.value = user.phone;
+        this.$.updateUserEmail.value = user.email;
+        this.$.updateUserRole.value = user.role;
+        this.$.updateUserStatus.value = user.status;
+        this.$.updateUserServiceNumber.value = user.servicesNum;
+        this.$.updateUserDialog.open();
       },
 
       _onDisactivateTap: function(evt) {
