@@ -7,9 +7,10 @@
   <dependencies>
     <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.2.3.v20140905" />
     <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.2.3.v20140905" />
-    <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.7" />
-    <dependency org="org.glassfish.jersey.containers" name="jersey-container-servlet-core" rev="2.7" />
-    <dependency org="org.glassfish.jersey.containers" name="jersey-container-jetty-http" rev="2.7" />
-    <dependency org="org.glassfish.jersey.media" name="jersey-media-moxy" rev="2.7" />
+    <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.8" />
+    <dependency org="org.glassfish.jersey.containers" name="jersey-container-servlet-core" rev="2.8" />
+    <dependency org="org.glassfish.jersey.containers" name="jersey-container-jetty-http" rev="2.8" />
+    <dependency org="org.glassfish.jersey.media" name="jersey-media-moxy" rev="2.8" />
+    <dependency org="org.glassfish.jersey.bundles.repackaged" name="jersey-guava" rev="2.8" />
   </dependencies>
 </ivy-module>

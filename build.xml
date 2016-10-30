@@ -1,17 +1,22 @@
 <project name="kazlist" basedir="." default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <!-- build properties -->
-  <property name="src.dir"     value="src"/>
-  <property name="build.dir"   value="build"/>
-  <property name="lib.dir"     value="${build.dir}/lib"/>
-  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="src.dir"         value="src"/>
+  <property name="conf.dir"        value="conf"/>
+  <property name="build.dir"       value="build"/>
+  <property name="dist.dir"        value="${build.dir}/dist"/>
+  <property name="dist.lib.dir"    value="${dist.dir}/lib"/>
+  <property name="dist.webapp.dir" value="${dist.dir}/webapp"/>
+  <property name="dist.bin.dir"    value="${dist.dir}/bin"/>
+  <property name="dist.conf.dir"   value="${dist.dir}/conf"/>
+  <property name="classes.dir"     value="${build.dir}/classes"/>
 
   <!-- kazlist main -->
   <property name="main-class"  value="com.kaz.kazlist.main.Main"/>
 
   <!-- classpath -->
   <path id="classpath">
-    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    <fileset dir="${dist.lib.dir}" includes="**/*.jar"/>
   </path>
 
   <!-- clean target -->
@@ -21,10 +26,20 @@
 
   <!-- init target -->
   <target name="init" depends="clean">
+    <mkdir dir="${build.dir}"/>
     <mkdir dir="${classes.dir}"/>
-    <mkdir dir="${lib.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${dist.lib.dir}"/>
+    <mkdir dir="${dist.bin.dir}"/>
+    <mkdir dir="${dist.webapp.dir}"/>
+    <mkdir dir="${dist.conf.dir}"/>
+    <copy todir="${dist.conf.dir}">
+      <fileset dir="${conf.dir}">
+        <include name="**/*.properties"/>
+      </fileset>
+    </copy>
     <ivy:resolve />
-    <ivy:retrieve sync="true" type="jar" pattern="${lib.dir}/[artifact].[ext]" />
+    <ivy:retrieve sync="true" type="jar,bundle" pattern="${dist.lib.dir}/[artifact].[ext]" />
   </target>
 
   <!-- compile target -->
@@ -34,7 +49,7 @@
 
   <!-- jar target -->
   <target name="jar" depends="compile">
-    <jar destfile="${lib.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+    <jar destfile="${dist.lib.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
       <manifest>
         <attribute name="Main-Class" value="${main-class}"/>
       </manifest>
@@ -43,7 +58,7 @@
 
   <!-- run target -->
   <target name="run" depends="jar">
-    <java jar="${lib.dir}/${ant.project.name}.jar" fork="true"/>
+    <java jar="${dist.lib.dir}/${ant.project.name}.jar" fork="true"/>
   </target>
 
   <!-- clean build target -->
